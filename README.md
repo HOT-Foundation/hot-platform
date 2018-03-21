@@ -2,7 +2,7 @@
 Clone this repository
 
 ```
-git clone https://git.proteus-tech.com/hotnow/htkn-platform
+git clone git@git.proteus-tech.com:hotnow/htkn-platform.git
 cd  htkn-platform
 ```
 
