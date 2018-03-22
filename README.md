@@ -11,7 +11,7 @@ docker build -t registry-hotnow.proteus-tech.com/service/htkn-platform .
 
 # Run docker
 ```
-docker run --rm -p "8081:<port>" -v "$(pwd)/aiohttp:/usr/src" --name htkn-platform registry-hotnow.proteus-tech.com/service/htkn-platform:latest python -u server.py
+docker run --rm -p "<port>:8081" -v "$(pwd)/aiohttp:/usr/src" --name htkn-platform registry-hotnow.proteus-tech.com/service/htkn-platform:latest python -u server.py
 ```
 
 `port: port on your localhost that you want to run this service`
