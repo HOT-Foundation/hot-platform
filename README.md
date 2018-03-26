@@ -44,8 +44,7 @@ docker-compose up -d
 ./runtests.sh
 ```
 
-
-#Reset
+# Reset
 ```
 ./reset.sh
 ```
