@@ -39,8 +39,7 @@ docker-compose build
 docker-compose up -d
 ```
 
-# Runtest
+# Run unit tests
 ```
-docker exec -it htkn-platform bash
-python3 -m pytest
+./runtests.sh
 ```
