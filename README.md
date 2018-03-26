@@ -1,22 +1,43 @@
-# Clone this repository
+# Pre-requisites
+
+Clone repository
 ```
 git clone git@git.proteus-tech.com:hotnow/htkn-platform.git
-cd  htkn-platform
+cd htkn-platform
 ```
 
-# Build docker image
+Log in to proteus docker-registry (https://ratticdb.proteus-tech.com:7078/cred/detail/918/)
 ```
-docker build -t registry-hotnow.proteus-tech.com/service/htkn-platform .
-```
-
-# Run docker
-```
-docker run --rm -p "<port>:8081" -v "$(pwd)/aiohttp:/usr/src" --name htkn-platform registry-hotnow.proteus-tech.com/service/htkn-platform:latest python -u server.py
+sudo docker login registry-hotnow.proteus-tech.com
 ```
 
-`port: port on your localhost that you want to run this service`
+Required software
+```
+# docker
+sudo apt-get install docker-ce
 
-**Have to rerun docker after change source code
+# docker-compose
+sudo curl -L https://github.com/docker/compose/releases/download/1.20.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
+# One-line installation
+```
+docker-compose build && docker-compose up -d
+
+navigate to localhost:8081
+```
+
+# Build local development container
+Do this everytime you want to install new python package
+```
+docker-compose build
+```
+
+# Start development server
+```
+docker-compose up -d
+```
 
 # Runtest
 ```

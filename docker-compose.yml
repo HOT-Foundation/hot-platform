@@ -1,0 +1,10 @@
+version: '3'
+services:
+  hotnow-token-platform:
+    image: hotnow-token-platform
+    build: .
+    container_name: hotnow-token-platform
+    working_dir: "/usr/src"
+    command: "python -u token_platform/server.py"
+    ports:
+      - "8081:8081"
