@@ -1,4 +1,4 @@
-FROM python:3.6.4-slim-jessie
+FROM registry-hotnow.proteus-tech.com/base-hotnow-htkn-platform:1.1
 
 COPY requirements.txt /
 RUN pip install -r requirements.txt

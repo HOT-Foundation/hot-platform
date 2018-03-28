@@ -2,3 +2,4 @@ aiohttp==3.1.0
 async-timeout==2.0.1
 pytest==3.5.0
 pytest-aiohttp==0.3.0
+stellar-base==0.1.8.1
