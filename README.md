@@ -7,6 +7,7 @@ cd htkn-platform
 ```
 
 Log in to proteus docker-registry (https://ratticdb.proteus-tech.com:7078/cred/detail/918/)
+** If you get 404 error, Please contract infra give you a permission.
 ```
 sudo docker login registry-hotnow.proteus-tech.com
 ```
