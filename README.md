@@ -46,6 +46,7 @@ docker-compose up -d
 ```
 
 # Reset
+Build new image and reset environment
 ```
 ./reset.sh
 ```
