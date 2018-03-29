@@ -1,13 +1,39 @@
 from aiohttp import web
 from stellar_base.address import Address
 from pprint import pprint
+from functools import reduce 
 
+def formatBalance2(item):
+    balance = {}
+    if item['asset_type'] == 'native':
+        result = {
+            'XLM': { 
+                'balance': item['balance'],
+                'issuer': 'native'
+            }
+        }
+        return result
+    balance[item['asset_code']] = {
+        'balance': item['balance'],
+        'issuer': item['asset_issuer']
+    }
+    return balance
+
+def format_balance(balances):
+    balanceList = list(map(formatBalance2, balances))
+    balance = reduce((lambda x, y: {**x, **y}), balanceList)
+    return balance
+
+def format_signers(signer):
+    signer.pop('key', None)
+    return signer
+    
 
 async def get_account(request):
     account_address = request.match_info.get('account_address', "")
     account = Address(address=account_address)
     account.get()
-
+    import pdb; pdb.set_trace()
     # {'address': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
     #  'balances': [{'asset_code': 'RNTK',
     #                'asset_issuer': 'GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD',
@@ -36,37 +62,46 @@ async def get_account(request):
     #               'weight': 0}],
     #  'thresholds': {'high_threshold': 2, 'low_threshold': 1, 'med_threshold': 2}}
 
+    # result = {
+    #     "asset": {
+    #         "HTKN": {
+    #             "balance": "100.0000000",
+    #             "issuer": "GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD"
+    #         },
+    #         "XLM": {
+    #             "balance": "5.0000000",
+    #             "issuer": "native"
+    #         }
+    #     },
+    #     "thresholds": {
+    #         "low_threshold": 1,
+    #         "med_threshold": 2,
+    #         "high_threshold": 2,
+    #     },
+    #     "signers": [{
+    #         "public_key": "GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF",
+    #         "type": "ed25519_public_key",
+    #         "weight": 1,
+    #     }, {
+    #         "public_key": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
+    #         "type": "ed25519_public_key",
+    #         "weight": 1,
+    #     }, {
+    #         "public_key": "GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD",
+    #         "type": "ed25519_public_key",
+    #         "weight": 0,
+    #     }],
+    #     "@id": "GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD",
+    #     "@url": "localhost:8080/account/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD"
+    # }
+    balances = format_balance(account.balances)
+    signers = list(map(format_signers, account.signers))
     result = {
-        "asset": {
-            "HTKN": {
-                "balance": "100.0000000",
-                "issuer": "GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD"
-            },
-            "XLM": {
-                "balance": "5.0000000",
-                "issuer": "native"
-            }
-        },
-        "thresholds": {
-            "low_threshold": 1,
-            "med_threshold": 2,
-            "high_threshold": 2,
-        },
-        "signers": [{
-            "public_key": "GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF",
-            "type": "ed25519_public_key",
-            "weight": 1,
-        }, {
-            "public_key": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
-            "type": "ed25519_public_key",
-            "weight": 1,
-        }, {
-            "public_key": "GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD",
-            "type": "ed25519_public_key",
-            "weight": 0,
-        }],
-        "@id": "GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD",
-        "@url": "localhost:8080/account/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD"
+        "@url": "localhost:8080/account/{}".format(account_address),
+        "@id": account_address,
+        "asset": balances,
+        "thresholds": account.thresholds,
+        "signers": signers
     }
 
     return web.json_response(result)

@@ -16,12 +16,12 @@ async def test_case_001(cli):
     actual = await resp.json()
     expect = {
         "asset": {
-            "HTKN": {
-                "balance": "100.0000000",
+            "RNTK": {
+                "balance": "7.0000000",
                 "issuer": "GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD"
             },
             "XLM": {
-                "balance": "5.0000000",
+                "balance": "9.9999200",
                 "issuer": "native"
             }
         },
