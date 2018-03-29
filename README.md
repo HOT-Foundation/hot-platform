@@ -44,9 +44,3 @@ docker-compose up -d
 ```
 ./runtests.sh
 ```
-
-# Reset
-Build fresh local development image and restart it.
-```
-./reset.sh
-```
