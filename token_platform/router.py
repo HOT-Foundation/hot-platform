@@ -4,5 +4,5 @@ from controller import handle
 
 routes = [
     web.get('/', get_account),
-    web.get('/{name}', get_account),
+    web.get('/account/{account_address}', get_account),
 ]

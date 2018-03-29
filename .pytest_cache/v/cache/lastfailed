@@ -1,3 +1,4 @@
 {
+  "token_platform/account/test/test_base.py::test_case_001[pyloop]": true,
   "token_platform/test/test_base.py": true
 }
