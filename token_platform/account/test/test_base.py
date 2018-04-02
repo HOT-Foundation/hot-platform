@@ -10,7 +10,7 @@ def cli(loop, aiohttp_client):
     app.add_routes(routes)
     return loop.run_until_complete(aiohttp_client(app))
 
-async def test_case_001(cli):
+async def test_get_account_success(cli):
     resp = await cli.get('/account/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')
     assert resp.status == 200
     actual = await resp.json()
@@ -48,3 +48,10 @@ async def test_case_001(cli):
     }
     assert actual == expect
 
+
+async def test_get_account_not_found(cli):
+    resp = await cli.get('/account/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAA')
+    assert resp.status == 404
+    actual = await resp.json()
+    # expect = {}
+    # assert account == expect
