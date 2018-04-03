@@ -7,10 +7,12 @@ from account.get_account import get_account, Address
 from utils.nametuple_mapping import map_namedtuple
 from aiohttp.test_utils import make_mocked_request
 import json
+from stellar_base.utils import AccountNotExistError
+
 
 @asyncio.coroutine
 @patch('account.get_account.Address')
-async def test_call_get_account_success(mock_address):
+async def test_get_account_success(mock_address):
     instance = mock_address.return_value
     mock_data = {
         'address': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
@@ -119,56 +121,39 @@ async def test_call_get_account_success(mock_address):
     assert actual_data == expect_data
 
 
-async def test_get_account_success(cli):
-    resp = await cli.get('/account/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')
-    assert resp.status == 200
-    actual = await resp.json()
-    expect = {
-        "asset": {
-            "RNTK": {
-                "balance": "7.0000000",
-                "issuer": "GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD"
-            },
-            "XLM": {
-                "balance": "9.9999200",
-                "issuer": "native"
-            }
-        },
-        "thresholds": {
-            "low_threshold": 1,
-            "med_threshold": 2,
-            "high_threshold": 2,
-        },
-        "signers": [{
-            "public_key": "GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF",
-            "type": "ed25519_public_key",
-            "weight": 1,
-        }, {
-            "public_key": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
-            "type": "ed25519_public_key",
-            "weight": 1,
-        }, {
-            "public_key": "GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD",
-            "type": "ed25519_public_key",
-            "weight": 0,
-        }],
-        "@id": "GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD",
-        "@url": "localhost:8080/account/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD"
-    }
-    assert actual == expect
+@asyncio.coroutine
+@patch('account.get_account.Address')
+async def test_get_account_not_found(mock_address):
+    resp = make_mocked_request('GET', '/account/{}'.format('GB7D54NKPWYYMMS7JFEQZKDDTW5R7IMXTFN2WIEST2YZVVNO3SHJ3Y7M'),
+        match_info={'account_address': 'GB7D54NKPWYYMMS7JFEQZKDDTW5R7IMXTFN2WIEST2YZVVNO3SHJ3Y7M'}
+    )
+
+    class MockAddress(object):
+        def get(self):
+            raise AccountNotExistError('Resource Missing')
+
+    instance = mock_address.return_value
+    mock_address.return_value = MockAddress()
+
+    with pytest.raises(AccountNotExistError) as context:
+        await get_account(resp)
+    assert str(context.value) == 'Resource Missing'
 
 
-async def test_get_account_not_found(cli):
-    resp = await cli.get('/account/GC7PF4PSLSLQKPMUS54H4F5WWT7KB5S7OWAI2Q7QG2BNNXF4FBEWVJOG')
-    assert resp.status == 404
-    actual = await resp.json()
-    expect = {'error': 'Resource Missing'}
-    assert actual == expect
+@asyncio.coroutine
+@patch('account.get_account.Address')
+async def test_get_account_invalid_address(mock_address):
+    resp = make_mocked_request('GET', '/account/{}'.format('XXXX'),
+        match_info={'account_address': 'XXXX'}
+    )
 
+    class MockAddress(object):
+        def get(self):
+            raise AccountNotExistError('Resource Missing')
 
-async def test_get_account_invalid_address(cli):
-    resp = await cli.get('/account/XXXX')
-    assert resp.status == 404
-    actual = await resp.json()
-    expect = {'error': 'Resource Missing'}
-    assert actual == expect
+    instance = mock_address.return_value
+    mock_address.return_value = MockAddress()
+
+    with pytest.raises(AccountNotExistError) as context:
+        await get_account(resp)
+    assert str(context.value) == 'Resource Missing'
