@@ -1,5 +1,6 @@
 from aiohttp import web
 from stellar_base.address import Address
+from stellar_base.utils import AccountNotExistError
 from pprint import pprint
 from functools import reduce 
 
@@ -35,11 +36,7 @@ def format_signers(signer):
 async def get_account(request):
     account_address = request.match_info.get('account_address', "")
     account = Address(address=account_address)
-
-    try:
-        account.get()
-    except:
-        return web.json_response(' ', status=404)
+    account.get()
 
     balances = map_balance(account.balances)
     signers = list(map(format_signers, account.signers))
