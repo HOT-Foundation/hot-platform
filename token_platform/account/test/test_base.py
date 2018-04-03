@@ -201,6 +201,13 @@ def test_map_balance():
     }
 
 
+def test_map_empty_balance():
+    balances = []
+    with pytest.raises(TypeError) as context:
+        map_balance(balances)
+    assert str(context.value) == 'reduce() of empty sequence with no initial value'
+
+
 def test_format_balance_asset_type_native():
     balance = {
         'balance': '9.9999200',
