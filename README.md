@@ -44,9 +44,3 @@ docker-compose up -d
 ```
 ./runtests.sh
 ```
-
-# Reset
-Build new image and reset environment
-```
-./reset.sh
-```
