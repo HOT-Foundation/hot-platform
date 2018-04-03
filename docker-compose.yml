@@ -11,4 +11,5 @@ services:
     volumes:
       - "./:/usr/src"
     environment:
+      - HOST=localhost:8081
       - PYTHONPATH=/usr/src/token_platform

@@ -4,13 +4,12 @@ from controller import handle
 import asyncio
 from middleware import error_middleware
 from account.get_account import get_account 
-
+from router import routes
 
 async def init_app():
     """Initialize the application server."""
     app = web.Application(middlewares=[error_middleware])
-    app.router.add_get('/', handle)
-    app.router.add_get('/account/{account_address}', get_account)
+    app.add_routes(routes)
     return app
 
 

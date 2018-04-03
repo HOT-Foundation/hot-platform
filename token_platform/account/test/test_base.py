@@ -4,7 +4,6 @@ import asyncio
 from router import routes
 from asynctest import patch
 from account.get_account import get_account, Address, format_signers, map_balance, format_balance
-from utils.nametuple_mapping import map_namedtuple
 from aiohttp.test_utils import make_mocked_request
 import json
 from stellar_base.utils import AccountNotExistError
@@ -85,7 +84,7 @@ async def test_get_account_success(mock_address):
 
     actual_data = json.loads(result.text)
     expect_data = {
-        '@url': 'localhost:8080/account/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+        '@url': 'localhost:8081/account/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
         '@id': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
         'asset': {
             'RNTK': {

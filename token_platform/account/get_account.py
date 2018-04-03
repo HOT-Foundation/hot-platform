@@ -3,7 +3,7 @@ from stellar_base.address import Address
 from stellar_base.utils import AccountNotExistError
 from pprint import pprint
 from functools import reduce 
-
+from conf import settings
 
 def format_balance(item):
     balance = {}
@@ -41,7 +41,7 @@ async def get_account(request):
     balances = map_balance(account.balances)
     signers = list(map(format_signers, account.signers))
     result = {
-        "@url": "localhost:8080/account/{}".format(account_address),
+        "@url": '{}/account/{}'.format(settings['HOST'], account_address),
         "@id": account_address,
         "asset": balances,
         "thresholds": account.thresholds,
