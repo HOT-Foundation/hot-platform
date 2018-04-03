@@ -134,9 +134,9 @@ async def test_get_account_not_found(mock_address):
     instance = mock_address.return_value
     mock_address.return_value = MockAddress()
 
-    with pytest.raises(AccountNotExistError) as context:
+    with pytest.raises(web.HTTPNotFound) as context:
         await get_account(resp)
-    assert str(context.value) == 'Resource Missing'
+    assert str(context.value) == 'Not Found'
 
 
 @asyncio.coroutine
@@ -153,9 +153,9 @@ async def test_get_account_invalid_address(mock_address):
     instance = mock_address.return_value
     mock_address.return_value = MockAddress()
 
-    with pytest.raises(AccountNotExistError) as context:
+    with pytest.raises(web.HTTPNotFound) as context:
         await get_account(resp)
-    assert str(context.value) == 'Resource Missing'
+    assert str(context.value) == 'Not Found'
 
 
 def test_format_signer():

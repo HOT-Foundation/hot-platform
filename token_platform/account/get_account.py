@@ -36,7 +36,10 @@ def format_signers(signer):
 async def get_account(request):
     account_address = request.match_info.get('account_address', "")
     account = Address(address=account_address)
-    account.get()
+    try:
+        account.get()
+    except AccountNotExistError as ex:
+        raise web.HTTPNotFound(text=str(ex))
 
     balances = map_balance(account.balances)
     signers = list(map(format_signers, account.signers))
