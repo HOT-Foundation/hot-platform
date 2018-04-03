@@ -3,7 +3,7 @@ from aiohttp import web
 import asyncio
 from router import routes
 from asynctest import patch
-from account.get_account import get_account, Address
+from account.get_account import get_account, Address, format_signers, map_balance, format_balance
 from utils.nametuple_mapping import map_namedtuple
 from aiohttp.test_utils import make_mocked_request
 import json
@@ -157,3 +157,67 @@ async def test_get_account_invalid_address(mock_address):
     with pytest.raises(AccountNotExistError) as context:
         await get_account(resp)
     assert str(context.value) == 'Resource Missing'
+
+
+def test_format_signer():
+    signer = {
+        'key': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+        'public_key': 'GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF',
+        'weight': 1,
+        'type': 'ed25519_public_key'
+    }
+    format_signers(signer)
+    assert signer == {
+            'public_key': 'GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF',
+            'weight': 1,
+            'type': 'ed25519_public_key'
+        }
+
+
+def test_map_balance():
+    balances = [
+        {
+            'balance': '7.0000000',
+            'limit': '922337203685.4775807',
+            'asset_type': 'credit_alphanum4',
+            'asset_code': 'RNTK',
+            'asset_issuer': 'GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD'
+        },
+        {
+            'balance': '9.9999200',
+            'asset_type': 'native'
+        }
+    ]
+    result = map_balance(balances)
+
+    assert result == {
+        'RNTK': {
+            'balance': '7.0000000',
+            'issuer': 'GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD'
+        },
+        'XLM': {
+            'balance': '9.9999200',
+            'issuer': 'native'
+        }
+    }
+
+
+def test_format_balance_asset_type_native():
+    balance = {
+        'balance': '9.9999200',
+        'asset_type': 'native'
+    }
+    result = format_balance(balance)
+    assert result == {'XLM': {'balance': '9.9999200', 'issuer': 'native'}}
+
+
+def test_format_balance_asset_type_not_native():
+    balance = {
+        'balance': '7.0000000',
+        'limit': '922337203685.4775807',
+        'asset_type': 'credit_alphanum4',
+        'asset_code': 'RNTK',
+        'asset_issuer': 'GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD'
+    }
+    result = format_balance(balance)
+    assert result == {'RNTK': {'balance': '7.0000000', 'issuer': 'GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD'}}
