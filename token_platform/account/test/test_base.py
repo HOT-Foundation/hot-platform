@@ -77,8 +77,10 @@ async def test_call_get_account_success(mock_address):
     req = make_mocked_request('GET', '/account/{}'.format('GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'),
         match_info={'account_address': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'}
     )
-
     result = await get_account(req)
+
+    assert result.status == 200
+
     actual_data = json.loads(result.text)
     expect_data = {
         '@url': 'localhost:8080/account/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
