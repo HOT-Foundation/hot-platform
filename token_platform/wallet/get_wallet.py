@@ -6,21 +6,21 @@ from functools import reduce
 from conf import settings
 
 def format_balance(item):
-    balance = {}
+    """Format wallet balances to dictionary"""
     if item['asset_type'] == 'native':
-        result = {
+        return {
             'XLM': { 
                 'balance': item['balance'],
                 'issuer': 'native'
             }
         }
-        return result
-    balance[item['asset_code']] = {
-        'balance': item['balance'],
-        'issuer': item['asset_issuer']
+    return {
+        item['asset_code']: {
+            'balance': item['balance'],
+            'issuer': item['asset_issuer']
+        }
     }
-    return balance
-
+    
 # balances -> account_balances
 def map_balance(balances):
     """
@@ -33,7 +33,8 @@ def map_balance(balances):
 
 # don't destroy parameter
 # copy or construct new
-def format_signers(signer):
+def format_signers(signers):
+    # return map(lambda y: {''})
     signer.pop('key', None)
     return signer
 
@@ -52,13 +53,16 @@ async def get_wallet(wallet_address):
         raise web.HTTPNotFound(text=str(ex))
 
     balances = map_balance(wallet.balances)
-    signers = list(map(format_signers, wallet.signers))
-    result = {
-        "@url": '{}/wallet/{}'.format(settings['HOST'], wallet_address),
+    signers = format_signers(wallet.signers)
+    result = wallet_response(wallet_address, balances, thresholds, signers)
+    return web.json_response(result)
+
+
+def wallet_response(wallet_address, balances, thresholds, signers, host=settings['HOST']):
+    return {
+        "@url": '{}/wallet/{}'.format(host, wallet_address),
         "@id": wallet_address,
         "asset": balances,
-        "thresholds": wallet.thresholds,
+        "thresholds": thresholds,
         "signers": signers
     }
-
-    return web.json_response(result)

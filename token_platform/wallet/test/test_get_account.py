@@ -33,7 +33,7 @@ async def xtest_get_wallet_success(mock_address):
 
     actual_data = json.loads(result.text)
 
-    assert actual_data == WALLET
+    assert actual_data == wallet_response(xxx)
 
 
 @asyncio.coroutine
@@ -85,8 +85,7 @@ def test_format_signer():
 
 
 def test_map_balance():
-
-    result = map_balance(BALANCES)
+    result = map_balance(StellarWallet().balances)
 
     assert result == {
         'RNTK': {
