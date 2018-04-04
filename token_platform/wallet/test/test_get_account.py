@@ -18,7 +18,6 @@ async def test_get_wallet_from_request(mock_get_wallet):
     assert mock_get_wallet.call_count == 1
 
 
-
 @asyncio.coroutine
 @patch('wallet.get_wallet.stellar_address')
 async def test_get_wallet_success(mock_address):
@@ -96,10 +95,7 @@ async def test_get_wallet_invalid_address(mock_address):
 
 
 def test_format_signer():
-    signer = StellarWallet().signers
-    
-    result = format_signers(signer)
-
+    result = format_signers(StellarWallet().signers)
     assert result == [{
         'public_key': 'GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF',
         'weight': 1,
@@ -119,7 +115,6 @@ def test_format_signer():
 
 def test_map_balance():
     result = map_balance(StellarWallet().balances)
-
     assert result == {
         'RNTK': {
             'balance': '7.0000000',
@@ -160,4 +155,72 @@ def test_format_balance_asset_type_not_native():
     assert result == {'RNTK': {'balance': '7.0000000', 'issuer': 'GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD'}}
 
 def test_wallet_response():
-    pass
+    actual_data = wallet_response(
+        'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+        {
+            'RNTK': {
+                'balance': '7.0000000',
+                'issuer': 'GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD'
+            },
+            'XLM': {
+                'balance': '9.9999200',
+                'issuer': 'native'
+            }
+        },
+        {
+            'low_threshold': 1,
+            'med_threshold': 2,
+            'high_threshold': 2
+        },
+        [{
+            'public_key': 'GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF',
+            'weight': 1,
+            'type': 'ed25519_public_key'
+        },
+        {
+            'public_key': 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI',
+            'weight': 1,
+            'type': 'ed25519_public_key'
+        },
+        {
+            'public_key': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+            'weight': 0,
+            'type': 'ed25519_public_key'
+        }]
+    )
+    expect_data = {
+        '@url': 'localhost:8081/wallet/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+        '@id': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+        'asset': {
+            'RNTK': {
+                'balance': '7.0000000',
+                'issuer': 'GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD'
+            },
+            'XLM': {
+                'balance': '9.9999200',
+                'issuer': 'native'
+            }
+        },
+        'thresholds': {
+            'low_threshold': 1,
+            'med_threshold': 2,
+            'high_threshold': 2
+        },
+        'signers': [
+            {
+                'public_key': 'GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF',
+                'weight': 1,
+                'type': 'ed25519_public_key'
+            }, {
+                'public_key': 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI',
+                'weight': 1,
+                'type': 'ed25519_public_key'
+            }, {
+                'public_key': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+                'weight': 0,
+                'type': 'ed25519_public_key'
+            }
+        ]
+    }
+
+    assert actual_data == expect_data
