@@ -1,5 +1,5 @@
 from aiohttp import web
-from stellar_base.address import Address
+from stellar_base.address import Address as stellar_address
 from stellar_base.utils import AccountNotExistError
 from pprint import pprint
 from functools import reduce 
@@ -21,21 +21,31 @@ def format_balance(item):
     }
     return balance
 
-
+# balances -> account_balances
 def map_balance(balances):
+    """
+     sould have comment every function and class
+     doc_string
+    """
     balanceList = list(map(format_balance, balances))
     balance = reduce((lambda x, y: {**x, **y}), balanceList)
     return balance
 
-
+# don't destroy parameter
+# copy or construct new
 def format_signers(signer):
     signer.pop('key', None)
     return signer
 
-
-async def get_wallet(request):
+async def get_wallet_from_request(request):
     wallet_address = request.match_info.get('wallet_address', "")
-    wallet = Address(address=wallet_address)
+    return get_wallet(wallet_address)
+
+
+async def get_wallet(wallet_address):
+    # wallet_address = request.match_info.get('wallet_address', "")
+    # stellar.Address
+    wallet = stellar_address(address=wallet_address)
     try:
         wallet.get()
     except AccountNotExistError as ex:
