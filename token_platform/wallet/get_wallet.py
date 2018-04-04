@@ -7,17 +7,12 @@ from conf import settings
 
 def format_balance(item):
     """Format wallet balances to dictionary"""
-    if item['asset_type'] == 'native':
-        return {
-            'XLM': { 
-                'balance': item['balance'],
-                'issuer': 'native'
-            }
-        }
+    asset = 'XLM' if item['asset_type'] is 'native' else item['asset_code']
+    issuer = 'native' if item['asset_type'] is 'native' else item['asset_issuer']
     return {
-        item['asset_code']: {
+        asset: {
             'balance': item['balance'],
-            'issuer': item['asset_issuer']
+            'issuer': issuer
         }
     }
     
