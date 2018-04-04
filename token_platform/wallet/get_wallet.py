@@ -5,6 +5,7 @@ from pprint import pprint
 from functools import reduce 
 from conf import settings
 
+
 def format_balance(item):
     """Format wallet balances to dictionary"""
     asset = 'XLM' if item['asset_type'] is 'native' else item['asset_code']
@@ -15,23 +16,17 @@ def format_balance(item):
             'issuer': issuer
         }
     }
-    
-# balances -> account_balances
-def map_balance(balances):
-    """
-     sould have comment every function and class
-     doc_string
-    """
-    balanceList = list(map(format_balance, balances))
+
+
+def map_balance(account_balances):
+    balanceList = list(map(format_balance, account_balances))
     balance = reduce((lambda x, y: {**x, **y}), balanceList)
     return balance
 
-# don't destroy parameter
-# copy or construct new
+
 def format_signers(signers):
-    # return map(lambda y: {''})
-    signer.pop('key', None)
-    return signer
+    return list(map(lambda signer: {'public_key': signer['public_key'], 'type': signer['type'], 'weight': signer['weight']}, signers))
+
 
 async def get_wallet_from_request(request):
     wallet_address = request.match_info.get('wallet_address', "")
@@ -39,8 +34,6 @@ async def get_wallet_from_request(request):
 
 
 async def get_wallet(wallet_address):
-    # wallet_address = request.match_info.get('wallet_address', "")
-    # stellar.Address
     wallet = stellar_address(address=wallet_address)
     try:
         wallet.get()
@@ -49,7 +42,7 @@ async def get_wallet(wallet_address):
 
     balances = map_balance(wallet.balances)
     signers = format_signers(wallet.signers)
-    result = wallet_response(wallet_address, balances, thresholds, signers)
+    result = wallet_response(wallet_address, balances, wallet.thresholds, signers)
     return web.json_response(result)
 
 
