@@ -3,15 +3,15 @@ from aiohttp import web
 import asyncio
 from router import routes
 from asynctest import patch
-from account.get_account import get_account, Address, format_signers, map_balance, format_balance
+from wallet.get_wallet import get_wallet, Address, format_signers, map_balance, format_balance
 from aiohttp.test_utils import make_mocked_request
 import json
 from stellar_base.utils import AccountNotExistError
 
 
 @asyncio.coroutine
-@patch('account.get_account.Address')
-async def test_get_account_success(mock_address):
+@patch('wallet.get_wallet.Address')
+async def test_get_wallet_success(mock_address):
     instance = mock_address.return_value
     mock_data = {
         'address': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
@@ -75,16 +75,16 @@ async def test_get_account_success(mock_address):
 
     mock_address.return_value = MockAddress()
 
-    req = make_mocked_request('GET', '/account/{}'.format('GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'),
-        match_info={'account_address': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'}
+    req = make_mocked_request('GET', '/wallet/{}'.format('GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'),
+        match_info={'wallet_address': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'}
     )
-    result = await get_account(req)
+    result = await get_wallet(req)
 
     assert result.status == 200
 
     actual_data = json.loads(result.text)
     expect_data = {
-        '@url': 'localhost:8081/account/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+        '@url': 'localhost:8081/wallet/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
         '@id': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
         'asset': {
             'RNTK': {
@@ -121,10 +121,10 @@ async def test_get_account_success(mock_address):
 
 
 @asyncio.coroutine
-@patch('account.get_account.Address')
-async def test_get_account_not_found(mock_address):
-    resp = make_mocked_request('GET', '/account/{}'.format('GB7D54NKPWYYMMS7JFEQZKDDTW5R7IMXTFN2WIEST2YZVVNO3SHJ3Y7M'),
-        match_info={'account_address': 'GB7D54NKPWYYMMS7JFEQZKDDTW5R7IMXTFN2WIEST2YZVVNO3SHJ3Y7M'}
+@patch('wallet.get_wallet.Address')
+async def test_get_wallet_not_found(mock_address):
+    resp = make_mocked_request('GET', '/wallet/{}'.format('GB7D54NKPWYYMMS7JFEQZKDDTW5R7IMXTFN2WIEST2YZVVNO3SHJ3Y7M'),
+        match_info={'wallet_address': 'GB7D54NKPWYYMMS7JFEQZKDDTW5R7IMXTFN2WIEST2YZVVNO3SHJ3Y7M'}
     )
 
     class MockAddress(object):
@@ -135,15 +135,15 @@ async def test_get_account_not_found(mock_address):
     mock_address.return_value = MockAddress()
 
     with pytest.raises(web.HTTPNotFound) as context:
-        await get_account(resp)
+        await get_wallet(resp)
     assert str(context.value) == 'Not Found'
 
 
 @asyncio.coroutine
-@patch('account.get_account.Address')
-async def test_get_account_invalid_address(mock_address):
-    resp = make_mocked_request('GET', '/account/{}'.format('XXXX'),
-        match_info={'account_address': 'XXXX'}
+@patch('wallet.get_wallet.Address')
+async def test_get_wallet_invalid_address(mock_address):
+    resp = make_mocked_request('GET', '/wallet/{}'.format('XXXX'),
+        match_info={'wallet_address': 'XXXX'}
     )
 
     class MockAddress(object):
@@ -154,7 +154,7 @@ async def test_get_account_invalid_address(mock_address):
     mock_address.return_value = MockAddress()
 
     with pytest.raises(web.HTTPNotFound) as context:
-        await get_account(resp)
+        await get_wallet(resp)
     assert str(context.value) == 'Not Found'
 
 
