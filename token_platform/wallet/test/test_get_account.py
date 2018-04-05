@@ -3,7 +3,7 @@ from aiohttp import web
 import asyncio
 from router import routes
 from asynctest import patch
-from wallet.get_wallet import get_wallet, stellar_address, format_signers, map_balance, get_wallet_from_request, wallet_response
+from wallet.get_wallet import get_wallet, stellar_address, get_wallet_from_request, wallet_response
 from aiohttp.test_utils import make_mocked_request
 import json
 from stellar_base.utils import AccountNotExistError
@@ -93,66 +93,6 @@ async def test_get_wallet_invalid_address(mock_address):
         await get_wallet('XXXX')
     assert str(context.value) == 'Not Found'
 
-
-def test_format_signer():
-    result = format_signers(StellarWallet().signers)
-    assert result == [{
-        'public_key': 'GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF',
-        'weight': 1,
-        'type': 'ed25519_public_key'
-    },
-    {
-        'public_key': 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI',
-        'weight': 1,
-        'type': 'ed25519_public_key'
-    },
-    {
-        'public_key': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
-        'weight': 0,
-        'type': 'ed25519_public_key'
-    }]
-
-
-def test_map_balance():
-    result = map_balance(StellarWallet().balances)
-    assert result == {
-        'HTKN': {
-            'balance': '7.0000000',
-            'issuer': 'GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD'
-        },
-        'XLM': {
-            'balance': '9.9999200',
-            'issuer': 'native'
-        }
-    }
-
-
-def test_map_empty_balance():
-    balances = []
-    with pytest.raises(TypeError) as context:
-        map_balance(balances)
-    assert str(context.value) == 'reduce() of empty sequence with no initial value'
-
-
-def xtest_format_balance_asset_type_native():
-    balance = {
-        'balance': '9.9999200',
-        'asset_type': 'native'
-    }
-    result = format_balance(balance)
-    assert result == {'XLM': {'balance': '9.9999200', 'issuer': 'native'}}
-
-
-def xtest_format_balance_asset_type_not_native():
-    balance = {
-        'balance': '7.0000000',
-        'limit': '922337203685.4775807',
-        'asset_type': 'credit_alphanum4',
-        'asset_code': 'HTKN',
-        'asset_issuer': 'GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD'
-    }
-    result = format_balance(balance)
-    assert result == {'HTKN': {'balance': '7.0000000', 'issuer': 'GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD'}}
 
 def test_wallet_response():
     actual_data = wallet_response(
