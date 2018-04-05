@@ -11,7 +11,7 @@ class StellarWallet(object):
                 'balance': '7.0000000',
                 'limit': '922337203685.4775807',
                 'asset_type': 'credit_alphanum4',
-                'asset_code': 'RNTK',
+                'asset_code': 'HTKN',
                 'asset_issuer': 'GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD'
             },
             {

@@ -32,7 +32,7 @@ async def test_get_wallet_success(mock_address):
     expect_data = wallet_response(
         'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD', 
         {
-            'RNTK': {
+            'HTKN': {
                 'balance': '7.0000000',
                 'issuer': 'GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD'
             },
@@ -116,7 +116,7 @@ def test_format_signer():
 def test_map_balance():
     result = map_balance(StellarWallet().balances)
     assert result == {
-        'RNTK': {
+        'HTKN': {
             'balance': '7.0000000',
             'issuer': 'GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD'
         },
@@ -148,17 +148,17 @@ def xtest_format_balance_asset_type_not_native():
         'balance': '7.0000000',
         'limit': '922337203685.4775807',
         'asset_type': 'credit_alphanum4',
-        'asset_code': 'RNTK',
+        'asset_code': 'HTKN',
         'asset_issuer': 'GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD'
     }
     result = format_balance(balance)
-    assert result == {'RNTK': {'balance': '7.0000000', 'issuer': 'GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD'}}
+    assert result == {'HTKN': {'balance': '7.0000000', 'issuer': 'GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD'}}
 
 def test_wallet_response():
     actual_data = wallet_response(
         'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
         {
-            'RNTK': {
+            'HTKN': {
                 'balance': '7.0000000',
                 'issuer': 'GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD'
             },
@@ -192,7 +192,7 @@ def test_wallet_response():
         '@url': 'localhost:8081/wallet/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
         '@id': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
         'asset': {
-            'RNTK': {
+            'HTKN': {
                 'balance': '7.0000000',
                 'issuer': 'GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD'
             },
