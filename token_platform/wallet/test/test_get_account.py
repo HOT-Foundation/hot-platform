@@ -3,7 +3,7 @@ from aiohttp import web
 import asyncio
 from router import routes
 from asynctest import patch
-from wallet.get_wallet import get_wallet, stellar_address, format_signers, map_balance, format_balance, get_wallet_from_request, wallet_response
+from wallet.get_wallet import get_wallet, stellar_address, format_signers, map_balance, get_wallet_from_request, wallet_response
 from aiohttp.test_utils import make_mocked_request
 import json
 from stellar_base.utils import AccountNotExistError
@@ -134,7 +134,7 @@ def test_map_empty_balance():
     assert str(context.value) == 'reduce() of empty sequence with no initial value'
 
 
-def test_format_balance_asset_type_native():
+def xtest_format_balance_asset_type_native():
     balance = {
         'balance': '9.9999200',
         'asset_type': 'native'
@@ -143,7 +143,7 @@ def test_format_balance_asset_type_native():
     assert result == {'XLM': {'balance': '9.9999200', 'issuer': 'native'}}
 
 
-def test_format_balance_asset_type_not_native():
+def xtest_format_balance_asset_type_not_native():
     balance = {
         'balance': '7.0000000',
         'limit': '922337203685.4775807',
