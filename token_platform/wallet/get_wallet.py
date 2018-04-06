@@ -1,15 +1,14 @@
 from aiohttp import web, web_request, web_response
-from stellar_base.address import Address as stellar_address
+from stellar_base.address import Address as StellarAddress
 from stellar_base.utils import AccountNotExistError
-from pprint import pprint
 from functools import reduce 
 from conf import settings
-from typing import Dict, List, Any, NewType, Union, Mapping
+from typing import Dict, List, Any, NewType, Union, Mapping, Optional
 
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 STELLAR_BALANCE = Dict[str, str]
-STELLAR_BALANCES = List[Dict[str, str]]
-BALANCE_RESPONSE = Dict[str, Dict[str, str]]
+STELLAR_BALANCES = List[STELLAR_BALANCE]
+BALANCE_RESPONSE = Union[Dict[str, str], Dict]
 SIGNERS = List[Dict[str, str]]
 THRESHOLDS = Dict[str, int]
 
@@ -21,47 +20,44 @@ async def get_wallet_from_request(request: web_request.Request) ->  web_response
 
 
 async def get_wallet(wallet_address: str) -> web_response.Response:
-    """Get wallet from stellar network"""
+    """Get wallet balances from stellar network"""
 
-    def _map_balance(stellar_balances: STELLAR_BALANCES) -> BALANCE_RESPONSE:
-        """Map wallet balances to dictionary"""
-        balanceList = list(map(_format_balance, stellar_balances))
-        balance = reduce((lambda x, y: {**x, **y}), balanceList)
-        return balance
+    def _format_balance(balance: STELLAR_BALANCE) -> BALANCE_RESPONSE:
+        """Format balance in pattern dict {asset_code: balance}"""
+        if balance['asset_type'] == 'native':
+            return {'XLM': balance['balance']}
+        elif balance['asset_code'] == settings['ASSET_CODE'] and balance['asset_issuer'] == settings['ISSUER']:
+            return {settings['ASSET_CODE']: balance['balance']}
+        return {}
 
-    def _format_balance(stellar_balance: STELLAR_BALANCE) -> BALANCE_RESPONSE:
-        """Format wallet balances to dictionary"""
-        asset = 'XLM' if stellar_balance['asset_type'] == 'native' else stellar_balance['asset_code']
-        issuer = 'native' if stellar_balance['asset_type'] == 'native' else stellar_balance['asset_issuer']
-        return {
-            asset: {
-                'balance': stellar_balance['balance'],
-                'issuer': issuer
-            }
-        }
+    def _merge_balance(balances: STELLAR_BALANCES) -> Dict[str, str]:
+        """Merge all balances to one Dict"""
+        asset:Union[Dict, Dict[str, str]] = {}
+        for balance in balances:
+            asset.update(_format_balance(balance))
+        return asset
 
-    def _format_signers(signers: SIGNERS) -> SIGNERS:
-        """Format signers's wallet to dictionary is not include field key"""
-        return list(map(lambda signer: {'public_key': signer['public_key'], 'type': signer['type'], 'weight': signer['weight']}, signers))
+    def _trusted_htkn(balances: STELLAR_BALANCES) -> Union[Dict, Dict[str, str]]:
+        """Return URL for making trust HTKN"""
+        if len(list(filter(lambda b: b.get('asset_code', None) == settings['ASSET_CODE'] and b.get('asset_issuer', None) == settings['ISSUER'], balances))) == 0:
+            return {'trust': '{}/wallet/{}/transaction/change-trust'.format(settings['HOST'], wallet_address)}
+        return {}
 
-    wallet:stellar_address = stellar_address(address=wallet_address)
+
+    wallet = StellarAddress(address=wallet_address)
     try:
         wallet.get()
     except AccountNotExistError as ex:
         raise web.HTTPNotFound(text=str(ex))
 
-    balances = _map_balance(wallet.balances)
-    signers = _format_signers(wallet.signers)
-    result = wallet_response(wallet_address, balances, wallet.thresholds, signers)
+    result:Dict[str, Any] = {
+        '@id':wallet.id,
+        '@url': '{}/wallet/{}'.format(settings['HOST'], wallet_address),
+        'asset': _merge_balance(wallet.balances)
+    }
+
+    result.update(_trusted_htkn(wallet.balances))
+
     return web.json_response(result)
 
 
-def wallet_response(wallet_address: str, balances: BALANCE_RESPONSE, thresholds: THRESHOLDS, signers: SIGNERS, host:str=settings['HOST']) -> JSONType:
-    """Format of wallet to dictionary"""
-    return {
-        "@url": '{}/wallet/{}'.format(host, wallet_address),
-        "@id": wallet_address,
-        "asset": balances,
-        "thresholds": thresholds,
-        "signers": signers
-    }

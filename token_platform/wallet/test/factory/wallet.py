@@ -6,6 +6,10 @@ class StellarWallet(object):
             pass
 
         @property
+        def id(self):
+            return 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'
+
+        @property
         def balances(self):
             return [{
                 'balance': '7.0000000',
