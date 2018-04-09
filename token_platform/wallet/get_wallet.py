@@ -1,7 +1,7 @@
 from aiohttp import web, web_request, web_response
 from stellar_base.address import Address as StellarAddress
 from stellar_base.utils import AccountNotExistError
-from functools import reduce 
+from functools import reduce
 from conf import settings
 from typing import Dict, List, Any, NewType, Union, Mapping, Optional
 
@@ -51,7 +51,7 @@ async def get_wallet(wallet_address: str) -> web_response.Response:
         raise web.HTTPNotFound(text=str(ex))
 
     result:Dict[str, Any] = {
-        '@id':wallet.id,
+        '@id':wallet.address,
         '@url': '{}/wallet/{}'.format(settings['HOST'], wallet_address),
         'asset': _merge_balance(wallet.balances)
     }
