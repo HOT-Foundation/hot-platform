@@ -15,3 +15,9 @@ services:
       - ISSUER=GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD
       - HOST=localhost:8081
       - PYTHONPATH=/usr/src/token_platform
+    networks:
+      - hotnow-network
+networks:
+  hotnow-network:
+    external:
+      name: hotnow-network
