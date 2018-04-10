@@ -1,5 +1,9 @@
 __pycache__
+.pytest_cache
 htmlcov
 .coverage
 .pytest_cache
 *.pyc
+.directory
+.mypy_cache
+.vscode/

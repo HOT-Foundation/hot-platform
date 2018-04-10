@@ -1,6 +1,7 @@
 FROM registry-hotnow.proteus-tech.com/base-hotnow-htkn-platform:1.1
 
 COPY requirements.txt /
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 COPY /token_platform /usr/src/token_platform

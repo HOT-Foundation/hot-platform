@@ -1,8 +1,8 @@
 from aiohttp import web
-from account.get_account import get_account 
+from wallet.get_wallet import get_wallet_from_request
 from controller import handle
 
 routes = [
-    web.get('/', get_account),
-    web.get('/{name}', get_account),
+    web.get('/', handle),
+    web.get('/wallet/{wallet_address}', get_wallet_from_request),
 ]
