@@ -51,7 +51,7 @@ async def get_wallet(wallet_address: str) -> web_response.Response:
         raise web.HTTPNotFound(text=str(ex))
 
     result:Dict[str, Any] = {
-        '@id':wallet.address,
+        '@id': wallet_address,
         '@url': '{}/wallet/{}'.format(settings['HOST'], wallet_address),
         'asset': _merge_balance(wallet.balances)
     }

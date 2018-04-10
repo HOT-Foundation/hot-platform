@@ -6,3 +6,4 @@ htmlcov
 *.pyc
 .directory
 .mypy_cache
+.vscode/
