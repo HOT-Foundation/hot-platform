@@ -1,17 +1,21 @@
-from stellar_base.builder import Builder
-from stellar_base.address import Address as StellarAddress
+from typing import Tuple
 
-def wallet_address_is_not_duplicate(destination_address: str) -> bool:
+from stellar_base.address import Address as StellarAddress
+from stellar_base.builder import Builder
+
+
+def wallet_address_is_duplicate(destination_address: str) -> bool:
     """Check address ID is not duplicate"""
     wallet = StellarAddress(address=destination_address)
     try:
         wallet.get()
         return False
-    except Exception:
+    except ValueError:
         return True
 
-def build_create_wallet_transaction(source_address: str, destination_address: str, amount: int, builder: Builder = None) -> bytes:
-    """"Build transaction
+
+def build_create_wallet_transaction(source_address: str, destination_address: str, amount: int) -> Tuple:
+    """"Build transaction return unsigned XDR and transaction hash.
 
         Args:
             source_address: Owner of
@@ -19,11 +23,11 @@ def build_create_wallet_transaction(source_address: str, destination_address: st
             amount: starting balance of new wallet
             builder(optional): Builder object
     """
-    if builder is None:
-        builder = Builder(address=source_address)
-    builder.append_create_account_op(source=source_address, destination=destination_address, starting_balance=amount)
-    builder.append_trust_op(source=destination_address, destination=destination_address, code="HTKN")
+    builder = Builder(address=source_address)
+    builder.append_create_account_op(
+        source=source_address, destination=destination_address, starting_balance=amount)
+    builder.append_trust_op(source=destination_address,
+                            destination=destination_address, code="HTKN")
     unsigned_xdr = builder.gen_xdr()
-
-    import pdb; pdb.set_trace()
-    return unsigned_xdr
+    tx_hash = builder.te.hash_meta()
+    return unsigned_xdr, tx_hash
