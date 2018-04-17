@@ -18,7 +18,7 @@ async def get_create_wallet_from_request(request: web_request.Request):
         source_address = request.match_info['wallet_address']
     except KeyError:
         raise web_exceptions.HTTPBadRequest()
-    source_address: str = request.match_info.get('wallet_address', None)
+
     queries = request.query
     destination_address: str = queries.get('target', None)
     amount: int = int(queries.get('starting_amount', 0))
@@ -30,9 +30,8 @@ async def get_create_wallet_from_request(request: web_request.Request):
     if duplicate:
         raise ValueError('Wallet ID of new wallet is duplicate.')
 
-    tx = build_create_wallet_transaction(source_address, destination_address, amount)
-    unsigned_xdr: bytes = tx[0]
-    tx_hash: str = tx[1]
+    unsigned_xdr, tx_hash = build_create_wallet_transaction(source_address, destination_address, amount)
+
     signers: List[str] = [source_address, destination_address]
     host: str = settings['HOST']
     result = {

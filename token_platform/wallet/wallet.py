@@ -14,7 +14,7 @@ def wallet_address_is_duplicate(destination_address: str) -> bool:
         return True
 
 
-def build_create_wallet_transaction(source_address: str, destination_address: str, amount: int) -> Tuple:
+def build_create_wallet_transaction(source_address: str, destination_address: str, amount: int) -> Tuple[bytes, str]:
     """"Build transaction return unsigned XDR and transaction hash.
 
         Args:

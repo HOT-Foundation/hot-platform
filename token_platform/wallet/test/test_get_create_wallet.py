@@ -1,13 +1,11 @@
-from unittest.mock import Mock
-
+import pytest
 from aiohttp.test_utils import unittest_run_loop
 from asynctest import patch
-
-import pytest
-from conf import settings
 from stellar_base.keypair import Keypair
 from stellar_base.utils import StellarMnemonic
 from tests.test_utils import BaseTestClass
+
+from conf import settings
 from wallet.wallet import (build_create_wallet_transaction,
                            wallet_address_is_duplicate)
 
