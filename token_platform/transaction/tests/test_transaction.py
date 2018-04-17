@@ -4,7 +4,8 @@ from aiohttp.web_exceptions import HTTPBadRequest
 from asynctest import patch
 from tests.test_utils import BaseTestClass
 
-from transaction.transaction import submit_transaction, is_duplicate_transaction
+from transaction.transaction import (is_duplicate_transaction,
+                                     submit_transaction)
 
 
 class TestSubmitTransactionFromRequest(BaseTestClass):

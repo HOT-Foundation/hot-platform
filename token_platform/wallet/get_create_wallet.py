@@ -1,7 +1,7 @@
 from functools import reduce
 from typing import Any, Dict, List, Mapping, NewType, Optional, Union
 
-from aiohttp import web, web_request, web_response, web_exceptions
+from aiohttp import web
 
 import requests
 from conf import settings
@@ -12,12 +12,12 @@ from wallet.wallet import (build_create_wallet_transaction,
                            wallet_address_is_duplicate)
 
 
-async def get_create_wallet_from_request(request: web_request.Request):
+async def get_create_wallet_from_request(request: web.Request):
     """Aiohttp Request wallet address to get create wallet transaction."""
     try:
         source_address = request.match_info['wallet_address']
     except KeyError:
-        raise web_exceptions.HTTPBadRequest()
+        raise web.HTTPBadRequest
 
     queries = request.query
     destination_address: str = queries.get('target', None)
