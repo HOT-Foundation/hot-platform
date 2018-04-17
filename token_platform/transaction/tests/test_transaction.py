@@ -38,7 +38,7 @@ class TestSubmitTransactionFromRequest(BaseTestClass):
         assert resp.status == 400
         text = await resp.json()
         expect = {
-            'message': 'transaction fail, please check your parameter.'
+            'error': 'transaction fail, please check your parameter.'
         }
 
         assert text == expect

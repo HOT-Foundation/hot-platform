@@ -27,7 +27,6 @@ async def submit_transaction(xdr: bytes) -> Dict[str, str]:
 
 
 async def submit_transaction_from_request(request: web.Request) -> web.Response:
-    raise web.HTTPBadRequest(reason='test na krub')
     signed_xdr = await request.text()
     tx_hash = request.match_info['transaction_hash']
     result = {'message': 'transaction success.'}
