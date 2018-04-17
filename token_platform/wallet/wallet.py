@@ -2,7 +2,7 @@ from typing import Tuple
 
 from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
-
+from conf import settings
 
 def wallet_address_is_duplicate(destination_address: str) -> bool:
     """Check address ID is not duplicate"""
@@ -27,7 +27,7 @@ def build_create_wallet_transaction(source_address: str, destination_address: st
     builder.append_create_account_op(
         source=source_address, destination=destination_address, starting_balance=amount)
     builder.append_trust_op(source=destination_address,
-                            destination=destination_address, code="HTKN")
+                            destination=destination_address, code=settings['ASSET_CODE'])
     unsigned_xdr = builder.gen_xdr()
     tx_hash = builder.te.hash_meta()
     return unsigned_xdr, tx_hash
