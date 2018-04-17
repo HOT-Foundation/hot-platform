@@ -38,4 +38,4 @@ async def submit_transaction_from_request(request: web.Request) -> web.Response:
         raise web.HTTPBadRequest(reason='transaction fail, please check your parameter.')
 
     response = await submit_transaction(signed_xdr)
-    return web.json_response(result) if (response['status'] == 200) else web.json_response(web.HTTPInternalServerError)
+    return web.json_response(result)
