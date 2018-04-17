@@ -1,9 +1,15 @@
+from functools import reduce
+from typing import Any, Dict, List, Mapping, NewType, Optional, Union
+
+import requests
 from aiohttp import web, web_request, web_response
 from stellar_base.address import Address as StellarAddress
+from stellar_base.builder import Builder
 from stellar_base.utils import AccountNotExistError
-from functools import reduce
+
 from conf import settings
-from typing import Dict, List, Any, NewType, Union, Mapping, Optional
+from wallet.wallet import (build_create_wallet_transaction,
+                           wallet_address_is_duplicate)
 
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 STELLAR_BALANCE = Dict[str, str]
@@ -13,7 +19,7 @@ SIGNERS = List[Dict[str, str]]
 THRESHOLDS = Dict[str, int]
 
 
-async def get_wallet_from_request(request: web_request.Request) ->  web_response.Response:
+async def get_wallet_from_request(request: web_request.Request) -> web_response.Response:
     """AIOHttp Request wallet address to get wallet"""
     wallet_address = request.match_info.get('wallet_address', "")
     return await get_wallet(wallet_address)
@@ -32,7 +38,7 @@ async def get_wallet(wallet_address: str) -> web_response.Response:
 
     def _merge_balance(balances: STELLAR_BALANCES) -> Dict[str, str]:
         """Merge all balances to one Dict"""
-        asset:Union[Dict, Dict[str, str]] = {}
+        asset: Union[Dict, Dict[str, str]] = {}
         for balance in balances:
             asset.update(_format_balance(balance))
         return asset
@@ -43,14 +49,13 @@ async def get_wallet(wallet_address: str) -> web_response.Response:
             return {'trust': '{}/wallet/{}/transaction/change-trust'.format(settings['HOST'], wallet_address)}
         return {}
 
-
     wallet = StellarAddress(address=wallet_address)
     try:
         wallet.get()
     except AccountNotExistError as ex:
         raise web.HTTPNotFound(text=str(ex))
 
-    result:Dict[str, Any] = {
+    result: Dict[str, Any] = {
         '@id': wallet_address,
         '@url': '{}/wallet/{}'.format(settings['HOST'], wallet_address),
         'asset': _merge_balance(wallet.balances)
@@ -59,5 +64,3 @@ async def get_wallet(wallet_address: str) -> web_response.Response:
     result.update(_trusted_htkn(wallet.balances))
 
     return web.json_response(result)
-
-
