@@ -7,7 +7,7 @@ from wallet.get_wallet import get_wallet, StellarAddress, get_wallet_from_reques
 from aiohttp.test_utils import make_mocked_request
 import json
 from stellar_base.utils import AccountNotExistError
-from wallet.test.factory.wallet import StellarWallet
+from wallet.tests.factory.wallet import StellarWallet
 from conf import settings
 
 @patch('wallet.get_wallet.get_wallet')
