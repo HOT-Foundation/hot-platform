@@ -49,7 +49,7 @@ async def get_wallet(wallet_address: str) -> web_response.Response:
             return {'trust': '{}/wallet/{}/transaction/change-trust'.format(settings['HOST'], wallet_address)}
         return {}
 
-    wallet = StellarAddress(address=wallet_address)
+    wallet = StellarAddress(address=wallet_address, network=settings['STELLAR_NETWORK'])
     try:
         wallet.get()
     except AccountNotExistError as ex:
