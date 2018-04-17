@@ -26,7 +26,8 @@ async def submit_transaction(xdr: bytes) -> Dict[str, str]:
     return response
 
 
-async def submit_transaction_from_request(request: web.Request) -> web.Response:
+async def put_transaction_from_request(request: web.Request) -> web.Response:
+
     signed_xdr = await request.text()
     tx_hash = request.match_info['transaction_hash']
     result = {'message': 'transaction success.'}

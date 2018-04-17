@@ -13,7 +13,7 @@ class TestSubmitTransactionFromRequest(BaseTestClass):
     @unittest_run_loop
     @patch('transaction.transaction.is_duplicate_transaction')
     @patch('transaction.transaction.submit_transaction')
-    async def test_submit_transaction_from_request_success(self, mock_tx, mock_dup) -> None:
+    async def test_put_transaction_from_request_success(self, mock_tx, mock_dup) -> None:
         mock_dup.return_value = False
         mock_tx.return_value = {'status': 200}
         url = f'transaction/transaction-hash'
@@ -30,7 +30,7 @@ class TestSubmitTransactionFromRequest(BaseTestClass):
     @unittest_run_loop
     @patch('transaction.transaction.is_duplicate_transaction')
     @patch('transaction.transaction.submit_transaction')
-    async def test_submit_transaction_from_request_error_wrong_parameter(self, mock_tx, mock_dup) -> None:
+    async def test_put_transaction_from_request_error_wrong_parameter(self, mock_tx, mock_dup) -> None:
         mock_dup.return_value = False
         mock_tx.return_value = {'status': 200}
         url = f'transaction/transaction-hash'
