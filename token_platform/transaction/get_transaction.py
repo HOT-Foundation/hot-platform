@@ -19,7 +19,7 @@ async def get_transaction(tx_hash: str) -> web_response.Response:
         tx_hash: hash of transaction we are interested in.
     """
 
-    def _format_transaction(tx_detail: Dict[str, str]) -> Dict[str, str]:
+    def _format_transaction(tx_detail: Dict[str, str]) -> Dict[str, Union[str, int]]:
         """Format transaction detail in pattern dict"""
         return {
             "@id": tx_detail.get("id", None),
