@@ -25,7 +25,7 @@ class TestSubmitTransaction(BaseTestClass):
 
 class TestDuplicateTransaction(BaseTestClass):
 
-    class TransactionFail(object):
+    class TransactionFail():
         def transaction(self, tx_hash):
             return {
                 "title": "Resource Missing",
@@ -33,7 +33,7 @@ class TestDuplicateTransaction(BaseTestClass):
                 "detail": "The resource at the url requested was not found.  This is usually occurs for one of two reasons:  The url requested is not valid, or no data in our database could be found with the parameters provided."
             }
 
-    class TransactionSuccess(object):
+    class TransactionSuccess():
         def transaction(self, tx_hash):
             return {
                 "id": 'testteestsetbbdf'
@@ -59,9 +59,25 @@ class TestDuplicateTransaction(BaseTestClass):
         result = await is_duplicate_transaction(tx_hash)
         assert result == False
 
-# class TestGetNextSequenceNumber(BaseTestClass):
-#     @unittest_run_loop
-#     async def test_get_sequence_number_success(self) -> None:
-#         wallet_address = 'GASF2Q2GZMQMMNSYDU34MU4GJKSZPSN7FYKQEMNH4QJMVE3JR3C3I3N5'
-#         result = get_next_sequence_number(wallet_address)
-#         assert isinstance(wallet_address) == int
+
+class TestGetNextSequenceNumber(BaseTestClass):
+
+    class TransactionSuccess():
+
+        class Account():
+            def get(self, str):
+                return '1234566789'
+
+        def account(self, wallet_address):
+            return self.Account()
+
+    @unittest_run_loop
+    @patch('transaction.transaction.horizon_livenet')
+    @patch('transaction.transaction.horizon_testnet')
+    async def test_get_sequence_number_success(self, mock_test, mock_live) -> None:
+        mock_test.return_value = self.TransactionSuccess()
+        mock_live.return_value = self.TransactionSuccess()
+        wallet_address = 'GASF2Q2GZMQMMNSYDU34MU4GJKSZPSN7FYKQEMNH4QJMVE3JR3C3I3N5'
+        result = await get_next_sequence_number(wallet_address)
+        assert isinstance(result, str)
+        assert result == '1234566789'

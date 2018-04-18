@@ -29,7 +29,9 @@ async def submit_transaction(xdr: bytes) -> Dict[str, str]:
     return response
 
 async def get_next_sequence_number(wallet_address:str) -> int:
-    pass
+    horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
+    sequence = horizon.account(wallet_address).get('sequence')
+    return sequence
 
 async def get_transaction(tx_hash: str) -> web_response.Response:
     """Retrieve transaction detail from transaction hash
