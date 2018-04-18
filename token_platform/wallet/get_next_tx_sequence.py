@@ -6,8 +6,8 @@ from transaction.transaction import get_next_sequence_number
 
 
 async def get_next_tx_sequence_from_request(request: web.Request) -> web.Response:
-    horizon = horizon_livenet(
-    ) if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
+    """Get next available sequence number of the wallet"""
+    horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
 
     wallet_address: str = request.match_info.get('wallet_address')
 

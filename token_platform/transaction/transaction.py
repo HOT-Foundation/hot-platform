@@ -11,12 +11,15 @@ JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 
 
 async def is_duplicate_transaction(transaction_hash: str) -> bool:
+    """Check transaction is duplicate or not"""
+
     horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
     transaction = horizon.transaction(transaction_hash)
     id = transaction.get('id')
     return True if id else False
 
 async def submit_transaction(xdr: bytes) -> Dict[str, str]:
+    """Submit transaction into Stellar network"""
     horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
     try:
         response = horizon.submit(xdr)
@@ -29,6 +32,7 @@ async def submit_transaction(xdr: bytes) -> Dict[str, str]:
     return response
 
 async def get_next_sequence_number(wallet_address:str) -> int:
+    """Get next sequence number of the wallet"""
     horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
     sequence = horizon.account(wallet_address).get('sequence')
     return sequence
