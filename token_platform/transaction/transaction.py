@@ -17,7 +17,7 @@ async def submit_transaction(xdr: bytes) -> Dict[str, str]:
     horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
     try:
         response = horizon.submit(xdr)
-    except Exception as e:
+    except Exception:
         raise web.HTTPInternalServerError
     if response['status'] == 400:
         raise web.HTTPBadRequest
@@ -27,16 +27,16 @@ async def submit_transaction(xdr: bytes) -> Dict[str, str]:
 
 
 async def put_transaction_from_request(request: web.Request) -> web.Response:
-
     signed_xdr = await request.text()
     tx_hash = request.match_info['transaction_hash']
+
+    if not signed_xdr or not tx_hash:
+        raise web.HTTPBadRequest(reason='transaction fail, please check your parameter.')
+
     result = {'message': 'transaction success.'}
 
     if await is_duplicate_transaction(tx_hash):
         raise web.HTTPBadRequest(reason='Duplicate transaction.')
-
-    if not signed_xdr or not tx_hash:
-        raise web.HTTPBadRequest(reason='transaction fail, please check your parameter.')
 
     response = await submit_transaction(signed_xdr)
     return web.json_response(result)

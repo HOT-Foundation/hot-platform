@@ -46,12 +46,16 @@ class TestSubmitTransactionFromRequest(BaseTestClass):
 
 class TestSubmitTransaction(BaseTestClass):
     @unittest_run_loop
-    async def test_submit_transaction_fail(self) -> None:
+    async def test_submit_transaction_fail_with_duplicate_xdr(self) -> None:
         with pytest.raises(HTTPBadRequest):
             signed_xdr = b'AAAAACRdQ0bLIMY2WB03xlOGSqWXyb8uFQIxp+QSypNpjsW0AAAAZAB79gEAAAAHAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAbUsVq2bqEoCf7vIHxSuFBHDqxrZiYvtyqyavFkpA9wQAAAABDzN9gAAAAAAAAAABaY7FtAAAAEB0OSEaK6FTDW3imY9vU/jFe3dDhz0j5/656Kpns/uzBdSMUvl9q8ZNQes7ASTp98hgsxfZBlVnYAr0jzwY05MI'
             result = await submit_transaction(signed_xdr)
 
-
+    @unittest_run_loop
+    async def test_submit_transaction_fail_with_wrong_xdr(self) -> None:
+        with pytest.raises(HTTPBadRequest):
+            signed_xdr = b'AAAAACRdQ0bLIMY2WB03xlOGSqWXy'
+            result = await submit_transaction(signed_xdr)
 
 
 class TestDuplicateTransaction(BaseTestClass):

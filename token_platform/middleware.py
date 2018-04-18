@@ -1,5 +1,3 @@
-import traceback
-
 from aiohttp import web
 from stellar_base.utils import AccountNotExistError
 
@@ -18,6 +16,3 @@ async def error_middleware(request, handler):
     except web.HTTPInternalServerError as ex:
         message = str(ex)
         return web.json_response({'error': message}, status=500)
-    # except Exception:
-    #     traceback.print_exc()
-    #     return web.json_response({'error': 'Internal server error.'}, status=500)
