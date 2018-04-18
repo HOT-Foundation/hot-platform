@@ -2,7 +2,7 @@ from functools import reduce
 from typing import Any, Dict, List, Mapping, NewType, Optional, Union
 
 import requests
-from aiohttp import web, web_request, web_response
+from aiohttp import web
 from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
 from stellar_base.utils import AccountNotExistError
@@ -19,13 +19,13 @@ SIGNERS = List[Dict[str, str]]
 THRESHOLDS = Dict[str, int]
 
 
-async def get_wallet_from_request(request: web_request.Request) -> web_response.Response:
+async def get_wallet_from_request(request: web.Request) -> web.Response:
     """AIOHttp Request wallet address to get wallet"""
     wallet_address = request.match_info.get('wallet_address', "")
     return await get_wallet(wallet_address)
 
 
-async def get_wallet(wallet_address: str) -> web_response.Response:
+async def get_wallet(wallet_address: str) -> web.Response:
     """Get wallet balances from stellar network"""
 
     def _format_balance(balance: STELLAR_BALANCE) -> BALANCE_RESPONSE:
@@ -49,7 +49,7 @@ async def get_wallet(wallet_address: str) -> web_response.Response:
             return {'trust': '{}/wallet/{}/transaction/change-trust'.format(settings['HOST'], wallet_address)}
         return {}
 
-    wallet = StellarAddress(address=wallet_address)
+    wallet = StellarAddress(address=wallet_address, network=settings['STELLAR_NETWORK'])
     try:
         wallet.get()
     except AccountNotExistError as ex:

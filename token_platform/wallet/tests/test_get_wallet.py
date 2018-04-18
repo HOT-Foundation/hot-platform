@@ -1,20 +1,24 @@
+import asyncio
+import json
+
 import pytest
 from aiohttp import web
-import asyncio
-from router import routes
-from asynctest import patch
-from wallet.get_wallet import get_wallet, StellarAddress, get_wallet_from_request
 from aiohttp.test_utils import make_mocked_request
-import json
+from asynctest import patch
 from stellar_base.utils import AccountNotExistError
-from wallet.test.factory.wallet import StellarWallet
+
 from conf import settings
+from router import routes
+from wallet.get_wallet import (StellarAddress, get_wallet,
+                               get_wallet_from_request)
+from wallet.tests.factory.wallet import StellarWallet
+
 
 @patch('wallet.get_wallet.get_wallet')
 async def test_get_wallet_from_request(mock_get_wallet):
-    req = make_mocked_request('GET', '/wallet/{}'.format('GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'),
-        match_info={'wallet_address': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'}
-    )
+    wallet_address = 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'
+    req = make_mocked_request('GET', '/wallet/{}'.format(wallet_address),
+                              match_info={'wallet_address': wallet_address})
     await get_wallet_from_request(req)
     assert mock_get_wallet.call_count == 1
 
@@ -23,7 +27,7 @@ async def test_get_wallet_from_request(mock_get_wallet):
 @patch('wallet.get_wallet.StellarAddress')
 async def test_get_wallet_success_trusted_htkn(mock_address):
     instance = mock_address.return_value
-    balances =[{
+    balances = [{
         'balance': '7.0000000',
         'limit': '922337203685.4775807',
         'asset_type': 'credit_alphanum4',
@@ -56,11 +60,11 @@ async def test_get_wallet_success_trusted_htkn(mock_address):
 @patch('wallet.get_wallet.StellarAddress')
 async def test_get_wallet_success_not_trust_htkn(mock_address):
     instance = mock_address.return_value
-    balances =[
-    {
-        'balance': '9.9999200',
-        'asset_type': 'native'
-    }]
+    balances = [
+        {
+            'balance': '9.9999200',
+            'asset_type': 'native'
+        }]
     mock_address.return_value = StellarWallet(balances)
 
     result = await get_wallet('GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')
