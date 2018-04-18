@@ -3,6 +3,7 @@ from wallet.get_wallet import get_wallet_from_request
 from wallet.get_create_wallet import get_create_wallet_from_request
 from transaction.get_transaction import get_transaction_from_request
 from transaction.transaction import put_transaction_from_request
+from transaction.get_unsigned_transfer import get_unsigned_transfer_from_request
 from controller import handle
 
 routes = [
@@ -10,5 +11,6 @@ routes = [
     web.get('/wallet/{wallet_address}', get_wallet_from_request),
     web.get('/wallet/{wallet_address}/create-wallet', get_create_wallet_from_request),
     web.get('/transaction/{transaction_hash}', get_transaction_from_request),
-    web.put('/transaction/{transaction_hash}', put_transaction_from_request)
+    web.put('/transaction/{transaction_hash}', put_transaction_from_request),
+    web.get('/wallet/{account_address}/transaction/transfer', get_unsigned_transfer_from_request)
 ]
