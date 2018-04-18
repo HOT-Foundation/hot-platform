@@ -8,7 +8,7 @@ JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 
 async def get_transaction_from_request(request: web_request.Request) ->  web_response.Response:
     """AIOHttp Request transaction hash to get transaction detail"""
-    tx_hash = request.match_info.get('tx_hash', "")
+    tx_hash = request.match_info.get('transaction_hash', "")
     return await get_transaction(tx_hash)
 
 
