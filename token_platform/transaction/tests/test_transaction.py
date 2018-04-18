@@ -4,44 +4,9 @@ from aiohttp.web_exceptions import HTTPBadRequest
 from asynctest import patch
 from tests.test_utils import BaseTestClass
 
-from transaction.transaction import (is_duplicate_transaction,
+from transaction.transaction import (get_next_sequence_number,
+                                     is_duplicate_transaction,
                                      submit_transaction)
-
-
-class TestSubmitTransactionFromRequest(BaseTestClass):
-
-    @unittest_run_loop
-    @patch('transaction.transaction.is_duplicate_transaction')
-    @patch('transaction.transaction.submit_transaction')
-    async def test_put_transaction_from_request_success(self, mock_tx, mock_dup) -> None:
-        mock_dup.return_value = False
-        mock_tx.return_value = {'status': 200}
-        url = f'transaction/transaction-hash'
-        resp = await self.client.request("PUT", url, data=b'test data')
-        assert resp.status == 200
-        text = await resp.json()
-
-        expect = {
-            'message': 'transaction success.'
-        }
-
-        assert text == expect
-
-    @unittest_run_loop
-    @patch('transaction.transaction.is_duplicate_transaction')
-    @patch('transaction.transaction.submit_transaction')
-    async def test_put_transaction_from_request_error_wrong_parameter(self, mock_tx, mock_dup) -> None:
-        mock_dup.return_value = False
-        mock_tx.return_value = {'status': 200}
-        url = f'transaction/transaction-hash'
-        resp = await self.client.request("PUT", url)
-        assert resp.status == 400
-        text = await resp.json()
-        expect = {
-            'error': 'transaction fail, please check your parameter.'
-        }
-
-        assert text == expect
 
 
 class TestSubmitTransaction(BaseTestClass):
@@ -59,11 +24,44 @@ class TestSubmitTransaction(BaseTestClass):
 
 
 class TestDuplicateTransaction(BaseTestClass):
+
+    class TransactionFail(object):
+        def transaction(self, tx_hash):
+            return {
+                "title": "Resource Missing",
+                "status": 404,
+                "detail": "The resource at the url requested was not found.  This is usually occurs for one of two reasons:  The url requested is not valid, or no data in our database could be found with the parameters provided."
+            }
+
+    class TransactionSuccess(object):
+        def transaction(self, tx_hash):
+            return {
+                "id": 'testteestsetbbdf'
+            }
+
     @unittest_run_loop
-    async def test_is_duplicate_transaction_success(self) -> None:
+    @patch('transaction.transaction.horizon_livenet')
+    @patch('transaction.transaction.horizon_testnet')
+    async def test_is_duplicate_transaction_duplicate_when_id_exist(self, mock_test, mock_live) -> None:
+        mock_test.return_value = self.TransactionSuccess()
+        mock_test.return_value = self.TransactionSuccess()
         tx_hash = 'e11b7a3677fdd45c885e8fb49d0079d083ee8a5cab08e32b00126172abb05111'
         result = await is_duplicate_transaction(tx_hash)
         assert result == True
+
+    @unittest_run_loop
+    @patch('transaction.transaction.horizon_livenet')
+    @patch('transaction.transaction.horizon_testnet')
+    async def test_is_duplicate_transaction_not_duplicate_when_get_not_found(self, mock_test, mock_live) -> None:
+        mock_test.return_value = self.TransactionFail()
+        mock_live.return_value = self.TransactionFail()
         tx_hash = 'e11b7a3677fdd45c885'
         result = await is_duplicate_transaction(tx_hash)
         assert result == False
+
+# class TestGetNextSequenceNumber(BaseTestClass):
+#     @unittest_run_loop
+#     async def test_get_sequence_number_success(self) -> None:
+#         wallet_address = 'GASF2Q2GZMQMMNSYDU34MU4GJKSZPSN7FYKQEMNH4QJMVE3JR3C3I3N5'
+#         result = get_next_sequence_number(wallet_address)
+#         assert isinstance(wallet_address) == int
