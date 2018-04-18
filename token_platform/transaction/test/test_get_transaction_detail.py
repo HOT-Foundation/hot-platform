@@ -2,7 +2,8 @@ from aiohttp import web
 from aiohttp.test_utils import make_mocked_request
 import asyncio
 from asynctest import patch
-from transaction.get_transaction import get_transaction_from_request, get_transaction, horizon_testnet
+from transaction.get_transaction import get_transaction_from_request
+from transaction.transaction import get_transaction, horizon_testnet
 from transaction.test.factory.horizon import HorizonData
 import json
 import pytest
@@ -10,14 +11,14 @@ import pytest
 @patch('transaction.get_transaction.get_transaction')
 async def test_get_transaction_from_request(mock_get_transaction):
     req = make_mocked_request('GET', '/transaction/{}'.format('4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9'),
-        match_info={'tx_hash': '4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9'}
+        match_info={'transaction_hash': '4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9'}
     )
     await get_transaction_from_request(req)
     assert mock_get_transaction.call_count == 1
 
 
 @asyncio.coroutine
-@patch('transaction.get_transaction.horizon_testnet')
+@patch('transaction.transaction.horizon_testnet')
 async def test_get_transaction_success(mock_horizon):
     instance = mock_horizon.return_value
     mock_horizon.return_value = HorizonData()
@@ -71,7 +72,7 @@ async def test_get_transaction_success(mock_horizon):
 
 
 @asyncio.coroutine
-@patch('transaction.get_transaction.horizon_testnet')
+@patch('transaction.transaction.horizon_testnet')
 async def test_get_transaction_not_found(mock_transaction):
     class MockTransaction(object):
         def transaction(self, tx_hash):
