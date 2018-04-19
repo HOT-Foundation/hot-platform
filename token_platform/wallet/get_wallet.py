@@ -3,13 +3,12 @@ from typing import Any, Dict, List, Mapping, NewType, Optional, Union
 
 import requests
 from aiohttp import web
-from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
 from stellar_base.utils import AccountNotExistError
 
 from conf import settings
 from wallet.wallet import (build_create_wallet_transaction,
-                           wallet_address_is_duplicate)
+                           wallet_address_is_duplicate, get_wallet)
 
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 STELLAR_BALANCE = Dict[str, str]
@@ -49,11 +48,7 @@ async def get_wallet_detail(wallet_address: str) -> web.Response:
             return {'trust': '{}/wallet/{}/transaction/change-trust'.format(settings['HOST'], wallet_address)}
         return {}
 
-    wallet = StellarAddress(address=wallet_address, network=settings['STELLAR_NETWORK'])
-    try:
-        wallet.get()
-    except AccountNotExistError as ex:
-        raise web.HTTPNotFound(text=str(ex))
+    wallet = await get_wallet(wallet_address)
 
     result: Dict[str, Any] = {
         '@id': wallet_address,

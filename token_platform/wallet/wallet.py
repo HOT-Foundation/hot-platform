@@ -3,6 +3,20 @@ from typing import Tuple
 from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
 from conf import settings
+from aiohttp import web
+from stellar_base.utils import AccountNotExistError
+
+async def get_wallet(wallet_address: str) -> StellarAddress:
+    """Get wallet from stellar address"""
+    wallet = StellarAddress(address=wallet_address, network=settings['STELLAR_NETWORK'])
+
+    try:
+        wallet.get()
+    except AccountNotExistError as ex:
+        raise web.HTTPNotFound(text=str(ex))
+
+    return wallet
+
 
 def wallet_address_is_duplicate(destination_address: str) -> bool:
     """Check address ID is not duplicate"""

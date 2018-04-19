@@ -9,7 +9,8 @@ from stellar_base.utils import AccountNotExistError
 
 from conf import settings
 from router import routes
-from wallet.get_wallet import (StellarAddress, get_wallet_detail,
+from wallet.wallet import StellarAddress
+from wallet.get_wallet import (get_wallet_detail,
                                get_wallet_from_request)
 from wallet.tests.factory.wallet import StellarWallet
 
@@ -24,7 +25,7 @@ async def test_get_wallet_from_request(mock_get_wallet):
 
 
 @asyncio.coroutine
-@patch('wallet.get_wallet.StellarAddress')
+@patch('wallet.get_wallet.get_wallet')
 async def test_get_wallet_success_trusted_htkn(mock_address):
     instance = mock_address.return_value
     balances = [{
@@ -57,7 +58,7 @@ async def test_get_wallet_success_trusted_htkn(mock_address):
 
 
 @asyncio.coroutine
-@patch('wallet.get_wallet.StellarAddress')
+@patch('wallet.get_wallet.get_wallet')
 async def test_get_wallet_success_not_trust_htkn(mock_address):
     instance = mock_address.return_value
     balances = [
@@ -84,7 +85,7 @@ async def test_get_wallet_success_not_trust_htkn(mock_address):
 
 
 @asyncio.coroutine
-@patch('wallet.get_wallet.StellarAddress')
+@patch('wallet.wallet.StellarAddress')
 async def test_get_wallet_not_found(mock_address):
     class MockAddress(object):
         def get(self):
@@ -99,7 +100,7 @@ async def test_get_wallet_not_found(mock_address):
 
 
 @asyncio.coroutine
-@patch('wallet.get_wallet.StellarAddress')
+@patch('wallet.wallet.StellarAddress')
 async def test_get_wallet_invalid_address(mock_address):
     class MockAddress(object):
         def get(self):
