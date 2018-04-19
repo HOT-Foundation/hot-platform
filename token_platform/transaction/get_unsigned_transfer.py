@@ -3,6 +3,9 @@ from conf import settings
 from stellar_base.builder import Builder
 from typing import Tuple
 import hashlib
+from wallet.wallet import (build_create_wallet_transaction,
+                           wallet_address_is_duplicate)
+from stellar_base.address import Address as StellarAddress
 
 
 async def get_unsigned_transfer_from_request(request: web.Request) -> web.Response:
@@ -15,13 +18,14 @@ async def get_unsigned_transfer_from_request(request: web.Request) -> web.Respon
 
 async def get_unsigned_transfer(source_address, destination, amount) -> web.Response:
     unsigned_xdr, tx_hash = build_unsigned_transfer(source_address, destination, amount)
-    # signers = get_signers()
     host: str = settings['HOST']
     result = {
         '@id': source_address,
-        'signers': ["signers"],
-        'unsigned_xdr': unsigned_xdr.decode('utf8'),
-        'transaction_url': '{}/transaction/{}'.format(host, tx_hash)
+        '@url': '{}/wallet/{}/transaction/transfer'.format(host, source_address),
+        '@transaction_url': '{}/transaction/{}'.format(host, tx_hash),
+        'min_signer': await get_threshold_weight(source_address, 'payment'),
+        'signers': await get_signers(source_address),
+        'unsigned_xdr': unsigned_xdr.decode('utf8')
     }
     return web.json_response(result)
 
@@ -40,7 +44,43 @@ def build_unsigned_transfer(source_address: str, destination_address: str, amoun
                           asset_issuer=settings['ISSUER'], source=source_address)
     unsigned_xdr = builder.gen_xdr()
     tx_hash = builder.te.hash_meta()
-        
-    print("=====>>>> {}".format(hashlib.sha256(tx_hash)))
-    print("----->>>> {}".format(builder.te.hash_meta()))
     return unsigned_xdr, tx_hash
+
+
+async def get_signers(wallet_address):
+    """Get signers list of wallet address"""
+    wallet = StellarAddress(address=wallet_address, network=settings['STELLAR_NETWORK'])
+
+    try:
+        wallet.get()
+    except AccountNotExistError as ex:
+        raise web.HTTPNotFound(text=str(ex))
+
+    signers = list(filter(lambda signer: signer['weight'] > 0, wallet.signers))
+    formated = list(map(lambda signer: {'public_key': signer['public_key'], 'weight': signer['weight']}, signers))
+    return formated
+
+
+async def get_threshold_weight(wallet_address, operation_type):
+    """Get threshold weight for operation type of wallet address"""
+
+    def _get_threshould_level(operation_type):
+        """Get threshould level from operation type"""
+        low = ['allow_trust']
+        high = ['set_signer', 'set_thershould']
+
+        if operation_type in low:
+            return 'low_threshold'
+        elif operation_type in high:
+            return 'high_threshold'
+        else:
+            return 'med_threshold'
+
+    wallet = StellarAddress(address=wallet_address, network=settings['STELLAR_NETWORK'])
+    try:
+        wallet.get()
+    except AccountNotExistError as ex:
+        raise web.HTTPNotFound(text=str(ex))
+
+    level = _get_threshould_level(operation_type)
+    return wallet.thresholds[level]
