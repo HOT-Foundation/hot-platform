@@ -12,7 +12,7 @@ services:
       - "./:/usr/src"
     environment:
       - ASSET_CODE=HTKN
-      - ISSUER=GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD
+      - ISSUER=GDCNVJZCQ22253VL4ETJ36EDNZV7OXRVJOZ7474IWKSP5JZQSIWQ4CJK
       - HOST=localhost:8081
       - PYTHONPATH=/usr/src/token_platform
     networks:
