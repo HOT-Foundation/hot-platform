@@ -2,7 +2,7 @@ import asyncio
 import json
 from asynctest import patch
 from aiohttp.test_utils import make_mocked_request
-from transaction.get_unsigned_transfer import get_unsigned_transfer_from_request, get_unsigned_transfer, get_signers
+from transaction.get_unsigned_transfer import get_unsigned_transfer_from_request, get_unsigned_transfer, get_signers, get_threshold_weight
 from wallet.tests.factory.wallet import StellarWallet
 
 
@@ -68,3 +68,46 @@ async def test_get_signers(mock_address):
     assert result == expect_result
 
 
+@asyncio.coroutine
+@patch('transaction.get_unsigned_transfer.get_wallet')
+async def test_get_threshold_weight_low_threshold(mock_address):
+    instance = mock_address.return_value
+    balances = [
+        {
+            'balance': '9.9999200',
+            'asset_type': 'native'
+        }]
+    mock_address.return_value = StellarWallet(balances)
+
+    result = await get_threshold_weight('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'allow_trust')
+    assert result == 1
+
+
+@asyncio.coroutine
+@patch('transaction.get_unsigned_transfer.get_wallet')
+async def test_get_threshold_weight_med_threshold(mock_address):
+    instance = mock_address.return_value
+    balances = [
+        {
+            'balance': '9.9999200',
+            'asset_type': 'native'
+        }]
+    mock_address.return_value = StellarWallet(balances)
+
+    result = await get_threshold_weight('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'payment')
+    assert result == 2
+
+
+@asyncio.coroutine
+@patch('transaction.get_unsigned_transfer.get_wallet')
+async def test_get_threshold_weight_high_threshold(mock_address):
+    instance = mock_address.return_value
+    balances = [
+        {
+            'balance': '9.9999200',
+            'asset_type': 'native'
+        }]
+    mock_address.return_value = StellarWallet(balances)
+
+    result = await get_threshold_weight('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'set_signer')
+    assert result == 2
