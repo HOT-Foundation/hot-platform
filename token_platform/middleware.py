@@ -10,6 +10,9 @@ async def error_middleware(request, handler):
     except web.HTTPBadRequest as ex:
         message = str(ex)
         return web.json_response({'error': message}, status=400)
+    except ValueError as ex:
+        message = str(ex)
+        return web.json_response({'error': message}, status=400)
     except web.HTTPNotFound as ex:
         message = str(ex)
         return web.json_response({'error': message}, status=404)
