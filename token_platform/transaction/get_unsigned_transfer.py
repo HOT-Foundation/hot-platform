@@ -12,9 +12,12 @@ from typing import Any, Dict, List, Mapping, NewType, Optional, Union
 
 async def get_unsigned_transfer_from_request(request: web.Request) -> web.Response:
     """AIOHttp Request unsigned transfer transaction"""
-    source_account = request.match_info.get("account_address", "")
-    destination = request.rel_url.query['destination']
-    amount = request.rel_url.query['amount']
+    try:
+        source_account = request.match_info.get("account_address", "")
+        destination = request.rel_url.query['destination']
+        amount = request.rel_url.query['amount']
+    except KeyError as context:
+        raise ValueError("Invalid, please check your parameter.")
     return await get_unsigned_transfer(source_account, destination, amount)
 
 
