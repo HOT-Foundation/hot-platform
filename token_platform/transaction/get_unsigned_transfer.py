@@ -1,3 +1,4 @@
+import binascii
 from aiohttp import web
 from conf import settings
 from stellar_base.builder import Builder
@@ -6,6 +7,7 @@ import hashlib
 from wallet.wallet import (build_create_wallet_transaction,
                            wallet_address_is_duplicate, get_wallet)
 from stellar_base.address import Address as StellarAddress
+from typing import Any, Dict, List, Mapping, NewType, Optional, Union
 
 
 async def get_unsigned_transfer_from_request(request: web.Request) -> web.Response:
@@ -17,6 +19,7 @@ async def get_unsigned_transfer_from_request(request: web.Request) -> web.Respon
 
 
 async def get_unsigned_transfer(source_address, destination, amount) -> web.Response:
+    """Get unsigned transfer transaction and signers"""
     unsigned_xdr, tx_hash = build_unsigned_transfer(source_address, destination, amount)
     host: str = settings['HOST']
     result = {
@@ -25,12 +28,12 @@ async def get_unsigned_transfer(source_address, destination, amount) -> web.Resp
         '@transaction_url': '{}/transaction/{}'.format(host, tx_hash),
         'min_signer': await get_threshold_weight(source_address, 'payment'),
         'signers': await get_signers(source_address),
-        'unsigned_xdr': unsigned_xdr.decode('utf8')
+        'unsigned_xdr': unsigned_xdr
     }
     return web.json_response(result)
 
 
-def build_unsigned_transfer(source_address: str, destination_address: str, amount: int) -> Tuple[bytes, str]:
+def build_unsigned_transfer(source_address: str, destination_address: str, amount: int) -> Tuple[str, str]:
     """"Build unsigned transfer transaction return unsigned XDR and transaction hash.
 
         Args:
@@ -44,10 +47,10 @@ def build_unsigned_transfer(source_address: str, destination_address: str, amoun
                           asset_issuer=settings['ISSUER'], source=source_address)
     unsigned_xdr = builder.gen_xdr()
     tx_hash = builder.te.hash_meta()
-    return unsigned_xdr, tx_hash
+    return unsigned_xdr.decode('utf8'), binascii.hexlify(tx_hash).decode()
 
 
-async def get_signers(wallet_address):
+async def get_signers(wallet_address: str) -> List[Dict[str, str]]:
     """Get signers list of wallet address"""
     wallet = await get_wallet(wallet_address)
     signers = list(filter(lambda signer: signer['weight'] > 0, wallet.signers))
@@ -55,7 +58,7 @@ async def get_signers(wallet_address):
     return formated
 
 
-async def get_threshold_weight(wallet_address, operation_type):
+async def get_threshold_weight(wallet_address:str, operation_type:str) -> int:
     """Get threshold weight for operation type of wallet address"""
 
     def _get_threshould_level(operation_type):
