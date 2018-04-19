@@ -4,7 +4,7 @@ import asyncio
 from asynctest import patch
 from transaction.get_transaction import get_transaction_from_request
 from transaction.transaction import get_transaction, horizon_testnet
-from transaction.test.factory.horizon import HorizonData
+from transaction.tests.factory.horizon import HorizonData
 import json
 import pytest
 
@@ -81,7 +81,7 @@ async def test_get_transaction_not_found(mock_transaction):
                 "status": 404,
                 "detail": "The resource at the url requested was not found.  This is usually occurs for one of two reasons:  The url requested is not valid, or no data in our database could be found with the parameters provided."
             }
-    
+
     instance = mock_transaction.return_value
     mock_transaction.return_value = MockTransaction()
 

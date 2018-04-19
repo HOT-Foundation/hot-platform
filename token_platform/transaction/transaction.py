@@ -11,12 +11,15 @@ JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 
 
 async def is_duplicate_transaction(transaction_hash: str) -> bool:
+    """Check transaction is duplicate or not"""
+
     horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
     transaction = horizon.transaction(transaction_hash)
     id = transaction.get('id')
     return True if id else False
 
 async def submit_transaction(xdr: bytes) -> Dict[str, str]:
+    """Submit transaction into Stellar network"""
     horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
     try:
         response = horizon.submit(xdr)
@@ -28,22 +31,11 @@ async def submit_transaction(xdr: bytes) -> Dict[str, str]:
         raise web.HTTPInternalServerError
     return response
 
-
-async def put_transaction_from_request(request: web.Request) -> web.Response:
-    signed_xdr = await request.text()
-    tx_hash = request.match_info['transaction_hash']
-
-    if not signed_xdr or not tx_hash:
-        raise web.HTTPBadRequest(reason='transaction fail, please check your parameter.')
-
-    result = {'message': 'transaction success.'}
-
-    if await is_duplicate_transaction(tx_hash):
-        raise web.HTTPBadRequest(reason='Duplicate transaction.')
-
-    response = await submit_transaction(signed_xdr)
-    return web.json_response(result)
-
+async def get_next_sequence_number(wallet_address:str) -> int:
+    """Get next sequence number of the wallet"""
+    horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
+    sequence = horizon.account(wallet_address).get('sequence')
+    return sequence
 
 async def get_transaction(tx_hash: str) -> web_response.Response:
     """Retrieve transaction detail from transaction hash
@@ -52,7 +44,7 @@ async def get_transaction(tx_hash: str) -> web_response.Response:
         tx_hash: hash of transaction we are interested in.
     """
 
-    def _format_transaction(tx_detail: Dict[str, str]) -> Dict[str, Union[str, int]]:
+    def _format_transaction(tx_detail: Dict[str, str]) -> Dict[str, Union[str, int, List[Dict[str, str]]]]:
         """Format transaction detail in pattern dict"""
         return {
             "@id": tx_detail.get("id", None),
@@ -65,10 +57,10 @@ async def get_transaction(tx_hash: str) -> web_response.Response:
             "fee_paid": tx_detail.get("fee_paid", None),
             "signatures": tx_detail.get("signatures", None)
         }
-    
+
     def _get_operation_data_of_transaction(tx_hash: str, horizon: Horizon) -> List[Dict[str, str]]:
         """Get operation list of transaction"""
-        
+
         operations = copy.deepcopy(horizon.transaction_operations(tx_hash).get("_embedded").get("records"))
 
         for operation in operations:
@@ -76,7 +68,7 @@ async def get_transaction(tx_hash: str) -> web_response.Response:
 
         return operations
 
-    
+
     horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
     transaction = horizon.transaction(tx_hash)
 
