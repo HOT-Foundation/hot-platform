@@ -9,12 +9,12 @@ from stellar_base.utils import AccountNotExistError
 
 from conf import settings
 from router import routes
-from wallet.get_wallet import (StellarAddress, get_wallet,
+from wallet.get_wallet import (StellarAddress, get_wallet_detail,
                                get_wallet_from_request)
 from wallet.tests.factory.wallet import StellarWallet
 
 
-@patch('wallet.get_wallet.get_wallet')
+@patch('wallet.get_wallet.get_wallet_detail')
 async def test_get_wallet_from_request(mock_get_wallet):
     wallet_address = 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'
     req = make_mocked_request('GET', '/wallet/{}'.format(wallet_address),
@@ -40,7 +40,7 @@ async def test_get_wallet_success_trusted_htkn(mock_address):
     }]
     mock_address.return_value = StellarWallet(balances)
 
-    result = await get_wallet('GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')
+    result = await get_wallet_detail('GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')
 
     assert result.status == 200
 
@@ -67,7 +67,7 @@ async def test_get_wallet_success_not_trust_htkn(mock_address):
         }]
     mock_address.return_value = StellarWallet(balances)
 
-    result = await get_wallet('GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')
+    result = await get_wallet_detail('GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')
 
     assert result.status == 200
 
@@ -94,7 +94,7 @@ async def test_get_wallet_not_found(mock_address):
     mock_address.return_value = MockAddress()
 
     with pytest.raises(web.HTTPNotFound) as context:
-        await get_wallet('GB7D54NKPWYYMMS7JFEQZKDDTW5R7IMXTFN2WIEST2YZVVNO3SHJ3Y7M')
+        await get_wallet_detail('GB7D54NKPWYYMMS7JFEQZKDDTW5R7IMXTFN2WIEST2YZVVNO3SHJ3Y7M')
     assert str(context.value) == 'Not Found'
 
 
@@ -109,5 +109,5 @@ async def test_get_wallet_invalid_address(mock_address):
     mock_address.return_value = MockAddress()
 
     with pytest.raises(web.HTTPNotFound) as context:
-        await get_wallet('XXXX')
+        await get_wallet_detail('XXXX')
     assert str(context.value) == 'Not Found'
