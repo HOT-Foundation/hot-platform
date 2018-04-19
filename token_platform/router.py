@@ -3,7 +3,6 @@ from wallet.get_wallet import get_wallet_from_request
 from wallet.get_create_wallet import get_create_wallet_from_request
 from wallet.get_next_tx_sequence import get_next_tx_sequence_from_request
 from transaction.get_transaction import get_transaction_from_request
-from transaction.transaction import put_transaction_from_request
 from transaction.get_unsigned_transfer import get_unsigned_transfer_from_request
 from transaction.put_transaction import put_transaction_from_request
 from controller import handle
