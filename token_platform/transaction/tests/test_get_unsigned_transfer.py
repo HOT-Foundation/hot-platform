@@ -33,7 +33,7 @@ async def test_get_unsigned_transfer(mock_get_threshold_weight, mock_get_signer)
     expect_data = {
         "@id": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
         "@url": "localhost:8081/wallet/GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI/transaction/transfer",
-        "@transaction_url": "localhost:8081/transaction/4038c87310497828ed6243b9678c1ebd072e907a8cf18fb62a892e2680ed837e",
+        "@transaction_url": "localhost:8081/transaction/a67f5b3127c281b7f6cc7b73d0baf4219dfc52406805299a94534c815327c7b9",
         "min_signer": 1,
         "signers": [
             {
@@ -41,8 +41,9 @@ async def test_get_unsigned_transfer(mock_get_threshold_weight, mock_get_signer)
             "weight": 1
             }
         ],
-        "unsigned_xdr": "AAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAZAB3A5sAAAAFAAAAAAAAAAAAAAABAAAAAQAAAADOf93UUiwNNmwwYj2/XOv/KuhgA2mooc0ID+GYa49siQAAAAEAAAAA2ZlGnrw2xRHbxWDQCoRQRz8b/Ua+KYUBVdlcf4Ec5bEAAAABSFRLTgAAAAAUaMgWvAL6cM0x6BLXsGqY3oRp+AHRtOvJoG9V7u6tTgAAAAA7msoAAAAAAAAAAAA="
+        "unsigned_xdr": "AAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAZAB3A5sAAAAFAAAAAAAAAAAAAAABAAAAAQAAAADOf93UUiwNNmwwYj2/XOv/KuhgA2mooc0ID+GYa49siQAAAAEAAAAA2ZlGnrw2xRHbxWDQCoRQRz8b/Ua+KYUBVdlcf4Ec5bEAAAABSFRLTgAAAADE2qcihrWu7qvhJp34g25r9141S7P+f4iypP6nMJItDgAAAAA7msoAAAAAAAAAAAA="
     }
+
     assert json.loads(result.text) == expect_data
 
 
