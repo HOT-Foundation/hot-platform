@@ -9,7 +9,7 @@ from stellar_base.utils import AccountNotExistError
 
 from conf import settings
 from router import routes
-from wallet.wallet import StellarAddress
+from wallet.wallet import StellarAddress, get_wallet
 from wallet.get_wallet import (get_wallet_detail,
                                get_wallet_from_request)
 from wallet.tests.factory.wallet import StellarWallet
@@ -82,6 +82,55 @@ async def test_get_wallet_success_not_trust_htkn(mock_address):
         }
     }
     assert actual_data == expect_data
+
+
+@asyncio.coroutine
+@patch('wallet.wallet.StellarAddress')
+async def test_get_wallet_success(mock_address):
+    instance = mock_address.return_value
+    balances = [
+        {
+            'balance': '9.9999200',
+            'asset_type': 'native'
+        }]
+    mock_address.return_value = StellarWallet(balances)
+
+    result = await get_wallet('GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')
+    expect_result = {
+        "id": "GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD",
+        "balances": [
+            {
+            "balance": "9.9999200",
+            "asset_type": "native"
+            }
+        ],
+        "signers": [
+            {
+            "public_key": "GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF",
+            "weight": 1,
+            "key": "GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF",
+            "type": "ed25519_public_key"
+            },
+            {
+            "public_key": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
+            "weight": 1,
+            "key": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
+            "type": "ed25519_public_key"
+            },
+            {
+            "public_key": "GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD",
+            "weight": 0,
+            "key": "GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD",
+            "type": "ed25519_public_key"
+            }
+        ],
+        "thresholds": {
+            "low_threshold": 1,
+            "med_threshold": 2,
+            "high_threshold": 2
+        }
+    }
+    assert result.__dict__ == expect_result
 
 
 @asyncio.coroutine
