@@ -22,10 +22,10 @@ THRESHOLDS = Dict[str, int]
 async def get_wallet_from_request(request: web.Request) -> web.Response:
     """AIOHttp Request wallet address to get wallet"""
     wallet_address = request.match_info.get('wallet_address', "")
-    return await get_wallet(wallet_address)
+    return await get_wallet_detail(wallet_address)
 
 
-async def get_wallet(wallet_address: str) -> web.Response:
+async def get_wallet_detail(wallet_address: str) -> web.Response:
     """Get wallet balances from stellar network"""
 
     def _format_balance(balance: STELLAR_BALANCE) -> BALANCE_RESPONSE:

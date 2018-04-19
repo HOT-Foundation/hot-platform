@@ -3,7 +3,6 @@ from aiohttp import web, ClientSession
 from controller import handle
 import asyncio
 from middleware import error_middleware
-from wallet.get_wallet import get_wallet
 from router import routes
 
 async def init_app():
