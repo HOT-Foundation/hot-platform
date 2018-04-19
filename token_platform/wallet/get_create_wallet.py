@@ -5,7 +5,6 @@ from aiohttp import web
 
 import requests
 from conf import settings
-from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
 from stellar_base.utils import AccountNotExistError
 from wallet.wallet import (build_create_wallet_transaction,
