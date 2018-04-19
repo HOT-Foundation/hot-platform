@@ -4,7 +4,7 @@ from stellar_base.builder import Builder
 from typing import Tuple
 import hashlib
 from wallet.wallet import (build_create_wallet_transaction,
-                           wallet_address_is_duplicate)
+                           wallet_address_is_duplicate, get_wallet)
 from stellar_base.address import Address as StellarAddress
 
 
@@ -49,13 +49,7 @@ def build_unsigned_transfer(source_address: str, destination_address: str, amoun
 
 async def get_signers(wallet_address):
     """Get signers list of wallet address"""
-    wallet = StellarAddress(address=wallet_address, network=settings['STELLAR_NETWORK'])
-
-    try:
-        wallet.get()
-    except AccountNotExistError as ex:
-        raise web.HTTPNotFound(text=str(ex))
-
+    wallet = await get_wallet(wallet_address)
     signers = list(filter(lambda signer: signer['weight'] > 0, wallet.signers))
     formated = list(map(lambda signer: {'public_key': signer['public_key'], 'weight': signer['weight']}, signers))
     return formated
@@ -76,11 +70,7 @@ async def get_threshold_weight(wallet_address, operation_type):
         else:
             return 'med_threshold'
 
-    wallet = StellarAddress(address=wallet_address, network=settings['STELLAR_NETWORK'])
-    try:
-        wallet.get()
-    except AccountNotExistError as ex:
-        raise web.HTTPNotFound(text=str(ex))
+    wallet = await get_wallet(wallet_address)
 
     level = _get_threshould_level(operation_type)
     return wallet.thresholds[level]
