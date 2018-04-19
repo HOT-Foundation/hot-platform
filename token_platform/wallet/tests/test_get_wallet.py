@@ -33,7 +33,7 @@ async def test_get_wallet_success_trusted_htkn(mock_address):
         'limit': '922337203685.4775807',
         'asset_type': 'credit_alphanum4',
         'asset_code': 'HTKN',
-        'asset_issuer': 'GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD'
+        'asset_issuer': 'GDCNVJZCQ22253VL4ETJ36EDNZV7OXRVJOZ7474IWKSP5JZQSIWQ4CJK'
     },{
         'balance': '10.0000000',
         'limit': '1000',
