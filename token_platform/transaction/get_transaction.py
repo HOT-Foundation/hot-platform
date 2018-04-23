@@ -6,4 +6,5 @@ from transaction.transaction import get_transaction
 async def get_transaction_from_request(request: web_request.Request) ->  web_response.Response:
     """AIOHttp Request transaction hash to get transaction detail"""
     tx_hash = request.match_info.get('transaction_hash', "")
-    return await get_transaction(tx_hash)
+    result = await get_transaction(tx_hash)
+    return web.json_response(result)
