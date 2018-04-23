@@ -66,7 +66,7 @@ class TestGetTransactionFromRequest(BaseTestClass):
                 'transaction_hash': '4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9',
                 'asset_type': 'credit_alphanum4',
                 'asset_code': 'HTKN',
-                'asset_issuer': 'GAKGRSAWXQBPU4GNGHUBFV5QNKMN5BDJ7AA5DNHLZGQG6VPO52WU5TQD',
+                'asset_issuer': 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ',
                 'from': 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI',
                 'to': 'GAULEK4CU7IYZTFVKA4EG3RQLKB7LCSYX2WI46C2KXLDUJGQTSH2JWTD',
                 'amount': '20.0000000'
