@@ -1,9 +1,13 @@
 import asyncio
 import json
+
 import pytest
-from asynctest import patch
 from aiohttp.test_utils import make_mocked_request
-from transaction.get_unsigned_transfer import get_unsigned_transfer_from_request, get_unsigned_transfer, get_signers, get_threshold_weight
+from asynctest import patch
+from transaction.get_unsigned_transfer import (get_signers,
+                                               get_threshold_weight,
+                                               get_unsigned_transfer,
+                                               get_unsigned_transfer_from_request)
 from wallet.tests.factory.wallet import StellarWallet
 
 
@@ -62,7 +66,6 @@ async def test_get_unsigned_transfer(mock_get_threshold_weight, mock_get_signer)
 @asyncio.coroutine
 @patch('transaction.get_unsigned_transfer.get_wallet')
 async def test_get_signers(mock_address):
-    instance = mock_address.return_value
     balances = [
         {
             'balance': '9.9999200',
@@ -84,7 +87,6 @@ async def test_get_signers(mock_address):
 @asyncio.coroutine
 @patch('transaction.get_unsigned_transfer.get_wallet')
 async def test_get_threshold_weight_low_threshold(mock_address):
-    instance = mock_address.return_value
     balances = [
         {
             'balance': '9.9999200',
@@ -99,7 +101,6 @@ async def test_get_threshold_weight_low_threshold(mock_address):
 @asyncio.coroutine
 @patch('transaction.get_unsigned_transfer.get_wallet')
 async def test_get_threshold_weight_med_threshold(mock_address):
-    instance = mock_address.return_value
     balances = [
         {
             'balance': '9.9999200',
@@ -114,7 +115,6 @@ async def test_get_threshold_weight_med_threshold(mock_address):
 @asyncio.coroutine
 @patch('transaction.get_unsigned_transfer.get_wallet')
 async def test_get_threshold_weight_high_threshold(mock_address):
-    instance = mock_address.return_value
     balances = [
         {
             'balance': '9.9999200',
