@@ -11,14 +11,15 @@ from wallet.wallet import (build_create_wallet_transaction, get_wallet,
 
 from transaction.transaction import get_threshold_weight, get_signers
 
+
 async def get_unsigned_change_trust_from_request(request: web.Request) -> web.Response:
     """AIOHttp Request unsigned transfer transaction"""
     source_account = request.match_info.get("wallet_address", "")
-    
-    return await get_unsigned_change_trust(source_account)
+    result = await get_unsigned_change_trust(source_account)
+    return web.json_response(result)
 
 
-async def get_unsigned_change_trust(source_address: str) -> web.Response:
+async def get_unsigned_change_trust(source_address: str) -> Dict[str, str]:
     """Get unsigned transfer transaction and signers"""
     unsigned_xdr, tx_hash = build_unsigned_change_trust(source_address)
     host: str = settings['HOST']
@@ -30,7 +31,7 @@ async def get_unsigned_change_trust(source_address: str) -> web.Response:
         'signers': await get_signers(source_address),
         'unsigned_xdr': unsigned_xdr
     }
-    return web.json_response(result)
+    return result
 
 
 def build_unsigned_change_trust(source_address: str) -> Tuple[str, str]:
