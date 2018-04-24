@@ -1,21 +1,22 @@
 import asyncio
 import json
 
+from tests.test_utils import BaseTestClass
+
 import pytest
 from aiohttp.test_utils import make_mocked_request, unittest_run_loop
 from asynctest import patch
 from transaction.get_unsigned_change_trust import (get_signers,
-                                               get_threshold_weight,
-                                               get_unsigned_change_trust,
-                                               get_unsigned_change_trust_from_request)
+                                                   get_threshold_weight,
+                                                   get_unsigned_change_trust,
+                                                   get_unsigned_change_trust_from_request)
 from wallet.tests.factory.wallet import StellarWallet
-from tests.test_utils import BaseTestClass
 
 
 class TestGetUnsignedChangeTrust(BaseTestClass):
     @unittest_run_loop
     @patch('transaction.get_unsigned_change_trust.get_unsigned_change_trust')
-    async def test_get_change_trust_from_request(self, mock_get_unsigned_change_trust):
+    async def test_get_change_trust_from_request_success(self, mock_get_unsigned_change_trust):
         mock_get_unsigned_change_trust.return_value = {}
         wallet_address = 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'
         resp = await self.client.request('GET', '/wallet/{}/transaction/change-trust'.format(wallet_address))
@@ -26,7 +27,7 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
     @unittest_run_loop
     @patch('transaction.get_unsigned_change_trust.get_signers')
     @patch('transaction.get_unsigned_change_trust.get_threshold_weight')
-    async def test_get_unsigned_change_trust(self, mock_get_threshold_weight, mock_get_signer):
+    async def test_get_unsigned_change_trust_success(self, mock_get_threshold_weight, mock_get_signer):
         mock_get_threshold_weight.return_value = 1
         mock_get_signer.return_value = [{
             "public_key": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
