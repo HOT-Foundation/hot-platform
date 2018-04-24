@@ -1,12 +1,14 @@
-from typing import Dict
+import copy
+from typing import Any, Dict, List, Mapping, NewType, Optional, Union
 
-from aiohttp import web, web_request, web_response
-from stellar_base.horizon import horizon_livenet, horizon_testnet, Horizon
+from stellar_base.horizon import Horizon, horizon_livenet, horizon_testnet
 from stellar_base.transaction import Transaction
 from stellar_base.transaction_envelope import TransactionEnvelope as Te
+
+from aiohttp import web, web_request, web_response
 from conf import settings
-from typing import Dict, List, Any, NewType, Union, Mapping, Optional
-import copy
+from wallet.wallet import get_wallet
+
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 
 
@@ -79,3 +81,32 @@ async def get_transaction(tx_hash: str) -> web_response.Response:
     tx_detail["operations"] = _get_operation_data_of_transaction(tx_hash, horizon)
 
     return web.json_response(tx_detail)
+
+
+async def get_signers(wallet_address: str) -> List[Dict[str, str]]:
+    """Get signers list of wallet address"""
+    wallet = await get_wallet(wallet_address)
+    signers = list(filter(lambda signer: signer['weight'] > 0, wallet.signers))
+    formated = list(map(lambda signer: {'public_key': signer['public_key'], 'weight': signer['weight']}, signers))
+    return formated
+
+
+async def get_threshold_weight(wallet_address:str, operation_type:str) -> int:
+    """Get threshold weight for operation type of wallet address"""
+
+    def _get_threshould_level(operation_type):
+        """Get threshould level from operation type"""
+        low = ['allow_trust']
+        high = ['set_signer', 'set_thershould']
+
+        if operation_type in low:
+            return 'low_threshold'
+        elif operation_type in high:
+            return 'high_threshold'
+        else:
+            return 'med_threshold'
+
+    wallet = await get_wallet(wallet_address)
+
+    level = _get_threshould_level(operation_type)
+    return wallet.thresholds[level]

@@ -1,5 +1,4 @@
 import binascii
-import hashlib
 from typing import Any, Dict, List, Mapping, NewType, Optional, Tuple, Union
 
 from stellar_base.address import Address as StellarAddress
@@ -10,6 +9,7 @@ from conf import settings
 from wallet.wallet import (build_create_wallet_transaction, get_wallet,
                            wallet_address_is_duplicate)
 
+from transaction.transaction import get_threshold_weight, get_signers
 
 async def get_unsigned_transfer_from_request(request: web.Request) -> web.Response:
     """AIOHttp Request unsigned transfer transaction"""
@@ -52,32 +52,3 @@ def build_unsigned_transfer(source_address: str, destination_address: str, amoun
     unsigned_xdr = builder.gen_xdr()
     tx_hash = builder.te.hash_meta()
     return unsigned_xdr.decode('utf8'), binascii.hexlify(tx_hash).decode()
-
-
-async def get_signers(wallet_address: str) -> List[Dict[str, str]]:
-    """Get signers list of wallet address"""
-    wallet = await get_wallet(wallet_address)
-    signers = list(filter(lambda signer: signer['weight'] > 0, wallet.signers))
-    formated = list(map(lambda signer: {'public_key': signer['public_key'], 'weight': signer['weight']}, signers))
-    return formated
-
-
-async def get_threshold_weight(wallet_address:str, operation_type:str) -> int:
-    """Get threshold weight for operation type of wallet address"""
-
-    def _get_threshould_level(operation_type):
-        """Get threshould level from operation type"""
-        low = ['allow_trust']
-        high = ['set_signer', 'set_thershould']
-
-        if operation_type in low:
-            return 'low_threshold'
-        elif operation_type in high:
-            return 'high_threshold'
-        else:
-            return 'med_threshold'
-
-    wallet = await get_wallet(wallet_address)
-
-    level = _get_threshould_level(operation_type)
-    return wallet.thresholds[level]

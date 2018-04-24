@@ -1,12 +1,14 @@
+from tests.test_utils import BaseTestClass
+
 import pytest
 from aiohttp.test_utils import unittest_run_loop
 from aiohttp.web_exceptions import HTTPBadRequest
 from asynctest import patch
-from tests.test_utils import BaseTestClass
-
-from transaction.transaction import (get_next_sequence_number,
+from transaction.transaction import (get_next_sequence_number, get_signers,
+                                     get_threshold_weight,
                                      is_duplicate_transaction,
                                      submit_transaction)
+from wallet.tests.factory.wallet import StellarWallet
 
 
 class TestSubmitTransaction(BaseTestClass):
@@ -81,3 +83,66 @@ class TestGetNextSequenceNumber(BaseTestClass):
         result = await get_next_sequence_number(wallet_address)
         assert isinstance(result, str)
         assert result == '1234566789'
+
+class TestGetSigner(BaseTestClass):
+    @unittest_run_loop
+    @patch('transaction.transaction.get_wallet')
+    async def test_get_signers(self, mock_address):
+        balances = [
+            {
+                'balance': '9.9999200',
+                'asset_type': 'native'
+            }]
+        mock_address.return_value = StellarWallet(balances)
+
+        result = await get_signers('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI')
+        expect_result = [{
+                'public_key': 'GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF',
+                'weight': 1
+            }, {
+                'public_key': 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI',
+                'weight': 1
+            }]
+        assert result == expect_result
+
+
+    @unittest_run_loop
+    @patch('transaction.transaction.get_wallet')
+    async def test_get_threshold_weight_low_threshold(self, mock_address):
+        balances = [
+            {
+                'balance': '9.9999200',
+                'asset_type': 'native'
+            }]
+        mock_address.return_value = StellarWallet(balances)
+
+        result = await get_threshold_weight('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'allow_trust')
+        assert result == 1
+
+
+    @unittest_run_loop
+    @patch('transaction.transaction.get_wallet')
+    async def test_get_threshold_weight_med_threshold(self, mock_address):
+        balances = [
+            {
+                'balance': '9.9999200',
+                'asset_type': 'native'
+            }]
+        mock_address.return_value = StellarWallet(balances)
+
+        result = await get_threshold_weight('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'payment')
+        assert result == 2
+
+
+    @unittest_run_loop
+    @patch('transaction.transaction.get_wallet')
+    async def test_get_threshold_weight_high_threshold(self, mock_address):
+        balances = [
+            {
+                'balance': '9.9999200',
+                'asset_type': 'native'
+            }]
+        mock_address.return_value = StellarWallet(balances)
+
+        result = await get_threshold_weight('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'set_signer')
+        assert result == 2
