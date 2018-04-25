@@ -7,6 +7,7 @@ from stellar_base.transaction_envelope import TransactionEnvelope as Te
 from conf import settings
 from typing import Dict, List, Any, NewType, Union, Mapping, Optional
 import copy
+
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 
 
@@ -21,14 +22,15 @@ async def is_duplicate_transaction(transaction_hash: str) -> bool:
 async def submit_transaction(xdr: bytes) -> Dict[str, str]:
     """Submit transaction into Stellar network"""
     horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
+
     try:
         response = horizon.submit(xdr)
-    except Exception:
+    except Exception as e:
+        msg = str(e)
         raise web.HTTPInternalServerError
-    if response['status'] == 400:
-        raise web.HTTPBadRequest
-    if response['status'] != 200:
-        raise web.HTTPInternalServerError
+    if response.get('status') == 400:
+        msg = response.get('extras', {}).get('result_codes', {}).get('transaction', None)
+        raise web.HTTPBadRequest(reason=msg)
     return response
 
 async def get_current_sequence_number(wallet_address:str) -> int:

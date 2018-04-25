@@ -1,4 +1,4 @@
-from transaction.transaction import is_duplicate_transaction, submit_transaction
+from transaction.transaction import is_duplicate_transaction, submit_transaction, get_transaction
 from aiohttp import web
 
 async def put_transaction_from_request(request: web.Request) -> web.Response:
@@ -15,4 +15,4 @@ async def put_transaction_from_request(request: web.Request) -> web.Response:
         raise web.HTTPBadRequest(reason='Duplicate transaction.')
 
     response = await submit_transaction(signed_xdr)
-    return web.json_response(result)
+    return await get_transaction(tx_hash)
