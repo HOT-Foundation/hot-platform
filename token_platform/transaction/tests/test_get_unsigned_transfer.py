@@ -17,12 +17,23 @@ from wallet.tests.factory.wallet import StellarWallet
 
 class TestGetUnsignedTransaction(BaseTestClass):
     @unittest_run_loop
+    @patch('transaction.get_unsigned_transfer.get_wallet')
     @patch('transaction.get_unsigned_transfer.get_unsigned_transfer')
-    async def test_get_transaction_from_request(self, mock_get_unsigned_transfer):
+    async def test_get_transaction_from_request(self, mock_get_unsigned_transfer, mock_address):
         mock_get_unsigned_transfer.return_value = {}
+        instance = mock_address.return_value
+        balances = [
+            {
+                'balance': '9.9999200',
+                'asset_type': 'native'
+            }]
+        mock_address.return_value = StellarWallet(balances)
         source_address = 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'
         destination_address = 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6'
-        resp = await self.client.request('GET', f'/wallet/{source_address}/transaction/transfer?destination={destination_address}&amount=100')
+        req = make_mocked_request('GET', f'/wallet/{source_address}/transaction/transfer?destination={destination_address}&amount=100',
+            match_info={'wallet_address': 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'}
+        )
+        resp = await get_unsigned_transfer_from_request(req)
         assert resp.status == 200
         mock_get_unsigned_transfer.assert_called_once_with(source_address, destination_address, '100')
 
@@ -40,18 +51,14 @@ class TestGetUnsignedTransaction(BaseTestClass):
 
 
     @unittest_run_loop
-    @patch('transaction.get_unsigned_transfer.StellarAddress')
+    @patch('transaction.get_unsigned_transfer.get_wallet')
     @patch('transaction.get_unsigned_transfer.get_unsigned_transfer')
     async def test_get_transaction_from_request_account_does_not_exist(self, mock_get_unsigned_transfer, mock_address):
         req = make_mocked_request('GET', '/wallet/{}/transaction/transfer?destination=GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6&amount=100'.format('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'),
             match_info={'wallet_address': 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'}
         )
 
-        class MockAddress(object):
-            def get(self):
-                raise AccountNotExistError('Resource Missing')
-
-        mock_address.return_value = MockAddress()
+        mock_address.side_effect = web.HTTPNotFound()
 
         with pytest.raises(web.HTTPNotFound) as context:
             await get_unsigned_transfer_from_request(req)

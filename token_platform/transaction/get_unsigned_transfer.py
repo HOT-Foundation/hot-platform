@@ -8,8 +8,7 @@ from stellar_base.utils import AccountNotExistError
 
 from aiohttp import web
 from conf import settings
-from wallet.wallet import (build_create_wallet_transaction, get_wallet,
-                           wallet_address_is_duplicate)
+from wallet.wallet import get_wallet
 
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 
@@ -23,14 +22,8 @@ async def get_unsigned_transfer_from_request(request: web.Request) -> web.Respon
     except KeyError as context:
         raise ValueError("Invalid, please check your parameter.")
 
-    source_wallet = StellarAddress(address=source_account, network=settings['STELLAR_NETWORK'])
-    destination_wallet = StellarAddress(address=destination, network=settings['STELLAR_NETWORK'])
-
-    try:
-        source_wallet.get()
-        destination_wallet.get()
-    except AccountNotExistError as ex:
-        raise web.HTTPNotFound(text=str(ex))
+    await get_wallet(source_account)
+    await get_wallet(destination)
 
     result = await get_unsigned_transfer(source_account, destination, amount)
     return web.json_response(result)
