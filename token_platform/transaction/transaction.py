@@ -37,7 +37,7 @@ async def get_current_sequence_number(wallet_address:str) -> int:
     sequence = horizon.account(wallet_address).get('sequence')
     return sequence
 
-async def get_transaction(tx_hash: str) -> web_response.Response:
+async def get_transaction(tx_hash: str) -> Dict[str, Union[str, int, List[Dict[str, str]]]]:
     """Retrieve transaction detail from transaction hash
 
         Args:
@@ -78,4 +78,4 @@ async def get_transaction(tx_hash: str) -> web_response.Response:
     tx_detail = _format_transaction(transaction)
     tx_detail["operations"] = _get_operation_data_of_transaction(tx_hash, horizon)
 
-    return web.json_response(tx_detail)
+    return tx_detail
