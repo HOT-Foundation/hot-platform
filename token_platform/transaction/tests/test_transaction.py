@@ -4,7 +4,7 @@ from aiohttp.web_exceptions import HTTPBadRequest
 from asynctest import patch
 from tests.test_utils import BaseTestClass
 
-from transaction.transaction import (get_next_sequence_number,
+from transaction.transaction import (get_current_sequence_number,
                                      is_duplicate_transaction,
                                      submit_transaction)
 
@@ -60,7 +60,7 @@ class TestDuplicateTransaction(BaseTestClass):
         assert result == False
 
 
-class TestGetNextSequenceNumber(BaseTestClass):
+class TestGetcurrentSequenceNumber(BaseTestClass):
 
     class TransactionSuccess():
 
@@ -78,6 +78,6 @@ class TestGetNextSequenceNumber(BaseTestClass):
         mock_test.return_value = self.TransactionSuccess()
         mock_live.return_value = self.TransactionSuccess()
         wallet_address = 'GASF2Q2GZMQMMNSYDU34MU4GJKSZPSN7FYKQEMNH4QJMVE3JR3C3I3N5'
-        result = await get_next_sequence_number(wallet_address)
+        result = await get_current_sequence_number(wallet_address)
         assert isinstance(result, str)
         assert result == '1234566789'
