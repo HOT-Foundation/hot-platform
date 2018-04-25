@@ -31,8 +31,8 @@ async def submit_transaction(xdr: bytes) -> Dict[str, str]:
         raise web.HTTPInternalServerError
     return response
 
-async def get_next_sequence_number(wallet_address:str) -> int:
-    """Get next sequence number of the wallet"""
+async def get_current_sequence_number(wallet_address:str) -> int:
+    """Get current sequence number of the wallet"""
     horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
     sequence = horizon.account(wallet_address).get('sequence')
     return sequence
