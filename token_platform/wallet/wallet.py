@@ -45,14 +45,13 @@ def build_create_wallet_transaction(source_address: str, destination_address: st
             builder(optional): Builder object
     """
 
-    builder = Builder(address='GASF2Q2GZMQMMNSYDU34MU4GJKSZPSN7FYKQEMNH4QJMVE3JR3C3I3N5',
-                      network=settings['STELLAR_NETWORK'],
-                      secret='SD7X3ZXMGTLH7SGDVG4ELXJXJ52L5MF57BYHFEJ2AZENF3DICUU5RBSC')
+    builder = Builder(address=source_address,
+                      network=settings['STELLAR_NETWORK'])
     builder.append_create_account_op(
         source=source_address, destination=destination_address, starting_balance=amount)
     try:
-        builder.append_trust_op(source=destination_address,
-                                destination=destination_address, code=settings['ASSET_CODE'])
+        builder.append_trust_op(
+            source=destination_address, destination=source_address, code=settings['ASSET_CODE'])
     except DecodeError:
         raise web.HTTPBadRequest(reason='Parameter values are not valid.')
 
