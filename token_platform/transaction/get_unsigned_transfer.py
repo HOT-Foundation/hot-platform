@@ -24,7 +24,7 @@ async def get_unsigned_transfer_from_request(request: web.Request) -> web.Respon
         raise ValueError("Invalid, please check your parameter.")
 
     source_wallet = StellarAddress(address=source_account, network=settings['STELLAR_NETWORK'])
-    destination_wallet = StellarAddress(address=source_account, network=settings['STELLAR_NETWORK'])
+    destination_wallet = StellarAddress(address=destination, network=settings['STELLAR_NETWORK'])
 
     try:
         source_wallet.get()
