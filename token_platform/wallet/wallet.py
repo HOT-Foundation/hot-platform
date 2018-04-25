@@ -1,13 +1,12 @@
 from typing import Tuple
 
-from aiohttp import web
 from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
 from stellar_base.utils import AccountNotExistError, DecodeError
 
-from conf import settings
 from aiohttp import web
-from stellar_base.utils import AccountNotExistError
+from conf import settings
+
 
 async def get_wallet(wallet_address: str) -> StellarAddress:
     """Get wallet from stellar address"""
