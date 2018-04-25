@@ -15,7 +15,7 @@ class TestSubmitTransactionFromRequest(BaseTestClass):
             'message': 'transaction success.'
         }
 
-        mock_get.return_value = web.json_response(expect)
+        mock_get.return_value = expect
         mock_dup.return_value = False
         mock_tx.return_value = {'status': 200}
         url = f'transaction/transaction-hash'
