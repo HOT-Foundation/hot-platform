@@ -97,7 +97,7 @@ async def get_threshold_weight(wallet_address:str, operation_type:str) -> int:
     def _get_threshould_level(operation_type):
         """Get threshould level from operation type"""
         low = ['allow_trust']
-        high = ['set_signer', 'set_thershould']
+        high = ['set_signer', 'set_threshold']
 
         if operation_type in low:
             return 'low_threshold'
