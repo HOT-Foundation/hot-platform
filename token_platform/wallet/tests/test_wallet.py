@@ -31,6 +31,8 @@ class TestBuildCreateWalletTx(BaseTestClass):
         def append_trust_op(self, source, destination, code):
             if (source == 'decode-error' or destination == 'decode-error'):
                 raise DecodeError('decode parameter error')
+            if (source == 'error' or destination == 'error'):
+                raise Exception('error')
 
         def gen_xdr(self):
             return 'unsugned-xdr'
@@ -57,4 +59,28 @@ class TestBuildCreateWalletTx(BaseTestClass):
             build_create_wallet_transaction(
                 'decode-error',
                 'decode-error',
+                self.starting_amount)
+
+    @unittest_run_loop
+    @patch('wallet.wallet.Builder')
+    async def test_build_create_wallet_transaction_without_issuer_setting(self, mock_builder):
+        te = self.TeMock()
+        mock_builder.return_value = self.BuilderMock(te)
+        with pytest.raises(web.HTTPInternalServerError):
+            build_create_wallet_transaction(
+                'error',
+                'error',
+                self.starting_amount)
+
+    @unittest_run_loop
+    @patch('wallet.wallet.Builder')
+    async def test_build_create_wallet_transaction_with_fake_source_and_destination(self, mock_builder):
+        te = self.TeMock()
+        mock_builder.return_value = self.BuilderMock(te)
+        instance = mock_builder.return_value
+        instance.gen_xdr = Exception('cannot find sequence')
+        with pytest.raises(web.HTTPBadRequest):
+            build_create_wallet_transaction(
+                self.source_address,
+                self.destination_address,
                 self.starting_amount)
