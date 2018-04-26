@@ -13,7 +13,7 @@ services:
     environment:
       - ASSET_CODE=HTKN
       - ISSUER=GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ
-      - HOST=hotnow-token-platform
+      - HOST=http://hotnow-token-platform
       - PYTHONPATH=/usr/src/token_platform
     networks:
       - hotnow-network
