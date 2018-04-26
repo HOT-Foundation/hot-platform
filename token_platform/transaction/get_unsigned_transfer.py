@@ -30,7 +30,13 @@ async def get_unsigned_transfer_from_request(request: web.Request) -> web.Respon
 
 
 async def get_unsigned_transfer(source_address: str, destination: str, amount: int) -> JSONType:
-    """Get unsigned transfer transaction and signers"""
+    """Get unsigned transfer transaction and signers
+
+        Args:
+            source_address: Owner of operation
+            destination_address: address of receiveing wallet
+            amount: amount of money that would be transferred
+    """
     unsigned_xdr, tx_hash = build_unsigned_transfer(source_address, destination, amount)
     host: str = settings['HOST']
     result = {
@@ -48,10 +54,9 @@ def build_unsigned_transfer(source_address: str, destination_address: str, amoun
     """"Build unsigned transfer transaction return unsigned XDR and transaction hash.
 
         Args:
-            source_address: Owner of
+            source_address: Owner of operation
             destination_address: wallet id of new wallet
             amount: starting balance of new wallet
-            builder(optional): Builder object
     """
     builder = Builder(address=source_address, network=settings['STELLAR_NETWORK'])
     builder.append_payment_op(destination_address, amount, asset_type=settings['ASSET_CODE'],

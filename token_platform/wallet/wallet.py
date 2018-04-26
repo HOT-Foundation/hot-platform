@@ -53,8 +53,15 @@ def build_create_wallet_transaction(source_address: str, destination_address: st
             source=destination_address, destination=settings['ISSUER'], code=settings['ASSET_CODE'])
     except DecodeError:
         raise web.HTTPBadRequest(reason='Parameter values are not valid.')
+    except Exception as e:
+        msg = str(e)
+        raise web.HTTPInternalServerError(reason=msg)
 
-    unsigned_xdr = builder.gen_xdr()
+    try:
+        unsigned_xdr = builder.gen_xdr()
+    except Exception as e:
+        raise web.HTTPBadRequest(reason='Bad request, Please ensure parameters are valid.')
+
     tx_hash = builder.te.hash_meta()
 
     return unsigned_xdr, tx_hash
