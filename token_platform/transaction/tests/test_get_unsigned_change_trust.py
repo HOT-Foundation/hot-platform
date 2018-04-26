@@ -43,7 +43,7 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
         expect_data = {
             "@id": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
             "@url": f"{settings['HOST']}/wallet/GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI/transaction/change-trust",
-            "@transaction_url": f"{settings['HOST']}/transaction/facf1e0e9060fcbdbaafe9d2d6f29a25b6ae8bae5dc9273feab02b803638cf47",
+            "@transaction_url": f"{settings['HOST']}/transaction/bbf17ffd2de5a1fafd1644b506ad601402426fe0633a168edec05522d30cf09c",
             "min_signer": 1,
             "signers": [
                 {
@@ -51,9 +51,9 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
                 "weight": 1
                 }
             ],
-            "unsigned_xdr": "AAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAZAB3A5sAAAAGAAAAAAAAAAAAAAABAAAAAQAAAADOf93UUiwNNmwwYj2/XOv/KuhgA2mooc0ID+GYa49siQAAAAYAAAABSFRLTgAAAADkHacjwpeFWz5txveZ4sJ3pEmTzpdS9fiBscDwpmoppgAAAASoF8gAAAAAAAAAAAA="
+            "unsigned_xdr": "AAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAZAB3A5sAAAAGAAAAAAAAAAAAAAABAAAAAQAAAADOf93UUiwNNmwwYj2/XOv/KuhgA2mooc0ID+GYa49siQAAAAYAAAABSFRLTgAAAADkHacjwpeFWz5txveZ4sJ3pEmTzpdS9fiBscDwpmoppn//////////AAAAAAAAAAA="
         }
-        print(result)
+
         assert result == expect_data
 
     @unittest_run_loop

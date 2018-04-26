@@ -41,7 +41,7 @@ def build_unsigned_change_trust(source_address: str) -> Tuple[str, str]:
             source_address: address need to be trust HTKN
     """
     builder = Builder(address=source_address, network=settings['STELLAR_NETWORK'])
-    builder.append_trust_op(settings['ISSUER'], settings['ASSET_CODE'], limit=int(settings['LIMIT_TRUST']), source=source_address)
+    builder.append_trust_op(settings['ISSUER'], settings['ASSET_CODE'], source=source_address)
 
     try:
         unsigned_xdr = builder.gen_xdr()
