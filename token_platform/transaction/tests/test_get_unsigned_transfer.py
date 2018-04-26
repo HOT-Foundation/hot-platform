@@ -1,13 +1,14 @@
 import asyncio
 import json
 
-from stellar_base.utils import AccountNotExistError
-from tests.test_utils import BaseTestClass
-
 import pytest
 from aiohttp import web
 from aiohttp.test_utils import make_mocked_request, unittest_run_loop
 from asynctest import patch
+from stellar_base.utils import AccountNotExistError
+from tests.test_utils import BaseTestClass
+
+from conf import settings
 from transaction.get_unsigned_transfer import (get_signers,
                                                get_threshold_weight,
                                                get_unsigned_transfer,
@@ -21,7 +22,6 @@ class TestGetUnsignedTransaction(BaseTestClass):
     @patch('transaction.get_unsigned_transfer.get_unsigned_transfer')
     async def test_get_transaction_from_request(self, mock_get_unsigned_transfer, mock_address):
         mock_get_unsigned_transfer.return_value = {}
-        instance = mock_address.return_value
         balances = [
             {
                 'balance': '9.9999200',
@@ -80,10 +80,11 @@ class TestGetUnsignedTransaction(BaseTestClass):
             'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6',
             '100')
 
+        host = settings.get('HOST', None)
         expect_data = {
             "@id": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
-            "@url": "localhost:8081/wallet/GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI/transaction/transfer",
-            "@transaction_url": "localhost:8081/transaction/dc8616f8013dc8134fe1618f1b667b10e425fed18cd6f36e62b0bd8de1e726fe",
+            "@url": f'{host}/wallet/GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI/transaction/transfer',
+            "@transaction_url": f'{host}/transaction/dc8616f8013dc8134fe1618f1b667b10e425fed18cd6f36e62b0bd8de1e726fe',
             "min_signer": 1,
             "signers": [
                 {
