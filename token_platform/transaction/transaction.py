@@ -23,23 +23,24 @@ async def is_duplicate_transaction(transaction_hash: str) -> bool:
 async def submit_transaction(xdr: bytes) -> Dict[str, str]:
     """Submit transaction into Stellar network"""
     horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
+
     try:
         response = horizon.submit(xdr)
-    except Exception:
+    except Exception as e:
+        msg = str(e)
         raise web.HTTPInternalServerError
-    if response['status'] == 400:
-        raise web.HTTPBadRequest
-    if response['status'] != 200:
-        raise web.HTTPInternalServerError
+    if response.get('status') == 400:
+        msg = response.get('extras', {}).get('result_codes', {}).get('transaction', None)
+        raise web.HTTPBadRequest(reason=msg)
     return response
 
-async def get_next_sequence_number(wallet_address:str) -> int:
-    """Get next sequence number of the wallet"""
+async def get_current_sequence_number(wallet_address:str) -> int:
+    """Get current sequence number of the wallet"""
     horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
     sequence = horizon.account(wallet_address).get('sequence')
     return sequence
 
-async def get_transaction(tx_hash: str) -> web_response.Response:
+async def get_transaction(tx_hash: str) -> Dict[str, Union[str, int, List[Dict[str, str]]]]:
     """Retrieve transaction detail from transaction hash
 
         Args:
@@ -80,7 +81,7 @@ async def get_transaction(tx_hash: str) -> web_response.Response:
     tx_detail = _format_transaction(transaction)
     tx_detail["operations"] = _get_operation_data_of_transaction(tx_hash, horizon)
 
-    return web.json_response(tx_detail)
+    return tx_detail
 
 
 async def get_signers(wallet_address: str) -> List[Dict[str, str]]:

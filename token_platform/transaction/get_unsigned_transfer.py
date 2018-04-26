@@ -3,11 +3,13 @@ from typing import Any, Dict, List, Mapping, NewType, Optional, Tuple, Union
 
 from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
+from stellar_base.utils import AccountNotExistError
 
 from aiohttp import web
 from conf import settings
-from wallet.wallet import (build_create_wallet_transaction, get_wallet,
-                           wallet_address_is_duplicate)
+from wallet.wallet import get_wallet
+
+JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 
 from transaction.transaction import get_threshold_weight, get_signers
 
@@ -19,10 +21,15 @@ async def get_unsigned_transfer_from_request(request: web.Request) -> web.Respon
         amount = request.rel_url.query['amount']
     except KeyError as context:
         raise ValueError("Invalid, please check your parameter.")
-    return await get_unsigned_transfer(source_account, destination, amount)
+
+    await get_wallet(source_account)
+    await get_wallet(destination)
+
+    result = await get_unsigned_transfer(source_account, destination, amount)
+    return web.json_response(result)
 
 
-async def get_unsigned_transfer(source_address: str, destination: str, amount: int) -> web.Response:
+async def get_unsigned_transfer(source_address: str, destination: str, amount: int) -> JSONType:
     """Get unsigned transfer transaction and signers"""
     unsigned_xdr, tx_hash = build_unsigned_transfer(source_address, destination, amount)
     host: str = settings['HOST']
@@ -34,7 +41,7 @@ async def get_unsigned_transfer(source_address: str, destination: str, amount: i
         'signers': await get_signers(source_address),
         'unsigned_xdr': unsigned_xdr
     }
-    return web.json_response(result)
+    return result
 
 
 def build_unsigned_transfer(source_address: str, destination_address: str, amount: int) -> Tuple[str, str]:

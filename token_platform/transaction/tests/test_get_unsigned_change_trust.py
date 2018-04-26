@@ -6,6 +6,7 @@ from tests.test_utils import BaseTestClass
 import pytest
 from aiohttp.test_utils import make_mocked_request, unittest_run_loop
 from asynctest import patch
+from conf import settings
 from transaction.get_unsigned_change_trust import (get_signers,
                                                    get_threshold_weight,
                                                    get_unsigned_change_trust,
@@ -39,8 +40,8 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
 
         expect_data = {
             "@id": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
-            "@url": "localhost:8081/wallet/GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI/transaction/change-trust",
-            "@transaction_url": "localhost:8081/transaction/facf1e0e9060fcbdbaafe9d2d6f29a25b6ae8bae5dc9273feab02b803638cf47",
+            "@url": f"{settings['HOST']}/wallet/GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI/transaction/change-trust",
+            "@transaction_url": f"{settings['HOST']}/transaction/facf1e0e9060fcbdbaafe9d2d6f29a25b6ae8bae5dc9273feab02b803638cf47",
             "min_signer": 1,
             "signers": [
                 {
@@ -50,5 +51,5 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
             ],
             "unsigned_xdr": "AAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAZAB3A5sAAAAGAAAAAAAAAAAAAAABAAAAAQAAAADOf93UUiwNNmwwYj2/XOv/KuhgA2mooc0ID+GYa49siQAAAAYAAAABSFRLTgAAAADkHacjwpeFWz5txveZ4sJ3pEmTzpdS9fiBscDwpmoppgAAAASoF8gAAAAAAAAAAAA="
         }
-
+        print(result)
         assert result == expect_data
