@@ -19,7 +19,7 @@ async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Respons
     cost_per_tx = body.get('cost_per_tx', None)
 
     result = {
-        "create_account": await get_unsigned_generate_account_xdr(
+        "create_account": await get_unsigned_generate_wallet_xdr(
             stellar_escrow_address,
             stellar_merchant_address,
             stellar_hotnow_address,
@@ -76,7 +76,7 @@ async def get_presigned_tx_xdr(
             stellar_hotnow_address,
             cost_per_tx,
             sequence=int(sequence_number)+i))
-    
+
     result = {
         'min_signer': await get_threshold_weight(stellar_escrow_address, 'payment'),
         'signers': await get_signers(stellar_escrow_address),
