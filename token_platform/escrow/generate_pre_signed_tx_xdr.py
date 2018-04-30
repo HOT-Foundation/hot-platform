@@ -18,16 +18,7 @@ async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Respons
     exp_date = body.get('expriring_date', None)
     cost_per_tx = body.get('cost_per_tx', None)
 
-    result = {
-        "create_account": await get_unsigned_generate_account_xdr(
-            stellar_escrow_address,
-            stellar_merchant_address,
-            stellar_hotnow_address,
-            starting_banace,
-            exp_date,
-            cost_per_tx
-        ),
-        "pre_signed_tx": await get_presigned_tx_xdr(
+    result = await get_presigned_tx_xdr(
             stellar_escrow_address,
             stellar_merchant_address,
             stellar_hotnow_address,
@@ -35,7 +26,6 @@ async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Respons
             exp_date,
             cost_per_tx
         )
-    }
 
     return web.json_response(result)
 
@@ -58,6 +48,7 @@ async def get_presigned_tx_xdr(
                 source_address: Owner of operation
                 destination_address: address of receiveing wallet
                 amount: amount of money that would be transferred
+                sequence: sequence number of escrow account
         """
         unsigned_xdr, tx_hash = build_unsigned_transfer(source_address, destination, amount, sequence=sequence)
         host: str = settings['HOST']
