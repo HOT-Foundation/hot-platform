@@ -1,4 +1,7 @@
+from typing import Dict, List
+
 from aiohttp import web
+from escrow.generate_account_xdr import get_unsigned_generate_account_xdr
 
 
 async def get_create_account_and_presigned_tx_xdr_from_request(request: web.Request) -> web.Response:
@@ -11,4 +14,34 @@ async def get_create_account_and_presigned_tx_xdr_from_request(request: web.Requ
     exp_date = body.get('expriring_date', None)
     cost_per_tx = body.get('cost_per_tx', None)
 
-    return web.json_response(body)
+    result = {
+        "create_account": get_unsigned_generate_account_xdr(
+            stellar_escrow_address,
+            stellar_merchant_address,
+            stellar_hotnow_address,
+            starting_banace,
+            exp_date,
+            cost_per_tx
+        ),
+        "pre_signed_tx": get_presigned_tx_xdr(
+            stellar_escrow_address,
+            stellar_merchant_address,
+            stellar_hotnow_address,
+            starting_banace,
+            exp_date,
+            cost_per_tx
+        )
+    }
+
+    return web.json_response(result)
+
+
+async def get_presigned_tx_xdr(stellar_escrow_address:str,
+            stellar_merchant_address:str,
+            stellar_hotnow_address:str,
+            starting_banace:int,
+            exp_date:str,
+            cost_per_tx:int
+        ) -> List:
+
+    return []
