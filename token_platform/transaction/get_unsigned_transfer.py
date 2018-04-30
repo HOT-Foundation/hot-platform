@@ -7,11 +7,11 @@ from stellar_base.utils import AccountNotExistError
 
 from aiohttp import web
 from conf import settings
+from transaction.transaction import get_signers, get_threshold_weight
 from wallet.wallet import get_wallet
 
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 
-from transaction.transaction import get_threshold_weight, get_signers
 
 async def get_unsigned_transfer_from_request(request: web.Request) -> web.Response:
     """AIOHttp Request unsigned transfer transaction"""
@@ -29,7 +29,7 @@ async def get_unsigned_transfer_from_request(request: web.Request) -> web.Respon
     return web.json_response(result)
 
 
-async def get_unsigned_transfer(source_address: str, destination: str, amount: int) -> JSONType:
+async def get_unsigned_transfer(source_address: str, destination: str, amount: int, sequence:int = None) -> JSONType:
     """Get unsigned transfer transaction and signers
 
         Args:
@@ -50,7 +50,7 @@ async def get_unsigned_transfer(source_address: str, destination: str, amount: i
     return result
 
 
-def build_unsigned_transfer(source_address: str, destination_address: str, amount: int) -> Tuple[str, str]:
+def build_unsigned_transfer(source_address: str, destination_address: str, amount: int, sequence=None) -> Tuple[str, str]:
     """"Build unsigned transfer transaction return unsigned XDR and transaction hash.
 
         Args:
@@ -58,7 +58,7 @@ def build_unsigned_transfer(source_address: str, destination_address: str, amoun
             destination_address: wallet id of new wallet
             amount: starting balance of new wallet
     """
-    builder = Builder(address=source_address, network=settings['STELLAR_NETWORK'])
+    builder = Builder(address=source_address, network=settings['STELLAR_NETWORK'], sequence=sequence)
     builder.append_payment_op(destination_address, amount, asset_type=settings['ASSET_CODE'],
                           asset_issuer=settings['ISSUER'], source=source_address)
     unsigned_xdr = builder.gen_xdr()

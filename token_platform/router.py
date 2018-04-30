@@ -9,11 +9,12 @@ from transaction.put_transaction import put_transaction_from_request
 from wallet.get_create_wallet import get_create_wallet_from_request
 from wallet.get_current_tx_sequence import get_current_tx_sequence_from_request
 from wallet.get_wallet import get_wallet_from_request
-from escrow.generate_pre_signed_tx_xdr import get_create_account_and_presigned_tx_xdr_from_request
+from escrow.generate_pre_signed_tx_xdr import get_presigned_tx_xdr_from_request
 
 routes = [
     web.get('/', handle),
-    web.post('/create-escrow', get_create_account_and_presigned_tx_xdr_from_request),
+    web.post('/create-escrow', get_presigned_tx_xdr_from_request),
+    web.post('/presigned-transfer', get_presigned_tx_xdr_from_request),
     web.get('/wallet/{wallet_address}', get_wallet_from_request),
     web.get('/wallet/{wallet_address}/create-wallet', get_create_wallet_from_request),
     web.get('/wallet/{wallet_address}/transaction/current-sequence', get_current_tx_sequence_from_request),
