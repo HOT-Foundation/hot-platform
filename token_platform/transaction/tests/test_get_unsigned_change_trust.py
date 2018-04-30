@@ -5,7 +5,7 @@ from tests.test_utils import BaseTestClass
 
 import pytest
 from aiohttp import web
-from aiohttp.test_utils import make_mocked_request, unittest_run_loop
+from aiohttp.test_utils import unittest_run_loop
 from asynctest import patch
 from conf import settings
 from transaction.get_unsigned_change_trust import (get_signers,
