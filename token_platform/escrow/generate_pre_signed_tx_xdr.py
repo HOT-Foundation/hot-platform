@@ -2,7 +2,6 @@ from typing import Dict, List
 
 from aiohttp import web
 from conf import settings
-from escrow.generate_account_xdr import get_unsigned_generate_account_xdr
 from transaction.get_unsigned_transfer import build_unsigned_transfer
 from transaction.transaction import (get_current_sequence_number, get_signers,
                                      get_threshold_weight)
@@ -67,7 +66,7 @@ async def get_presigned_tx_xdr(
             stellar_hotnow_address,
             cost_per_tx,
             sequence=int(sequence_number)+i))
-    
+
     result = {
         'min_signer': await get_threshold_weight(stellar_escrow_address, 'payment'),
         'signers': await get_signers(stellar_escrow_address),
