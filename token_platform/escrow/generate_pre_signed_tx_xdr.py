@@ -15,7 +15,7 @@ async def get_create_account_and_presigned_tx_xdr_from_request(request: web.Requ
     cost_per_tx = body.get('cost_per_tx', None)
 
     result = {
-        "create_account": get_unsigned_generate_account_xdr(
+        "create_account": await get_unsigned_generate_account_xdr(
             stellar_escrow_address,
             stellar_merchant_address,
             stellar_hotnow_address,
@@ -23,7 +23,7 @@ async def get_create_account_and_presigned_tx_xdr_from_request(request: web.Requ
             exp_date,
             cost_per_tx
         ),
-        "pre_signed_tx": get_presigned_tx_xdr(
+        "pre_signed_tx": await get_presigned_tx_xdr(
             stellar_escrow_address,
             stellar_merchant_address,
             stellar_hotnow_address,
