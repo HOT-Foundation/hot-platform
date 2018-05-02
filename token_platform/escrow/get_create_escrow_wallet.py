@@ -1,9 +1,10 @@
 import binascii
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Dict, List
 
 from aiohttp import web
 from stellar_base.builder import Builder
-from stellar_base.utils import AccountNotExistError, DecodeError
+from stellar_base.utils import DecodeError
 
 from conf import settings
 from transaction.transaction import get_signers, get_threshold_weight
@@ -57,8 +58,8 @@ async def create_escrow_wallet(stellar_escrow_address: str,
     '''Create wallet
 
     '''
-
-    starting_xlm: int = calculate_initial_xlm()
+    number_of_transaction = starting_balance / cost_per_tx
+    starting_xlm: int = calculate_initial_xlm(3, number_of_transaction)
     starting_custom_asset: int = starting_balance
 
     unsigned_xdr, tx_hash = await build_create_escrow_wallet_transaction(stellar_escrow_address,
@@ -72,19 +73,28 @@ async def create_escrow_wallet(stellar_escrow_address: str,
     return {
         'escrow_address': stellar_escrow_address,
         '@url': '{}/create-escrow'.format(host),
-        '@transaction_url': '{}/transaction/{}'.format(host, 'tx_hash'),
+        '@transaction_url': '{}/transaction/{}'.format(host, tx_hash),
         'signers': [stellar_escrow_address, stellar_merchant_address, stellar_hotnow_address],
-        'unsigned_xdr': 'unsigned_xdr'
+        'unsigned_xdr': unsigned_xdr
     }
 
-def calculate_initial_xlm() -> int:
-    return 20
+def calculate_initial_xlm(number_of_entries: int, number_of_transaction: int) -> int:
+    '''Calculate starting balance for wallet
+    starting balance: minimum balance + transaction fee
+    minimum balance = (2 + number of entries) × base reserve
+    '''
+    transaction_fee = 0.00001
+    minumum_balance_raw = ((2 + number_of_entries) * 0.5) + (number_of_transaction * transaction_fee)
+    our_value = Decimal(minumum_balance_raw)
+    result = Decimal(our_value.quantize(Decimal('.0001'), rounding=ROUND_HALF_UP))
+    import pdb; pdb.set_trace()
+    return result
 
 async def build_create_escrow_wallet_transaction(stellar_escrow_address: str,
                                            stellar_merchant_address: str,
                                            stellar_hotnow_address: str,
                                            starting_native_asset: int,
-                                           starting_custom_asset: int,
+                                           starting_custom_asset: int
                                            ) -> Dict:
     '''Building transaction for generating escrow account with minimum balance of lumens
         and return unsigned XDR and transaction hash.
@@ -112,9 +122,9 @@ async def build_create_escrow_wallet_transaction(stellar_escrow_address: str,
         raise web.HTTPInternalServerError(reason=msg)
 
     builder.append_set_options_op(
-        source=stellar_escrow_address, signer_address=stellar_hotnow_address, signer_weight=1)
+        source=stellar_escrow_address, signer_address=stellar_hotnow_address, signer_type='ed25519PublicKey', signer_weight=1)
     builder.append_set_options_op(
-        source=stellar_escrow_address, signer_address=stellar_merchant_address, signer_weight=1)
+        source=stellar_escrow_address, signer_address=stellar_merchant_address, signer_type='ed25519PublicKey', signer_weight=1)
     builder.append_set_options_op(source=stellar_escrow_address,
                                   master_weight=0, low_threshold=2, med_threshold=2, high_threshold=2)
 
@@ -131,4 +141,4 @@ async def build_create_escrow_wallet_transaction(stellar_escrow_address: str,
 
     tx_hash = builder.te.hash_meta()
 
-    return unsigned_xdr, binascii.hexlify(tx_hash).decode()
+    return unsigned_xdr.decode(), binascii.hexlify(tx_hash).decode()

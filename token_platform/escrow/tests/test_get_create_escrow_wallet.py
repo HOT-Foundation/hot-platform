@@ -4,7 +4,8 @@ from asynctest import patch
 from conf import settings
 from escrow.get_create_escrow_wallet import (build_create_escrow_wallet_transaction,
                                              create_escrow_wallet,
-                                             get_create_escrow_wallet_from_request)
+                                             get_create_escrow_wallet_from_request,
+                                             calculate_initial_xlm)
 
 class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
     async def setUpAsync(self):
@@ -185,16 +186,32 @@ class TestBuildCreateEscrowWalletTransaction(BaseTestClass):
         self.host = settings['HOST']
 
     @unittest_run_loop
-    async def test_build_create_escrow_wallet_transaction(self):
+    @patch('escrow.get_create_escrow_wallet.Builder')
+    async def test_build_create_escrow_wallet_transaction_success(self, mock_builder):
+
+        instance = mock_builder.return_value
+        instance.append_create_account_op.return_value = 'test'
+        instance.append_trust_op.return_value = 'test'
+        instance.append_set_options_op.return_value = 'test'
+        instance.gen_xdr.return_value = b'unsigned-xdr'
+        instance.te.hash_meta.return_value = b'tx-hash'
+
 
         result = await build_create_escrow_wallet_transaction(
-            stellar_escrow_address=self.stellar_escrow_address,
-            stellar_hotnow_address=self.stellar_hotnow_address,
-            stellar_merchant_address=self.stellar_merchant_address,
+            stellar_escrow_address=self.escrow_address,
+            stellar_hotnow_address=self.hotnow_address,
+            stellar_merchant_address=self.merchant_address,
             starting_native_asset=self.starting_native_asset,
             starting_custom_asset=self.starting_custom_asset
         )
 
-        expect = ['unsigned-xdr', 'tx-hash']
+        expect = ('unsigned-xdr', '74782d68617368')
 
         assert result == expect
+
+
+class TestCalculateInitialXLM():
+    async def test_calculate_initial_xlm_success(self):
+        result = calculate_initial_xlm(3, 200)
+        assert result == 2.5020
+
