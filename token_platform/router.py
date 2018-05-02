@@ -13,7 +13,8 @@ from wallet.get_wallet import get_wallet_from_request
 routes = [
     web.get('/', handle),
     web.get('/wallet/{wallet_address}', get_wallet_from_request),
-    web.get('/wallet/{wallet_address}/create-wallet', get_create_wallet_from_request),
+    # web.get('/wallet/{wallet_address}/create-wallet', get_create_wallet_from_request),
+    web.post('/wallet/create-wallet', get_create_wallet_from_request),
     web.get('/wallet/{wallet_address}/transaction/current-sequence', get_current_tx_sequence_from_request),
     web.get('/transaction/{transaction_hash}', get_transaction_from_request),
     web.put('/transaction/{transaction_hash}', put_transaction_from_request),

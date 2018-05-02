@@ -26,7 +26,7 @@ class TestCreateWallet(BaseTestClass):
         kp = Keypair.deterministic(secret_phrase, lang='english')
         self.wallet_address = 'GB6PGEFJSXPRUNYAJXH4OZNIZNCEXC6B2JMV5RUGWJECWVWNCJTMGJB4'
         self.target_address = kp.address().decode()
-        self.starting_amount = 600
+        self.starting_balance = 600
         self.host = settings['HOST']
 
     @unittest_run_loop
@@ -37,8 +37,15 @@ class TestCreateWallet(BaseTestClass):
         mock_te.return_value = MockBuilder()
         mock_xdr.return_value = (b'test-xdr', b'test-transaction-envelop')
         mock_check.return_value = False
-        url = f'/wallet/{self.wallet_address}/create-wallet?target-address={self.target_address}&starting-amount={self.starting_amount}'
-        resp = await self.client.request("GET", url)
+
+        url = '/wallet/create-wallet'
+        json_request = {
+            'wallet_address' : self.wallet_address,
+            'target-address' : self.target_address,
+            'starting-balance' : self.starting_balance
+        }
+
+        resp = await self.client.request("POST", url, data=json_request)
         assert resp.status == 200
         text = await resp.json()
         hash = MockBuilder()
@@ -55,20 +62,20 @@ class TestCreateWallet(BaseTestClass):
 
     @unittest_run_loop
     async def test_get_create_wallet_from_request_use_wrong_parameter(self):
-        url = f'/wallet/{self.wallet_address}/create-wallet?target=test'
-        resp = await self.client.request("GET", url)
+        url = '/wallet/create-wallet'
+        resp = await self.client.request("POST", url, data={'target':'test'})
         assert resp.status == 400
         text = await resp.json()
         assert 'Bad request, parameter missing.' in text['error']
 
-        url = f'/wallet/{self.wallet_address}/create-wallet?target=test&value=0'
-        resp = await self.client.request("GET", url)
+        resp = await self.client.request("POST", url, data={
+                                         'target' : 'test',
+                                         'value' : 0})
         assert resp.status == 400
         text = await resp.json()
         assert 'Bad request, parameter missing.' in text['error']
 
-        url = f'/wallet/{self.wallet_address}/create-wallet?value=500'
-        resp = await self.client.request("GET", url)
+        resp = await self.client.request("POST", url, data={'value' : 500})
         assert resp.status == 400
         text = await resp.json()
         assert 'Bad request, parameter missing.' in text['error']

@@ -15,10 +15,12 @@ from wallet.wallet import (build_create_wallet_transaction,
 
 async def get_create_wallet_from_request(request: web.Request):
     """Aiohttp Request wallet address to get create wallet transaction."""
+    data = await request.post()
+    destination_address: str = data.get('target-address', None)
+    source_address = data.get('wallet_address', None)
+    amount: int = int(data.get('starting-balance', 0))
 
-    source_address = request.match_info.get('wallet_address')
-    destination_address: str = request.query.get('target-address')
-    amount: int = int(request.query.get('starting-amount', 0))
+
     if destination_address is None or amount == 0:
         raise web.HTTPBadRequest(reason = 'Bad request, parameter missing.')
 
