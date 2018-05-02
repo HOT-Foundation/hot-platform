@@ -10,19 +10,22 @@ from transaction.transaction import (get_current_sequence_number, get_signers,
 async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Response:
     """AIOHttp Request create account xdr and presigned transaction xdr"""
     body = await request.json()
-    stellar_escrow_address = body.get('stellar_escrow_address', None)
-    stellar_merchant_address = body.get('stellar_merchant_address', None)
-    stellar_hotnow_address = body.get('stellar_hotnow_address', None)
-    starting_banace = body.get('starting_balance', None)
-    expiring_date = body.get('expiring_date', None)
-    cost_per_tx = body.get('cost_per_tx', None)
+    try:
+        stellar_escrow_address = body['stellar_escrow_address']
+        stellar_merchant_address = body['stellar_merchant_address']
+        stellar_hotnow_address = body['stellar_hotnow_address']
+        starting_balance = body['starting_balance']
+        exp_date = body['expiring_date']
+        cost_per_tx = body['cost_per_tx']
+    except KeyError as context:
+        raise ValueError(context)
 
     result = await get_presigned_tx_xdr(
             stellar_escrow_address,
             stellar_merchant_address,
             stellar_hotnow_address,
-            starting_banace,
-            expiring_date,
+            starting_balance,
+            exp_date,
             cost_per_tx
         )
 
@@ -33,14 +36,21 @@ async def get_presigned_tx_xdr(
     stellar_escrow_address:str,
     stellar_merchant_address:str,
     stellar_hotnow_address:str,
-    starting_banace:int,
-    expiring_date:str,
+    starting_balance:int,
+    exp_date:str,
     cost_per_tx:int
 ) -> Dict:
-    tx_count = int(starting_banace/cost_per_tx)
+    """Get XDR presigned transaction of promote deal"""
+
+    tx_count = int(starting_balance/cost_per_tx)
     sequence_number = await get_current_sequence_number(stellar_escrow_address)
 
-    async def _get_unsigned_transfer(source_address: str, destination: str, amount: int, sequence:int = None) -> Dict:
+    async def _get_unsigned_transfer(
+        source_address: str,
+        destination: str,
+        amount: int,
+        sequence:int = None
+    ) -> Dict:
         """Get unsigned transfer transaction and signers
 
             Args:
@@ -49,7 +59,9 @@ async def get_presigned_tx_xdr(
                 amount: amount of money that would be transferred
                 sequence: sequence number of escrow account
         """
-        unsigned_xdr, tx_hash = build_unsigned_transfer(source_address, destination, amount, sequence=sequence)
+        unsigned_xdr, tx_hash = build_unsigned_transfer(
+            source_address, destination, amount, sequence=sequence
+        )
         host: str = settings['HOST']
         result = {
             '@id': source_address,
