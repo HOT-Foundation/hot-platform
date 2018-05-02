@@ -13,7 +13,7 @@ async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Respons
     stellar_escrow_address = body.get('stellar_escrow_address', None)
     stellar_merchant_address = body.get('stellar_merchant_address', None)
     stellar_hotnow_address = body.get('stellar_hotnow_address', None)
-    starting_banace = body.get('starting_balance', None)
+    starting_balance = body.get('starting_balance', None)
     exp_date = body.get('expriring_date', None)
     cost_per_tx = body.get('cost_per_tx', None)
 
@@ -21,7 +21,7 @@ async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Respons
             stellar_escrow_address,
             stellar_merchant_address,
             stellar_hotnow_address,
-            starting_banace,
+            starting_balance,
             exp_date,
             cost_per_tx
         )
@@ -33,13 +33,13 @@ async def get_presigned_tx_xdr(
     stellar_escrow_address:str,
     stellar_merchant_address:str,
     stellar_hotnow_address:str,
-    starting_banace:int,
+    starting_balance:int,
     exp_date:str,
     cost_per_tx:int
 ) -> Dict:
     """Get XDR presigned transaction of promote deal"""
 
-    tx_count = int(starting_banace/cost_per_tx)
+    tx_count = int(starting_balance/cost_per_tx)
     sequence_number = await get_current_sequence_number(stellar_escrow_address)
 
     async def _get_unsigned_transfer(source_address: str, destination: str, amount: int, sequence:int = None) -> Dict:
