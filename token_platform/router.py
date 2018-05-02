@@ -2,7 +2,7 @@ from aiohttp import web
 
 from controller import handle
 from escrow.generate_pre_signed_tx_xdr import get_presigned_tx_xdr_from_request
-from escrow.get_create_escrow_wallet import create_escrow_wallet_from_request
+from escrow.get_create_escrow_wallet import get_create_escrow_wallet_from_request
 from transaction.get_transaction import get_transaction_from_request
 from transaction.get_unsigned_change_trust import \
     get_unsigned_change_trust_from_request
@@ -15,7 +15,7 @@ from wallet.get_wallet import get_wallet_from_request
 
 routes = [
     web.get('/', handle),
-    web.post('/create-escrow', create_escrow_wallet_from_request),
+    web.post('/create-escrow', get_create_escrow_wallet_from_request),
     web.post('/presigned-transfer', get_presigned_tx_xdr_from_request),
     web.get('/wallet/{wallet_address}', get_wallet_from_request),
     web.get('/wallet/{wallet_address}/create-wallet', get_create_wallet_from_request),

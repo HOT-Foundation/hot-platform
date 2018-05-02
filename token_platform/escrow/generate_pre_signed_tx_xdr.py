@@ -14,7 +14,7 @@ async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Respons
     stellar_merchant_address = body.get('stellar_merchant_address', None)
     stellar_hotnow_address = body.get('stellar_hotnow_address', None)
     starting_banace = body.get('starting_balance', None)
-    exp_date = body.get('expriring_date', None)
+    expiring_date = body.get('expiring_date', None)
     cost_per_tx = body.get('cost_per_tx', None)
 
     result = await get_presigned_tx_xdr(
@@ -22,7 +22,7 @@ async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Respons
             stellar_merchant_address,
             stellar_hotnow_address,
             starting_banace,
-            exp_date,
+            expiring_date,
             cost_per_tx
         )
 
@@ -34,7 +34,7 @@ async def get_presigned_tx_xdr(
     stellar_merchant_address:str,
     stellar_hotnow_address:str,
     starting_banace:int,
-    exp_date:str,
+    expiring_date:str,
     cost_per_tx:int
 ) -> Dict:
     tx_count = int(starting_banace/cost_per_tx)
