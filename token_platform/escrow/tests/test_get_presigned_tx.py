@@ -26,8 +26,27 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
         mock_get_transaction.return_value = {}
         resp = await self.client.request("POST", "/presigned-transfer", json=json_request)
         assert resp.status == 200
-        # mock_get_transaction.assert_called_once()
+        mock_get_transaction.assert_called_once_with(
+            json_request["stellar_escrow_address"],
+            json_request["stellar_merchant_address"],
+            json_request["stellar_hotnow_address"],
+            json_request["starting_balance"],
+            json_request["expriring_date"],
+            json_request["cost_per_tx"]
+        )
     
+    @unittest_run_loop
+    @patch('escrow.generate_pre_signed_tx_xdr.get_presigned_tx_xdr')
+    async def test_get_presigned_tx_xdr_from_request_invalid_json_body(self, mock_get_transaction):
+        json_request = {
+            "stellar_escrow_address": 'GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY',
+        }
+
+        mock_get_transaction.return_value = {}
+        resp = await self.client.request("POST", "/presigned-transfer", json=json_request)
+        assert resp.status == 400
+        text = await resp.json()
+        assert text == {'error': "'stellar_merchant_address'"}
 
     @unittest_run_loop
     @patch('escrow.generate_pre_signed_tx_xdr.get_threshold_weight')
