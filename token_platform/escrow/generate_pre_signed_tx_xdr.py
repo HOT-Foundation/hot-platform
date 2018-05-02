@@ -37,6 +37,8 @@ async def get_presigned_tx_xdr(
     exp_date:str,
     cost_per_tx:int
 ) -> Dict:
+    """Get XDR presigned transaction of promote deal"""
+
     tx_count = int(starting_banace/cost_per_tx)
     sequence_number = await get_current_sequence_number(stellar_escrow_address)
 
