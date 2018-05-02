@@ -19,7 +19,7 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
             "stellar_merchant_address": 'GDR3AGPEISYHLHAB6EVP3HD4COCIT7SPGL7WTSIZR3PNBWKFKZGTUJSNr',
             "stellar_hotnow_address": 'GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6',
             "starting_balance": 10,
-            "expriring_date": '2018-05-02',
+            "expiring_date": '2018-05-02',
             "cost_per_tx": 5
         }
 
@@ -31,7 +31,7 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
             json_request["stellar_merchant_address"],
             json_request["stellar_hotnow_address"],
             json_request["starting_balance"],
-            json_request["expriring_date"],
+            json_request["expiring_date"],
             json_request["cost_per_tx"]
         )
     

@@ -15,7 +15,7 @@ async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Respons
         stellar_merchant_address = body['stellar_merchant_address']
         stellar_hotnow_address = body['stellar_hotnow_address']
         starting_balance = body['starting_balance']
-        exp_date = body['expriring_date']
+        exp_date = body['expiring_date']
         cost_per_tx = body['cost_per_tx']
     except KeyError as context:
         raise ValueError(context)
