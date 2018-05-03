@@ -9,7 +9,7 @@ from tests.test_utils import BaseTestClass
 from aiohttp import web
 
 from conf import settings
-from wallet.wallet import (build_create_wallet_transaction,
+from wallet.wallet import (build_generate_wallet_transaction,
                            wallet_address_is_duplicate)
 
 
@@ -31,15 +31,15 @@ class TestCreateWallet(BaseTestClass):
         self.host = settings['HOST']
 
     @unittest_run_loop
-    @patch('wallet.post_create_wallet.Builder')
-    @patch('wallet.post_create_wallet.wallet_address_is_duplicate')
-    @patch('wallet.post_create_wallet.build_create_wallet_transaction')
-    async def test_post_create_wallet_from_request_success(self, mock_xdr, mock_check, mock_te):
+    @patch('wallet.post_generate_wallet.Builder')
+    @patch('wallet.post_generate_wallet.wallet_address_is_duplicate')
+    @patch('wallet.post_generate_wallet.build_generate_wallet_transaction')
+    async def test_post_generate_wallet_from_request_success(self, mock_xdr, mock_check, mock_te):
         mock_te.return_value = MockBuilder()
         mock_xdr.return_value = (b'test-xdr', b'test-transaction-envelop')
         mock_check.return_value = False
 
-        url = f'/wallet/{self.wallet_address}/create-wallet'
+        url = f'/wallet/{self.wallet_address}/generate-wallet'
         json_request = {
             'target_address' : self.target_address,
             'starting_balance' : self.starting_balance
@@ -61,8 +61,8 @@ class TestCreateWallet(BaseTestClass):
         assert text == expect
 
     @unittest_run_loop
-    async def test_post_create_wallet_from_request_use_wrong_parameter(self):
-        url = f'/wallet/{self.wallet_address}/create-wallet'
+    async def test_post_generate_wallet_from_request_use_wrong_parameter(self):
+        url = f'/wallet/{self.wallet_address}/generate-wallet'
         resp = await self.client.request("POST", url, json={'target':'test'})
         assert resp.status == 400
         text = await resp.json()
@@ -82,9 +82,9 @@ class TestCreateWallet(BaseTestClass):
         assert 'Invalid, please check your parameter.' in text['error']
 
     @unittest_run_loop
-    @patch('wallet.post_create_wallet.wallet_address_is_duplicate', **{'return_value' : True})
-    async def test_post_create_wallet_from_request_is_duplicate_wallet_address(self, mock):
-        url = f'/wallet/{self.wallet_address}/create-wallet'
+    @patch('wallet.post_generate_wallet.wallet_address_is_duplicate', **{'return_value' : True})
+    async def test_post_generate_wallet_from_request_is_duplicate_wallet_address(self, mock):
+        url = f'/wallet/{self.wallet_address}/generate-wallet'
         json_request = {
             'target_address' : self.target_address,
             'starting_balance' : self.starting_balance

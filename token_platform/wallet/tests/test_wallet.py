@@ -6,7 +6,7 @@ from stellar_base.utils import DecodeError
 from tests.test_utils import BaseTestClass
 
 from conf import settings
-from wallet.wallet import build_create_wallet_transaction
+from wallet.wallet import build_generate_wallet_transaction
 
 
 class TestBuildCreateWalletTx(BaseTestClass):
@@ -39,10 +39,10 @@ class TestBuildCreateWalletTx(BaseTestClass):
 
     @unittest_run_loop
     @patch('wallet.wallet.Builder')
-    async def test_build_create_wallet_transaction_success(self, mock_builder):
+    async def test_build_generate_wallet_transaction_success(self, mock_builder):
         te = self.TeMock()
         mock_builder.return_value = self.BuilderMock(te)
-        actual = build_create_wallet_transaction(
+        actual = build_generate_wallet_transaction(
             self.source_address,
             self.destination_address,
             self.starting_amount)
@@ -52,35 +52,35 @@ class TestBuildCreateWalletTx(BaseTestClass):
 
     @unittest_run_loop
     @patch('wallet.wallet.Builder')
-    async def test_build_create_wallet_transaction_with_wrong_parameter(self, mock_builder):
+    async def test_build_generate_wallet_transaction_with_wrong_parameter(self, mock_builder):
         te = self.TeMock()
         mock_builder.return_value = self.BuilderMock(te)
         with pytest.raises(web.HTTPBadRequest):
-            build_create_wallet_transaction(
+            build_generate_wallet_transaction(
                 'decode-error',
                 'decode-error',
                 self.starting_amount)
 
     @unittest_run_loop
     @patch('wallet.wallet.Builder')
-    async def test_build_create_wallet_transaction_without_issuer_setting(self, mock_builder):
+    async def test_build_generate_wallet_transaction_without_issuer_setting(self, mock_builder):
         te = self.TeMock()
         mock_builder.return_value = self.BuilderMock(te)
         with pytest.raises(web.HTTPInternalServerError):
-            build_create_wallet_transaction(
+            build_generate_wallet_transaction(
                 'error',
                 'error',
                 self.starting_amount)
 
     @unittest_run_loop
     @patch('wallet.wallet.Builder')
-    async def test_build_create_wallet_transaction_with_fake_source_and_destination(self, mock_builder):
+    async def test_build_generate_wallet_transaction_with_fake_source_and_destination(self, mock_builder):
         te = self.TeMock()
         mock_builder.return_value = self.BuilderMock(te)
         instance = mock_builder.return_value
         instance.gen_xdr = Exception('cannot find sequence')
         with pytest.raises(web.HTTPBadRequest):
-            build_create_wallet_transaction(
+            build_generate_wallet_transaction(
                 self.source_address,
                 self.destination_address,
                 self.starting_amount)
