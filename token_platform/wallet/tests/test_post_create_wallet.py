@@ -66,7 +66,7 @@ class TestCreateWallet(BaseTestClass):
         resp = await self.client.request("POST", url, json={'target':'test'})
         assert resp.status == 400
         text = await resp.json()
-        assert 'Invalid, please check your parameter.' in text['error']
+        assert 'Bad request, parameter missing.' in text['error']
 
         resp = await self.client.request("POST", url, json={
                                          'target_address' : 'test'})
