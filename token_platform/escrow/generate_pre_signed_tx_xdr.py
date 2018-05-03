@@ -5,33 +5,24 @@ from conf import settings
 from transaction.get_unsigned_transfer import build_unsigned_transfer
 from transaction.transaction import (get_current_sequence_number, get_signers,
                                      get_threshold_weight)
-
+from wallet.wallet import get_wallet
 
 async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Response:
     """AIOHttp Request create account xdr and presigned transaction xdr"""
-    body = await request.json()
-    try:
-        stellar_escrow_address = body['stellar_escrow_address']
-        stellar_hotnow_address = body['stellar_hotnow_address']
-        starting_balance = body['starting_balance']
-        cost_per_tx = body['cost_per_tx']
-    except KeyError as context:
-        msg = "Parameter {} not found. Please ensure parameters is valid.".format(str(context))
-        raise web.HTTPBadRequest(reason=str(msg))
-
+    escrow_address = request.match_info.get("escrow_address")
+    escrow = await get_wallet(escrow_address)
     result = await get_presigned_tx_xdr(
-            stellar_escrow_address,
-            stellar_hotnow_address,
-            starting_balance,
-            cost_per_tx
-        )
+        escrow_address,escrow.data["stellar_destination_address"],
+        escrow.data["starting_balance"],
+        escrow.data["cost_per_tx"]
+    )
 
     return web.json_response(result)
 
 
 async def get_presigned_tx_xdr(
     stellar_escrow_address:str,
-    stellar_hotnow_address:str,
+    stellar_destination_address:str,
     starting_balance:int,
     cost_per_tx:int
 ) -> Dict:
@@ -71,7 +62,7 @@ async def get_presigned_tx_xdr(
     for i in range(0, tx_count):
         presigneds.append(await _get_unsigned_transfer(
             stellar_escrow_address,
-            stellar_hotnow_address,
+            stellar_destination_address,
             cost_per_tx,
             sequence=int(sequence_number)+i))
 

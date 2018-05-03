@@ -16,7 +16,7 @@ from wallet.get_wallet import get_wallet_from_request
 routes = [
     web.get('/', handle),
     web.post('/create-escrow', create_escrow_wallet_from_request),
-    web.post('/presigned-transfer', get_presigned_tx_xdr_from_request),
+    web.post('/escrow/{escrow_address}/genarate-presigned-transections', get_presigned_tx_xdr_from_request),
     web.get('/wallet/{wallet_address}', get_wallet_from_request),
     web.get('/wallet/{wallet_address}/create-wallet', get_create_wallet_from_request),
     web.get('/wallet/{wallet_address}/transaction/current-sequence', get_current_tx_sequence_from_request),

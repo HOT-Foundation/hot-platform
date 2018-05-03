@@ -8,43 +8,55 @@ from escrow.generate_pre_signed_tx_xdr import (get_current_sequence_number,
                                                get_presigned_tx_xdr_from_request,
                                                get_signers,
                                                get_threshold_weight)
+from escrow.tests.factory.escrow_wallet import EscrowWallet
 
 
 class TestGeneratePreSignedTxXDR(BaseTestClass):
     @unittest_run_loop
+    @patch('escrow.generate_pre_signed_tx_xdr.get_wallet')
     @patch('escrow.generate_pre_signed_tx_xdr.get_presigned_tx_xdr')
-    async def test_get_presigned_tx_xdr_from_request(self, mock_get_transaction):
-        json_request = {
-            "stellar_escrow_address": 'GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY',
-            "stellar_merchant_address": 'GDR3AGPEISYHLHAB6EVP3HD4COCIT7SPGL7WTSIZR3PNBWKFKZGTUJSNr',
-            "stellar_hotnow_address": 'GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6',
-            "starting_balance": 10,
-            "expiring_date": '2018-05-02',
-            "cost_per_tx": 5
-        }
-
+    async def test_get_presigned_tx_xdr_from_request(self, mock_get_transaction, mock_get_wallet):
+        escrow_address = "GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY"
         mock_get_transaction.return_value = {}
-        resp = await self.client.request("POST", "/presigned-transfer", json=json_request)
+
+        balances = [
+            {
+                'balance': '500',
+                'asset_type': 'native'
+            }
+        ]
+        mock_get_wallet.return_value = EscrowWallet(balances)
+
+        resp = await self.client.request("POST", "/escrow/{}/genarate-presigned-transections".format(escrow_address), json={})
         assert resp.status == 200
+
+        mock_get_wallet.assert_called_once_with(
+            escrow_address
+        )
+
+        stellar_destination_address = "GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6"
+        starting_balance = "10"
+        cost_per_tx = "5"
+
         mock_get_transaction.assert_called_once_with(
-            json_request["stellar_escrow_address"],
-            json_request["stellar_hotnow_address"],
-            json_request["starting_balance"],
-            json_request["cost_per_tx"]
+            escrow_address,
+            stellar_destination_address,
+            starting_balance,
+            cost_per_tx
         )
     
     @unittest_run_loop
     @patch('escrow.generate_pre_signed_tx_xdr.get_presigned_tx_xdr')
-    async def test_get_presigned_tx_xdr_from_request_invalid_json_body(self, mock_get_transaction):
+    async def xtest_get_presigned_tx_xdr_from_request_invalid_json_body(self, mock_get_transaction):
         json_request = {
             "stellar_escrow_address": 'GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY',
         }
 
         mock_get_transaction.return_value = {}
-        resp = await self.client.request("POST", "/presigned-transfer", json=json_request)
+        resp = await self.client.request("POST", "/presigned-transfer", json={})
         assert resp.status == 400
         text = await resp.json()
-        assert text == {'error': "Parameter 'stellar_hotnow_address' not found. Please ensure parameters is valid."}
+        assert text == {'error': "Parameter 'stellar_destination_address' not found. Please ensure parameters is valid."}
 
     @unittest_run_loop
     @patch('escrow.generate_pre_signed_tx_xdr.get_threshold_weight')
