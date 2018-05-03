@@ -137,7 +137,8 @@ async def test_get_wallet_success(mock_address):
             "high_threshold": 2
         },
         "data": {
-            "name": "UnitTest"
+            "name": "VW5pdFRlc3Q=",
+            "age": "MzA="
         }
     }
     assert result.__dict__ == expect_result
