@@ -39,9 +39,8 @@ class TestCreateWallet(BaseTestClass):
         mock_xdr.return_value = (b'test-xdr', b'test-transaction-envelop')
         mock_check.return_value = False
 
-        url = '/wallet/create-wallet'
+        url = f'/wallet/{self.wallet_address}/create-wallet'
         json_request = {
-            'wallet_address' : self.wallet_address,
             'target_address' : self.target_address,
             'starting_balance' : self.starting_balance
         }
@@ -63,30 +62,30 @@ class TestCreateWallet(BaseTestClass):
 
     @unittest_run_loop
     async def test_post_create_wallet_from_request_use_wrong_parameter(self):
-        url = '/wallet/create-wallet'
+        url = f'/wallet/{self.wallet_address}/create-wallet'
         resp = await self.client.request("POST", url, json={'target':'test'})
+        assert resp.status == 400
+        text = await resp.json()
+        assert 'Invalid, please check your parameter.' in text['error']
+
+        resp = await self.client.request("POST", url, json={
+                                         'target_address' : 'test'})
         assert resp.status == 400
         text = await resp.json()
         assert 'Bad request, parameter missing.' in text['error']
 
         resp = await self.client.request("POST", url, json={
-                                         'target' : 'test',
-                                         'value' : 0})
+                                         'target_address' : 'test',
+                                         'starting_balance' : 'not_Integer'})
         assert resp.status == 400
         text = await resp.json()
-        assert 'Bad request, parameter missing.' in text['error']
-
-        resp = await self.client.request("POST", url, json={'value' : 500})
-        assert resp.status == 400
-        text = await resp.json()
-        assert 'Bad request, parameter missing.' in text['error']
+        assert 'Invalid, please check your parameter.' in text['error']
 
     @unittest_run_loop
     @patch('wallet.post_create_wallet.wallet_address_is_duplicate', **{'return_value' : True})
     async def test_post_create_wallet_from_request_is_duplicate_wallet_address(self, mock):
-        url = '/wallet/create-wallet'
+        url = f'/wallet/{self.wallet_address}/create-wallet'
         json_request = {
-            'wallet_address' : self.wallet_address,
             'target_address' : self.target_address,
             'starting_balance' : self.starting_balance
         }

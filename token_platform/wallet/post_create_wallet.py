@@ -16,11 +16,16 @@ from wallet.wallet import (build_create_wallet_transaction,
 async def post_create_wallet_from_request(request: web.Request):
     """Aiohttp Request wallet address to get create wallet transaction."""
     json_response = await request.json()
-    destination_address: str = json_response.get('target_address', None)
-    source_address: str = json_response.get('wallet_address', None)
-    balance: int = int(json_response.get('starting_balance', 0))
 
-    if destination_address is None or balance == 0:
+    source_address: str = request.match_info.get('wallet_address')
+
+    try:
+        destination_address: str = json_response['target_address']
+        balance: int = int(json_response.get('starting_balance', 0))
+    except (KeyError, ValueError):
+        raise ValueError("Invalid, please check your parameter.")
+
+    if balance == 0:
         raise web.HTTPBadRequest(reason = 'Bad request, parameter missing.')
 
     duplicate = wallet_address_is_duplicate(destination_address)
