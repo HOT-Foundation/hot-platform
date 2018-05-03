@@ -25,6 +25,7 @@ def wallet_address_is_duplicate(destination_address: str) -> bool:
     """Check address ID is not duplicate"""
     wallet = StellarAddress(address=destination_address,
                             network=settings['STELLAR_NETWORK'])
+
     try:
         wallet.get()
         return True
@@ -43,7 +44,6 @@ def build_create_wallet_transaction(source_address: str, destination_address: st
             amount: starting balance of new wallet
             builder(optional): Builder object
     """
-
     builder = Builder(address=source_address,
                       network=settings['STELLAR_NETWORK'])
     builder.append_create_account_op(

@@ -13,20 +13,29 @@ from wallet.wallet import (build_create_wallet_transaction,
                            wallet_address_is_duplicate)
 
 
-async def get_create_wallet_from_request(request: web.Request):
+async def post_create_wallet_from_request(request: web.Request):
     """Aiohttp Request wallet address to get create wallet transaction."""
+    json_response = await request.json()
 
-    source_address = request.match_info.get('wallet_address')
-    destination_address: str = request.query.get('target-address')
-    amount: int = int(request.query.get('starting-amount', 0))
-    if destination_address is None or amount == 0:
+    source_address: str = request.match_info.get('wallet_address')
+
+    try:
+        destination_address: str = json_response['target_address']
+        balance: int = int(json_response.get('starting_balance', 0))
+    except KeyError:
+        raise web.HTTPBadRequest(reason = 'Bad request, parameter missing.')
+    except (ValueError, TypeError):
+        raise ValueError('Invalid, please check your parameter.')
+
+    if balance == 0:
         raise web.HTTPBadRequest(reason = 'Bad request, parameter missing.')
 
     duplicate = wallet_address_is_duplicate(destination_address)
     if duplicate:
         raise web.HTTPBadRequest(reason = 'Target address is already used.')
 
-    unsigned_xdr_byte, tx_hash_byte = build_create_wallet_transaction(source_address, destination_address, amount)
+    unsigned_xdr_byte, tx_hash_byte = build_create_wallet_transaction(source_address, destination_address, balance)
+
     unsigned_xdr: str = unsigned_xdr_byte.decode()
     tx_hash: str = binascii.hexlify(tx_hash_byte).decode()
 
