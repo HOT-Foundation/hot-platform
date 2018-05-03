@@ -12,20 +12,16 @@ async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Respons
     body = await request.json()
     try:
         stellar_escrow_address = body['stellar_escrow_address']
-        stellar_merchant_address = body['stellar_merchant_address']
         stellar_hotnow_address = body['stellar_hotnow_address']
         starting_balance = body['starting_balance']
-        exp_date = body['expiring_date']
         cost_per_tx = body['cost_per_tx']
     except KeyError as context:
         raise ValueError(context)
 
     result = await get_presigned_tx_xdr(
             stellar_escrow_address,
-            stellar_merchant_address,
             stellar_hotnow_address,
             starting_balance,
-            exp_date,
             cost_per_tx
         )
 
@@ -34,10 +30,8 @@ async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Respons
 
 async def get_presigned_tx_xdr(
     stellar_escrow_address:str,
-    stellar_merchant_address:str,
     stellar_hotnow_address:str,
     starting_balance:int,
-    exp_date:str,
     cost_per_tx:int
 ) -> Dict:
     """Get XDR presigned transaction of promote deal"""

@@ -28,10 +28,8 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
         assert resp.status == 200
         mock_get_transaction.assert_called_once_with(
             json_request["stellar_escrow_address"],
-            json_request["stellar_merchant_address"],
             json_request["stellar_hotnow_address"],
             json_request["starting_balance"],
-            json_request["expiring_date"],
             json_request["cost_per_tx"]
         )
     
@@ -46,7 +44,7 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
         resp = await self.client.request("POST", "/presigned-transfer", json=json_request)
         assert resp.status == 400
         text = await resp.json()
-        assert text == {'error': "'stellar_merchant_address'"}
+        assert text == {'error': "'stellar_hotnow_address'"}
 
     @unittest_run_loop
     @patch('escrow.generate_pre_signed_tx_xdr.get_threshold_weight')
@@ -60,10 +58,8 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
         mock_threshold.return_value = 2
         result = await get_presigned_tx_xdr(
             'GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY',
-            'GDR3AGPEISYHLHAB6EVP3HD4COCIT7SPGL7WTSIZR3PNBWKFKZGTUJSNr',
             'GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6',
             10,
-            '2018-05-02',
             5
         )
 
