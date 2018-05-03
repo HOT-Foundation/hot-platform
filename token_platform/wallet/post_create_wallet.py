@@ -15,11 +15,10 @@ from wallet.wallet import (build_create_wallet_transaction,
 
 async def post_create_wallet_from_request(request: web.Request):
     """Aiohttp Request wallet address to get create wallet transaction."""
-    data = await request.post()
-    destination_address: str = data.get('target_address', None)
-    source_address = data.get('wallet_address', None)
-    balance: int = int(data.get('starting_balance', 0))
-
+    json_response = await request.json()
+    destination_address: str = json_response.get('target_address', None)
+    source_address: str = json_response.get('wallet_address', None)
+    balance: int = int(json_response.get('starting_balance', 0))
 
     if destination_address is None or balance == 0:
         raise web.HTTPBadRequest(reason = 'Bad request, parameter missing.')
@@ -29,6 +28,7 @@ async def post_create_wallet_from_request(request: web.Request):
         raise web.HTTPBadRequest(reason = 'Target address is already used.')
 
     unsigned_xdr_byte, tx_hash_byte = build_create_wallet_transaction(source_address, destination_address, balance)
+
     unsigned_xdr: str = unsigned_xdr_byte.decode()
     tx_hash: str = binascii.hexlify(tx_hash_byte).decode()
 

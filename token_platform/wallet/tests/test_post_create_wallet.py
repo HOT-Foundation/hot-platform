@@ -46,7 +46,7 @@ class TestCreateWallet(BaseTestClass):
             'starting_balance' : self.starting_balance
         }
 
-        resp = await self.client.request("POST", url, data=json_request)
+        resp = await self.client.request("POST", url, json=json_request)
         assert resp.status == 200
         text = await resp.json()
         hash = MockBuilder()
@@ -64,19 +64,19 @@ class TestCreateWallet(BaseTestClass):
     @unittest_run_loop
     async def test_post_create_wallet_from_request_use_wrong_parameter(self):
         url = '/wallet/create-wallet'
-        resp = await self.client.request("POST", url, data={'target':'test'})
+        resp = await self.client.request("POST", url, json={'target':'test'})
         assert resp.status == 400
         text = await resp.json()
         assert 'Bad request, parameter missing.' in text['error']
 
-        resp = await self.client.request("POST", url, data={
+        resp = await self.client.request("POST", url, json={
                                          'target' : 'test',
                                          'value' : 0})
         assert resp.status == 400
         text = await resp.json()
         assert 'Bad request, parameter missing.' in text['error']
 
-        resp = await self.client.request("POST", url, data={'value' : 500})
+        resp = await self.client.request("POST", url, json={'value' : 500})
         assert resp.status == 400
         text = await resp.json()
         assert 'Bad request, parameter missing.' in text['error']
@@ -91,7 +91,7 @@ class TestCreateWallet(BaseTestClass):
             'starting_balance' : self.starting_balance
         }
 
-        result = await self.client.request("POST", url, data=json_request)
+        result = await self.client.request("POST", url, json=json_request)
         assert result.status == 400
         text = await result.json()
         assert 'Target address is already used.' in text['error']
