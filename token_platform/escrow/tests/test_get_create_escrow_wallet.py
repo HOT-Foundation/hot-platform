@@ -1,7 +1,10 @@
 from decimal import Decimal
 
+import pytest
+from aiohttp import web
 from aiohttp.test_utils import unittest_run_loop
 from asynctest import patch
+from stellar_base.utils import DecodeError
 from tests.test_utils import BaseTestClass
 
 from conf import settings
@@ -237,6 +240,65 @@ class TestBuildCreateEscrowWalletTransaction(BaseTestClass):
         expect = ('unsigned-xdr', '74782d68617368')
 
         assert result == expect
+
+    @unittest_run_loop
+    @patch('escrow.get_create_escrow_wallet.Builder')
+    async def test_build_create_escrow_wallet_cannot_optain_trust_op(self, mock_builder):
+
+        def _raiseDecodeError(source, destination, code):
+            raise DecodeError('Parameter is not valid.')
+
+        def _raiseError(source, destination, code):
+            raise Exception('Parameter isnot valid.')
+
+        instance = mock_builder.return_value
+        instance.append_create_account_op.return_value = 'test'
+        instance.append_set_options_op.return_value = 'test'
+        instance.gen_xdr.return_value = b'unsigned-xdr'
+        instance.te.hash_meta.return_value = b'tx-hash'
+        instance.append_trust_op = _raiseDecodeError
+
+        with pytest.raises(web.HTTPBadRequest):
+            await build_create_escrow_wallet_transaction(
+                stellar_escrow_address=self.escrow_address,
+                stellar_hotnow_address=self.hotnow_address,
+                stellar_merchant_address=self.merchant_address,
+                starting_native_asset=self.starting_native_asset,
+                starting_custom_asset=self.starting_custom_asset
+            )
+
+        instance.append_trust_op = _raiseError
+        with pytest.raises(web.HTTPInternalServerError):
+            await build_create_escrow_wallet_transaction(
+                stellar_escrow_address=self.escrow_address,
+                stellar_hotnow_address=self.hotnow_address,
+                stellar_merchant_address=self.merchant_address,
+                starting_native_asset=self.starting_native_asset,
+                starting_custom_asset=self.starting_custom_asset
+            )
+
+    @unittest_run_loop
+    @patch('escrow.get_create_escrow_wallet.Builder')
+    async def test_build_create_escrow_wallet_cannot_gen_xdr(self, mock_builder):
+
+        def _raiseError(source, destination, code):
+            raise Exception('Parameter isnot valid.')
+
+        instance = mock_builder.return_value
+        instance.append_create_account_op.return_value = 'test'
+        instance.append_trust_op.return_value = 'test'
+        instance.append_set_options_op.return_value = 'test'
+        instance.gen_xdr = _raiseError
+        instance.te.hash_meta.return_value = b'tx-hash'
+
+        with pytest.raises(web.HTTPBadRequest):
+            await build_create_escrow_wallet_transaction(
+                stellar_escrow_address=self.escrow_address,
+                stellar_hotnow_address=self.hotnow_address,
+                stellar_merchant_address=self.merchant_address,
+                starting_native_asset=self.starting_native_asset,
+                starting_custom_asset=self.starting_custom_asset
+            )
 
 
 class TestCalculateInitialXLM():

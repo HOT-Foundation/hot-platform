@@ -76,13 +76,17 @@ async def create_escrow_wallet(stellar_escrow_address: str,
         'unsigned_xdr': unsigned_xdr
     }
 
-def calculate_initial_xlm(number_of_entries: int, number_of_transaction: int) -> int:
+def calculate_initial_xlm(number_of_entries: int, number_of_transaction: int) -> Decimal:
     '''Calculate starting balance for wallet
     starting balance: minimum balance + transaction fee
     minimum balance = (2 + number of entries) × base reserve
     '''
-    transaction_fee = 0.00001
-    minumum_balance_raw = ((2 + number_of_entries) * 0.5) + (number_of_transaction * transaction_fee)
+
+    transaction_fee = Decimal('0.00001')
+    base_reserve = Decimal('0.5')
+    number_of_transaction = Decimal(number_of_transaction)
+    number_of_entries = Decimal(number_of_entries)
+    minumum_balance_raw = ((2 + number_of_entries) * base_reserve) + (number_of_transaction * transaction_fee)
     our_value = Decimal(minumum_balance_raw)
     result = Decimal(our_value.quantize(Decimal('.0001'), rounding=ROUND_UP))
 
@@ -110,6 +114,7 @@ async def build_create_escrow_wallet_transaction(stellar_escrow_address: str,
                       network=settings['STELLAR_NETWORK'])
     builder.append_create_account_op(
         source=stellar_hotnow_address, destination=stellar_escrow_address, starting_balance=starting_native_asset)
+
     try:
         builder.append_trust_op(
             source=stellar_escrow_address, destination=settings['ISSUER'], code=settings['ASSET_CODE'])
