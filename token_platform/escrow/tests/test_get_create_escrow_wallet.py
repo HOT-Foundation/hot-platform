@@ -1,11 +1,15 @@
+from decimal import Decimal
+
 from aiohttp.test_utils import unittest_run_loop
-from tests.test_utils import BaseTestClass
 from asynctest import patch
+from tests.test_utils import BaseTestClass
+
 from conf import settings
 from escrow.get_create_escrow_wallet import (build_create_escrow_wallet_transaction,
+                                             calculate_initial_xlm,
                                              create_escrow_wallet,
-                                             get_create_escrow_wallet_from_request,
-                                             calculate_initial_xlm)
+                                             get_create_escrow_wallet_from_request)
+
 
 class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
     async def setUpAsync(self):
@@ -41,6 +45,31 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
 
         resp = await self.client.request('POST', '/create-escrow', json=data)
         assert resp.status == 200
+
+    @unittest_run_loop
+    @patch('escrow.get_create_escrow_wallet.create_escrow_wallet')
+    async def test_get_create_escrow_wallet_from_request_with_wrong_request_data(self, mock):
+
+        data = {
+            'stellar_escrow_address': self.escrow_address,
+            'stellar_merchant_address': self.merchant_address,
+            'stellar_hotnow_address': self.hotnow_address,
+            'starting_balance': 500,
+            'cost_per_tx': 200
+        }
+
+        expect = {
+            'escrow_address': self.escrow_address,
+            '@url': '{}/create-escrow'.format(self.host),
+            '@transaction_url': '{}/transaction/{}'.format(self.host, 'tx_hash'),
+            'signers': [self.escrow_address, self.merchant_address, self.hotnow_address],
+            'unsigned_xdr': 'unsigned_xdr'
+        }
+
+        mock.return_value = expect
+
+        resp = await self.client.request('POST', '/create-escrow', data=data)
+        assert resp.status == 400
 
     @unittest_run_loop
     @patch('escrow.get_create_escrow_wallet.create_escrow_wallet')
@@ -135,6 +164,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', '/create-escrow', json=data)
         assert resp.status == 400
 
+
 class TestGetCreateWallet(BaseTestClass):
 
     async def setUpAsync(self):
@@ -196,7 +226,6 @@ class TestBuildCreateEscrowWalletTransaction(BaseTestClass):
         instance.gen_xdr.return_value = b'unsigned-xdr'
         instance.te.hash_meta.return_value = b'tx-hash'
 
-
         result = await build_create_escrow_wallet_transaction(
             stellar_escrow_address=self.escrow_address,
             stellar_hotnow_address=self.hotnow_address,
@@ -213,5 +242,4 @@ class TestBuildCreateEscrowWalletTransaction(BaseTestClass):
 class TestCalculateInitialXLM():
     async def test_calculate_initial_xlm_success(self):
         result = calculate_initial_xlm(3, 200)
-        assert result == 2.5020
-
+        assert result == Decimal('2.5020')

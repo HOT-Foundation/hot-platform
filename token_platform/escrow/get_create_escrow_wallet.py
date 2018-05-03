@@ -55,10 +55,8 @@ async def create_escrow_wallet(stellar_escrow_address: str,
                                            starting_balance: int,
                                            cost_per_tx: int
                                            ) -> Dict:
-    '''Create wallet
-
-    '''
-    number_of_transaction = starting_balance / cost_per_tx
+    '''Making transaction for creating escrow wallet'''
+    number_of_transaction = (starting_balance / cost_per_tx) + 2
     starting_xlm: int = calculate_initial_xlm(3, number_of_transaction)
     starting_custom_asset: int = starting_balance
 
@@ -87,7 +85,7 @@ def calculate_initial_xlm(number_of_entries: int, number_of_transaction: int) ->
     minumum_balance_raw = ((2 + number_of_entries) * 0.5) + (number_of_transaction * transaction_fee)
     our_value = Decimal(minumum_balance_raw)
     result = Decimal(our_value.quantize(Decimal('.0001'), rounding=ROUND_HALF_UP))
-    import pdb; pdb.set_trace()
+
     return result
 
 async def build_create_escrow_wallet_transaction(stellar_escrow_address: str,
@@ -96,16 +94,16 @@ async def build_create_escrow_wallet_transaction(stellar_escrow_address: str,
                                            starting_native_asset: int,
                                            starting_custom_asset: int
                                            ) -> Dict:
-    '''Building transaction for generating escrow account with minimum balance of lumens
+    '''Building transaction for generating escrow wallet with minimum balance of lumens
         and return unsigned XDR and transaction hash.
 
         Args:
 
-        * stellar_escrow_address: an address of escrow account
-        * stellar_merchant_address: an address of merchant account
-        * stellar_hotnow_address: an address of hotnow account
-        * starting_balance: starting amount of HTKN balance
-        * cost_per_tx: amount of HTKN when submitting transaction
+        * stellar_escrow_address: an address of new wallet
+        * stellar_merchant_address: an address of merchant wallet
+        * stellar_hotnow_address: an address of source wallet which is owner of the transaction.
+        * starting_native_asset: starting amount of XLM.
+        * starting_custom_asset: starting amount of custom asset.
     '''
 
     builder = Builder(address=stellar_hotnow_address,
