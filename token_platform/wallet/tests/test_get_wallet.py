@@ -135,6 +135,9 @@ async def test_get_wallet_success(mock_address):
             "low_threshold": 1,
             "med_threshold": 2,
             "high_threshold": 2
+        },
+        "data": {
+            "name": "UnitTest"
         }
     }
     assert result.__dict__ == expect_result
