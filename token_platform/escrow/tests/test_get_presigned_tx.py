@@ -44,7 +44,7 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
         resp = await self.client.request("POST", "/presigned-transfer", json=json_request)
         assert resp.status == 400
         text = await resp.json()
-        assert text == {'error': "'stellar_hotnow_address'"}
+        assert text == {'error': "Parameter 'stellar_hotnow_address' not found. Please ensure parameters is valid."}
 
     @unittest_run_loop
     @patch('escrow.generate_pre_signed_tx_xdr.get_threshold_weight')

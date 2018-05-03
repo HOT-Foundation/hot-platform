@@ -16,7 +16,8 @@ async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Respons
         starting_balance = body['starting_balance']
         cost_per_tx = body['cost_per_tx']
     except KeyError as context:
-        raise ValueError(context)
+        msg = "Parameter {} not found. Please ensure parameters is valid.".format(str(context))
+        raise web.HTTPBadRequest(reason=str(msg))
 
     result = await get_presigned_tx_xdr(
             stellar_escrow_address,
