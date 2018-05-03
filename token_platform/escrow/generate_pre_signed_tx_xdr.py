@@ -62,7 +62,8 @@ async def get_presigned_tx_xdr(
             '@id': source_address,
             '@url': '{}/wallet/{}/transaction/transfer'.format(host, source_address),
             '@transaction_url': '{}/transaction/{}'.format(host, tx_hash),
-            'unsigned_xdr': unsigned_xdr
+            'unsigned_xdr': unsigned_xdr,
+            'sequence': sequence + 1
         }
         return result
 
