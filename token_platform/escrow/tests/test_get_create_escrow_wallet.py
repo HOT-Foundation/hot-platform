@@ -241,5 +241,5 @@ class TestBuildCreateEscrowWalletTransaction(BaseTestClass):
 
 class TestCalculateInitialXLM():
     async def test_calculate_initial_xlm_success(self):
-        result = calculate_initial_xlm(3, 200)
-        assert result == Decimal('2.5020')
+        result = calculate_initial_xlm(3, 11)
+        assert result == Decimal('2.5002')

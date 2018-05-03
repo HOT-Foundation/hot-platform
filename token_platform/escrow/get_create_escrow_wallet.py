@@ -1,5 +1,5 @@
 import binascii
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import ROUND_UP, Decimal
 from typing import Dict, List
 
 from aiohttp import web
@@ -84,7 +84,7 @@ def calculate_initial_xlm(number_of_entries: int, number_of_transaction: int) ->
     transaction_fee = 0.00001
     minumum_balance_raw = ((2 + number_of_entries) * 0.5) + (number_of_transaction * transaction_fee)
     our_value = Decimal(minumum_balance_raw)
-    result = Decimal(our_value.quantize(Decimal('.0001'), rounding=ROUND_HALF_UP))
+    result = Decimal(our_value.quantize(Decimal('.0001'), rounding=ROUND_UP))
 
     return result
 
