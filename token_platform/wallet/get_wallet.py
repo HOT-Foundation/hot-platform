@@ -7,7 +7,7 @@ from stellar_base.builder import Builder
 from stellar_base.utils import AccountNotExistError
 
 from conf import settings
-from wallet.wallet import (build_create_wallet_transaction,
+from wallet.wallet import (build_generate_wallet_transaction,
                            wallet_address_is_duplicate, get_wallet)
 
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
