@@ -15,8 +15,8 @@ routes = [
     web.get('/wallet/{wallet_address}', get_wallet_from_request),
     web.get('/wallet/{wallet_address}/create-wallet', get_create_wallet_from_request),
     web.get('/wallet/{wallet_address}/transaction/current-sequence', get_current_tx_sequence_from_request),
-    web.get('/transaction/{transaction_hash}', get_transaction_from_request),
-    web.put('/transaction/{transaction_hash}', put_transaction_from_request),
     web.get('/wallet/{wallet_address}/transaction/transfer', get_unsigned_transfer_from_request),
     web.get('/wallet/{wallet_address}/transaction/change-trust', get_unsigned_change_trust_from_request)
+    web.get('/transaction/{transaction_hash}', get_transaction_from_request),
+    web.put('/transaction/{transaction_hash}', put_transaction_from_request),
 ]
