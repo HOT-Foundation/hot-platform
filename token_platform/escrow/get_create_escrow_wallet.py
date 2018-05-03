@@ -12,33 +12,27 @@ from transaction.transaction import get_signers, get_threshold_weight
 
 async def get_create_escrow_wallet_from_request(request: web.Request) -> web.Response:
     """AIOHTTP Request create account xdr and presigned transaction xdr"""
+    body = await request.json()
+
     try:
-        body = await request.json()
-    except:
-        raise TypeError('Please ensure parameter is in json format.')
+        stellar_escrow_address = body['stellar_escrow_address']
+        stellar_merchant_address = body['stellar_merchant_address']
+        stellar_hotnow_address = body['stellar_hotnow_address']
+        starting_balance = body['starting_balance']
+        cost_per_tx = body['cost_per_tx']
+    except KeyError as e:
+        msg = str(e)
+        raise web.HTTPBadRequest(reason=f'Parameter {msg} not found. Please ensure parameters is valid.')
 
-    stellar_escrow_address = body.get('stellar_escrow_address', None)
-    if not stellar_escrow_address:
-        raise web.HTTPBadRequest(reason='Parameter stellar_escrow_address not found. Please ensure parameters is valid.')
+    try:
+        int(starting_balance)
+    except ValueError as ex:
+        raise web.HTTPBadRequest(reason=f'Parameter starting_balance is not valid.')
 
-    stellar_merchant_address = body.get('stellar_merchant_address', None)
-    if not stellar_merchant_address:
-        raise web.HTTPBadRequest(reason='Parameter stellar_merchant_address not found. Please ensure parameters is valid.')
-
-    stellar_hotnow_address = body.get('stellar_hotnow_address', None)
-    if not stellar_hotnow_address:
-        raise web.HTTPBadRequest(reason='Parameter stellar_hotnow_address not found. Please ensure parameters is valid.')
-
-    starting_balance = body.get('starting_balance', None)
-    if not starting_balance:
-        raise web.HTTPBadRequest(reason='Parameter starting_balance not found. Please ensure parameters is valid.')
-    starting_balance = int(starting_balance)
-
-    cost_per_tx = body.get('cost_per_tx', None)
-    if not cost_per_tx:
-        raise web.HTTPBadRequest(reason='Parameter cost_per_tx not found. Please ensure parameters is valid.')
-    cost_per_tx = int(cost_per_tx)
-
+    try:
+        int(cost_per_tx)
+    except ValueError as ex:
+        raise web.HTTPBadRequest(reason=f'Parameter cost_per_tx is not valid.')
 
     result = await create_escrow_wallet(stellar_escrow_address,
                                 stellar_merchant_address,
@@ -52,13 +46,20 @@ async def get_create_escrow_wallet_from_request(request: web.Request) -> web.Res
 async def create_escrow_wallet(stellar_escrow_address: str,
                                            stellar_merchant_address: str,
                                            stellar_hotnow_address: str,
-                                           starting_balance: int,
-                                           cost_per_tx: int
+                                           starting_balance: str,
+                                           cost_per_tx: str
                                            ) -> Dict:
-    '''Making transaction for creating escrow wallet'''
+    '''Making transaction for creating escrow wallet
+
+        number_of_transaction + 2 due to transfer to merchant and merge back to hotnow
+        number of entries is 3 due to escrow account have 1 trust line and add 2 signers
+    '''
+    starting_balance = Decimal(starting_balance)
+    cost_per_tx = Decimal(cost_per_tx)
+
     number_of_transaction = (starting_balance / cost_per_tx) + 2
-    starting_xlm: int = calculate_initial_xlm(3, number_of_transaction)
-    starting_custom_asset: int = starting_balance
+    starting_xlm: Decimal = calculate_initial_xlm(3, number_of_transaction)
+    starting_custom_asset: Decimal = starting_balance
 
     unsigned_xdr, tx_hash = await build_create_escrow_wallet_transaction(stellar_escrow_address,
         stellar_merchant_address,
@@ -95,8 +96,8 @@ def calculate_initial_xlm(number_of_entries: int, number_of_transaction: int) ->
 async def build_create_escrow_wallet_transaction(stellar_escrow_address: str,
                                            stellar_merchant_address: str,
                                            stellar_hotnow_address: str,
-                                           starting_native_asset: int,
-                                           starting_custom_asset: int
+                                           starting_native_asset: Decimal,
+                                           starting_custom_asset: Decimal
                                            ) -> Dict:
     '''Building transaction for generating escrow wallet with minimum balance of lumens
         and return unsigned XDR and transaction hash.

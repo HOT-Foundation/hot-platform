@@ -97,7 +97,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', '/create-escrow', json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter stellar_escrow_address not found. Please ensure parameters is valid.'
+        assert body['error'] == 'Parameter \'stellar_escrow_address\' not found. Please ensure parameters is valid.'
 
         data = {
             'stellar_escrow_address': self.escrow_address,
@@ -108,7 +108,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', '/create-escrow', json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter stellar_merchant_address not found. Please ensure parameters is valid.'
+        assert body['error'] == 'Parameter \'stellar_merchant_address\' not found. Please ensure parameters is valid.'
 
         data = {
             'stellar_escrow_address': self.escrow_address,
@@ -119,7 +119,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', '/create-escrow', json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter stellar_hotnow_address not found. Please ensure parameters is valid.'
+        assert body['error'] == 'Parameter \'stellar_hotnow_address\' not found. Please ensure parameters is valid.'
 
         data = {
             'stellar_escrow_address': self.escrow_address,
@@ -130,7 +130,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', '/create-escrow', json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter starting_balance not found. Please ensure parameters is valid.'
+        assert body['error'] == 'Parameter \'starting_balance\' not found. Please ensure parameters is valid.'
 
         data = {
             'stellar_escrow_address': self.escrow_address,
@@ -141,7 +141,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', '/create-escrow', json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter cost_per_tx not found. Please ensure parameters is valid.'
+        assert body['error'] == 'Parameter \'cost_per_tx\' not found. Please ensure parameters is valid.'
 
     @unittest_run_loop
     @patch('escrow.get_create_escrow_wallet.create_escrow_wallet')
