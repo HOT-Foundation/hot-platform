@@ -61,7 +61,8 @@ async def test_get_escrow_wallet_success_trusted_htkn(mock_address):
         },
         'generate-wallet': f'{host}/escrow/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD/generate-wallet',
         'data': {
-            'name': 'UnitTest'
+            'name': 'UnitTest',
+            'age': '30'
         }
     }
     assert actual_data == expect_data

@@ -9,6 +9,7 @@ from stellar_base.utils import AccountNotExistError
 from conf import settings
 from wallet.wallet import (build_create_wallet_transaction,
                            wallet_address_is_duplicate, get_wallet)
+from base64 import b64decode
 
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 STELLAR_BALANCE = Dict[str, str]
@@ -38,6 +39,10 @@ async def get_escrow_wallet_detail(escrow_address: str) -> web.Response:
         """Merge all balances to one Dict"""
         return reduce(lambda asset, balance: {**asset, **_format_balance(balance)}, balances, {})
 
+    def _format_data(data: Dict[str, str]) -> Dict:
+        """ Decode base64 data """
+        return {k: b64decode(v).decode('utf-8') for k, v in data.items()}
+
     wallet = await get_wallet(escrow_address)
 
     result: Dict[str, Any] = {
@@ -45,7 +50,7 @@ async def get_escrow_wallet_detail(escrow_address: str) -> web.Response:
         '@url': '{}/escrow/{}'.format(settings['HOST'], escrow_address),
         'asset': _merge_balance(wallet.balances),
         'generate-wallet': '{}/escrow/{}/generate-wallet'.format(settings['HOST'], escrow_address),
-        'data': wallet.data
+        'data': _format_data(wallet.data)
     }
 
     return web.json_response(result)

@@ -26,7 +26,8 @@ class StellarWallet(object):
             'high_threshold': 2
         }
         self.data = {
-            'name': 'UnitTest'
+            'name': 'VW5pdFRlc3Q=',
+            'age': 'MzA='
         }
 
     def get(self):
