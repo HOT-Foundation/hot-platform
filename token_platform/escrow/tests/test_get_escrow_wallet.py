@@ -17,8 +17,9 @@ from wallet.wallet import StellarAddress, get_wallet
 
 @patch('escrow.get_escrow_wallet.get_escrow_wallet_detail')
 async def test_get_escrow_wallet_from_request(mock_get_escrow_wallet):
+    mock_get_escrow_wallet.return_value = {'account': 'yes'}
     wallet_address = 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'
-    req = make_mocked_request('GET', '/wallet/{}'.format(wallet_address),
+    req = make_mocked_request('GET', '/escrow/{}'.format(wallet_address),
                               match_info={'wallet_address': wallet_address})
     await get_escrow_wallet_from_request(req)
     assert mock_get_escrow_wallet.call_count == 1
@@ -46,11 +47,7 @@ async def test_get_escrow_wallet_success_trusted_htkn(mock_address):
     }]
     mock_address.return_value = StellarWallet(balances)
 
-    result = await get_escrow_wallet_detail('GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')
-
-    assert result.status == 200
-
-    actual_data = json.loads(result.text)
+    actual_data = await get_escrow_wallet_detail('GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')
     host = settings.get('HOST', None)
     expect_data = {
         '@id': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',

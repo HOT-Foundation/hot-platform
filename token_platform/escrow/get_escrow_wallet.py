@@ -1,5 +1,5 @@
 from functools import reduce
-from typing import Any, Dict, List, Mapping, NewType, Optional, Union
+from typing import Any, Dict, List, Union
 
 import requests
 from aiohttp import web
@@ -7,8 +7,7 @@ from stellar_base.builder import Builder
 from stellar_base.utils import AccountNotExistError
 
 from conf import settings
-from wallet.wallet import (build_create_wallet_transaction,
-                           wallet_address_is_duplicate, get_wallet)
+from wallet.wallet import get_wallet
 from base64 import b64decode
 
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
@@ -22,7 +21,8 @@ THRESHOLDS = Dict[str, int]
 async def get_escrow_wallet_from_request(request: web.Request) -> web.Response:
     """AIOHttp Request escrow wallet address to get escrow wallet"""
     escrow_address = request.match_info.get('escrow_address', "")
-    return await get_escrow_wallet_detail(escrow_address)
+    escrow_wallet = await get_escrow_wallet_detail(escrow_address)
+    return web.json_response(escrow_wallet)
 
 
 async def get_escrow_wallet_detail(escrow_address: str) -> web.Response:
@@ -53,4 +53,4 @@ async def get_escrow_wallet_detail(escrow_address: str) -> web.Response:
         'data': _format_data(wallet.data)
     }
 
-    return web.json_response(result)
+    return result
