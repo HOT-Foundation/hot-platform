@@ -1,6 +1,6 @@
 from tests.test_utils import BaseTestClass
 
-from aiohttp.test_utils import unittest_run_loop
+from aiohttp.test_utils import unittest_run_loop, make_mocked_request
 from asynctest import patch
 from conf import settings
 from escrow.generate_pre_signed_tx_xdr import (get_current_sequence_number,
@@ -9,7 +9,8 @@ from escrow.generate_pre_signed_tx_xdr import (get_current_sequence_number,
                                                get_signers,
                                                get_threshold_weight)
 from escrow.tests.factory.escrow_wallet import EscrowWallet
-
+import pytest
+from aiohttp import web
 
 class TestGeneratePreSignedTxXDR(BaseTestClass):
     @unittest_run_loop
@@ -18,14 +19,7 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
     async def test_get_presigned_tx_xdr_from_request(self, mock_get_transaction, mock_get_wallet):
         escrow_address = "GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY"
         mock_get_transaction.return_value = {}
-
-        balances = [
-            {
-                'balance': '500',
-                'asset_type': 'native'
-            }
-        ]
-        mock_get_wallet.return_value = EscrowWallet(balances)
+        mock_get_wallet.return_value = EscrowWallet()
 
         resp = await self.client.request("POST", "/escrow/{}/genarate-presigned-transections".format(escrow_address), json={})
         assert resp.status == 200
@@ -44,19 +38,28 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
             starting_balance,
             cost_per_tx
         )
-    
-    @unittest_run_loop
-    @patch('escrow.generate_pre_signed_tx_xdr.get_presigned_tx_xdr')
-    async def xtest_get_presigned_tx_xdr_from_request_invalid_json_body(self, mock_get_transaction):
-        json_request = {
-            "stellar_escrow_address": 'GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY',
-        }
 
+    @unittest_run_loop
+    @patch('escrow.generate_pre_signed_tx_xdr.get_wallet')
+    @patch('escrow.generate_pre_signed_tx_xdr.get_presigned_tx_xdr')
+    async def test_get_presigned_tx_xdr_cannot_get_value_in_data(self, mock_get_transaction, mock_get_wallet):
+
+        class MockWallet():
+            pass
+
+        escrow_address = "GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY"
         mock_get_transaction.return_value = {}
-        resp = await self.client.request("POST", "/presigned-transfer", json={})
-        assert resp.status == 400
-        text = await resp.json()
-        assert text == {'error': "Parameter 'stellar_destination_address' not found. Please ensure parameters is valid."}
+        mock_get_wallet.return_value = MockWallet()
+        instance = mock_get_wallet.return_value
+        instance.data = {}
+        req = make_mocked_request("POST", "/escrow/{}/genarate-presigned-transections".format(escrow_address),
+            match_info={'wallet_address': 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'}
+        )
+
+        with pytest.raises(web.HTTPBadRequest) as context:
+            await get_presigned_tx_xdr_from_request(req)
+        assert str(context.value) ==  "Parameter 'stellar_destination_address' not found. Please ensure parameters is valid."
+
 
     @unittest_run_loop
     @patch('escrow.generate_pre_signed_tx_xdr.get_threshold_weight')

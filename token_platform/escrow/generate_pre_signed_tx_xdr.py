@@ -11,10 +11,19 @@ async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Respons
     """AIOHttp Request create account xdr and presigned transaction xdr"""
     escrow_address = request.match_info.get("escrow_address")
     escrow = await get_wallet(escrow_address)
+    try:
+        destination_address = escrow.data["stellar_destination_address"]
+        starting_balance = escrow.data["starting_balance"]
+        cost_per_tx = escrow.data["cost_per_tx"]
+    except KeyError as e:
+        msg = "Parameter {} not found. Please ensure parameters is valid.".format(str(e))
+        raise web.HTTPBadRequest(reason=str(msg))
+
     result = await get_presigned_tx_xdr(
-        escrow_address,escrow.data["stellar_destination_address"],
-        escrow.data["starting_balance"],
-        escrow.data["cost_per_tx"]
+        escrow_address,
+        destination_address,
+        starting_balance,
+        cost_per_tx
     )
 
     return web.json_response(result)

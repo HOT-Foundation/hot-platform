@@ -1,7 +1,12 @@
 class EscrowWallet(object):
-        def __init__(self, balances):
+        def __init__(self):
             self.id = 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'
-            self.balances = balances
+            self.balances = [
+                {
+                    'balance': '500',
+                    'asset_type': 'native'
+                }
+            ]
             self.signers = [{
                 'public_key': 'GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF',
                 'weight': 1,
