@@ -10,7 +10,7 @@ from conf import settings
 from transaction.transaction import get_signers, get_threshold_weight
 
 
-async def post_create_escrow_wallet_from_request(request: web.Request) -> web.Response:
+async def post_generate_escrow_wallet_from_request(request: web.Request) -> web.Response:
     """AIOHTTP Request create account xdr and presigned transaction xdr"""
     body = await request.json()
 
@@ -36,7 +36,7 @@ async def post_create_escrow_wallet_from_request(request: web.Request) -> web.Re
     except ValueError as ex:
         raise web.HTTPBadRequest(reason=f'Parameter cost_per_tx is not valid.')
 
-    result = await create_escrow_wallet(escrow_address,
+    result = await generate_escrow_wallet(escrow_address,
                                 creator_address,
                                 destination_address,
                                 provider_address,
@@ -48,7 +48,7 @@ async def post_create_escrow_wallet_from_request(request: web.Request) -> web.Re
     return web.json_response(result)
 
 
-async def create_escrow_wallet(escrow_address: str,
+async def generate_escrow_wallet(escrow_address: str,
                                            creator_address: str,
                                            destination_address: str,
                                            provider_address: str,
@@ -68,7 +68,7 @@ async def create_escrow_wallet(escrow_address: str,
     starting_xlm: Decimal = calculate_initial_xlm(8, number_of_transaction)
     starting_custom_asset: Decimal = starting_balance
 
-    unsigned_xdr, tx_hash = await build_create_escrow_wallet_transaction(escrow_address = escrow_address,
+    unsigned_xdr, tx_hash = await build_generate_escrow_wallet_transaction(escrow_address = escrow_address,
         provider_address = provider_address,
         creator_address = creator_address,
         destination_address = destination_address,
@@ -81,7 +81,7 @@ async def create_escrow_wallet(escrow_address: str,
     host = settings['HOST']
     return {
         'escrow_address': escrow_address,
-        '@url': f'{host}/escrow/{escrow_address}/create-wallet',
+        '@url': f'{host}/escrow/{escrow_address}/generate-wallet',
         '@transaction_url': f'{host}/transaction/{tx_hash}',
         'signers': [escrow_address, creator_address, provider_address],
         'unsigned_xdr': unsigned_xdr
@@ -90,7 +90,7 @@ async def create_escrow_wallet(escrow_address: str,
 def calculate_initial_xlm(number_of_entries: int, number_of_transaction: int) -> Decimal:
     '''Calculate starting balance for wallet
     starting balance: minimum balance + transaction fee
-    minimum balance = (2 + number of entries) × base reserve
+    minimum  balance= (2 + number of entries) × base reserve
     '''
 
     transaction_fee = Decimal('0.00001')
@@ -99,11 +99,10 @@ def calculate_initial_xlm(number_of_entries: int, number_of_transaction: int) ->
     number_of_entries = Decimal(number_of_entries)
     minumum_balance_raw = ((2 + number_of_entries) * base_reserve) + (number_of_transaction * transaction_fee)
     our_value = Decimal(minumum_balance_raw)
-    result = Decimal(our_value.quantize(Decimal('.0001'), rounding=ROUND_UP))
-
+    result = Decimal(our_value.quantize(Decimal('.1'), rounding=ROUND_UP))
     return result
 
-async def build_create_escrow_wallet_transaction(escrow_address: str,
+async def build_generate_escrow_wallet_transaction(escrow_address: str,
                                            creator_address: str,
                                            destination_address: str,
                                            provider_address: str,
