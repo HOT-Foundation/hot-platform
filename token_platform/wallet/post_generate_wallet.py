@@ -47,7 +47,7 @@ async def post_generate_wallet_from_request(request: web.Request):
         'signers': signers,
         'unsigned_xdr': unsigned_xdr,
         'transaction_url': f'{host}/transaction/{tx_hash}',
-        '@url': f'{host}{request.path_qs}'
+        '@url': f'{host}{request.path}'
     }
 
     return web.json_response(result)
