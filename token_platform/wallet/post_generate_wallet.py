@@ -3,6 +3,7 @@ from functools import reduce
 from typing import Any, Dict, List, Mapping, NewType, Optional, Union
 
 import requests
+from json import JSONDecodeError
 from aiohttp import web
 from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
@@ -15,7 +16,10 @@ from wallet.wallet import (build_generate_wallet_transaction,
 
 async def post_generate_wallet_from_request(request: web.Request):
     """Aiohttp Request wallet address to get create wallet transaction."""
-    json_response = await request.json()
+    try:
+        json_response = await request.json()
+    except JSONDecodeError:
+        raise web.HTTPBadRequest(reason='Bad request, JSON data missing.')
 
     source_address: str = request.match_info.get('wallet_address')
 
