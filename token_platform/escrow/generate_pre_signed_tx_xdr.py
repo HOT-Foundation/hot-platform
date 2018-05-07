@@ -32,15 +32,15 @@ async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Respons
 
 
 async def get_presigned_tx_xdr(
-    stellar_escrow_address:str,
-    stellar_destination_address:str,
+    escrow_address:str,
+    destination_address:str,
     starting_balance:Decimal,
     cost_per_tx:Decimal
 ) -> Dict:
     """Get XDR presigned transaction of promote deal"""
 
     tx_count = int(starting_balance/cost_per_tx)
-    sequence_number = await get_current_sequence_number(stellar_escrow_address)
+    sequence_number = await get_current_sequence_number(escrow_address)
 
     async def _get_unsigned_transfer(
         source_address: str,
@@ -72,14 +72,14 @@ async def get_presigned_tx_xdr(
     presigneds = []
     for i in range(0, tx_count):
         presigneds.append(await _get_unsigned_transfer(
-            stellar_escrow_address,
-            stellar_destination_address,
+            escrow_address,
+            destination_address,
             cost_per_tx,
             sequence=int(sequence_number)+i))
 
     result = {
-        'min_signer': await get_threshold_weight(stellar_escrow_address, 'payment'),
-        'signers': await get_signers(stellar_escrow_address),
+        'min_signer': await get_threshold_weight(escrow_address, 'payment'),
+        'signers': await get_signers(escrow_address),
         'xdr': presigneds
     }
     return result
