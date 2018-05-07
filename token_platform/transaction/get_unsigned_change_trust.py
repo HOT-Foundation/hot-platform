@@ -6,7 +6,7 @@ from stellar_base.builder import Builder
 
 from aiohttp import web
 from conf import settings
-from wallet.wallet import (build_create_wallet_transaction,
+from wallet.wallet import (build_generate_wallet_transaction,
                            wallet_address_is_duplicate)
 
 from transaction.transaction import get_threshold_weight, get_signers
@@ -19,7 +19,7 @@ async def get_unsigned_change_trust_from_request(request: web.Request) -> web.Re
     return web.json_response(result)
 
 
-async def get_unsigned_change_trust(source_address: str) -> Dict[str, str]:
+async def get_unsigned_change_trust(source_address: str) -> Dict:
     """Get unsigned transfer transaction and signers"""
     unsigned_xdr, tx_hash = build_unsigned_change_trust(source_address)
     host: str = settings['HOST']

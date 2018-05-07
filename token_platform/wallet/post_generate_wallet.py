@@ -9,11 +9,11 @@ from stellar_base.builder import Builder
 from stellar_base.utils import AccountNotExistError
 
 from conf import settings
-from wallet.wallet import (build_create_wallet_transaction,
+from wallet.wallet import (build_generate_wallet_transaction,
                            wallet_address_is_duplicate)
 
 
-async def post_create_wallet_from_request(request: web.Request):
+async def post_generate_wallet_from_request(request: web.Request):
     """Aiohttp Request wallet address to get create wallet transaction."""
     json_response = await request.json()
 
@@ -34,7 +34,7 @@ async def post_create_wallet_from_request(request: web.Request):
     if duplicate:
         raise web.HTTPBadRequest(reason = 'Target address is already used.')
 
-    unsigned_xdr_byte, tx_hash_byte = build_create_wallet_transaction(source_address, destination_address, balance)
+    unsigned_xdr_byte, tx_hash_byte = build_generate_wallet_transaction(source_address, destination_address, balance)
 
     unsigned_xdr: str = unsigned_xdr_byte.decode()
     tx_hash: str = binascii.hexlify(tx_hash_byte).decode()
@@ -47,7 +47,7 @@ async def post_create_wallet_from_request(request: web.Request):
         'signers': signers,
         'unsigned_xdr': unsigned_xdr,
         'transaction_url': f'{host}/transaction/{tx_hash}',
-        '@url': f'{host}{request.path_qs}'
+        '@url': f'{host}{request.path}'
     }
 
     return web.json_response(result)
