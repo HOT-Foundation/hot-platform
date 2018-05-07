@@ -17,12 +17,25 @@ from escrow.tests.factory.escrow_wallet import EscrowWallet
 
 class TestGeneratePreSignedTxXDR(BaseTestClass):
     @unittest_run_loop
-    @patch('escrow.generate_pre_signed_tx_xdr.get_wallet')
+    @patch('escrow.generate_pre_signed_tx_xdr.get_escrow_wallet_detail')
     @patch('escrow.generate_pre_signed_tx_xdr.get_presigned_tx_xdr')
     async def test_get_presigned_tx_xdr_from_request(self, mock_get_transaction, mock_get_wallet):
         escrow_address = "GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY"
         mock_get_transaction.return_value = {}
-        mock_get_wallet.return_value = EscrowWallet()
+        host = settings.get('HOST', None)
+        mock_get_wallet.return_value = {
+            '@id': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+            '@url': f'{host}/escrow/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+            'asset': {
+                'HTKN': '10.0000000',
+                'XLM': '9.9999200'
+            },
+            'generate-wallet': f'{host}/escrow/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD/generate-wallet',
+            'data': {
+                'destination_address': 'GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6',
+                'cost_per_transaction': '5'
+            }
+        }
 
         resp = await self.client.request("POST", "/escrow/{}/genarate-presigned-transections".format(escrow_address), json={})
         assert resp.status == 200
@@ -31,30 +44,37 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
             escrow_address
         )
 
-        stellar_destination_address = "GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6"
+        destination_address = "GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6"
         balance = Decimal("10.0000000")
         cost_per_tx = Decimal("5")
 
         mock_get_transaction.assert_called_once_with(
             escrow_address,
-            stellar_destination_address,
+            destination_address,
             balance,
             cost_per_tx
         )
 
     @unittest_run_loop
-    @patch('escrow.generate_pre_signed_tx_xdr.get_wallet')
+    @patch('escrow.generate_pre_signed_tx_xdr.get_escrow_wallet_detail')
     @patch('escrow.generate_pre_signed_tx_xdr.get_presigned_tx_xdr')
     async def test_get_presigned_tx_xdr_cannot_get_value_in_data(self, mock_get_transaction, mock_get_wallet):
-
-        class MockWallet():
-            pass
-
+        host = settings.get('HOST', None)
         escrow_address = "GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY"
         mock_get_transaction.return_value = {}
-        mock_get_wallet.return_value = MockWallet()
-        instance = mock_get_wallet.return_value
-        instance.data = {}
+        mock_get_wallet.return_value = {
+            '@id': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+            '@url': f'{host}/escrow/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+            'asset': {
+                'HTKN': '10.0000000',
+                'XLM': '9.9999200'
+            },
+            'generate-wallet': f'{host}/escrow/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD/generate-wallet',
+            'data': {
+                'source': 'GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6'
+            }
+        }
+
         req = make_mocked_request("POST", "/escrow/{}/genarate-presigned-transections".format(escrow_address),
             match_info={'wallet_address': 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'}
         )

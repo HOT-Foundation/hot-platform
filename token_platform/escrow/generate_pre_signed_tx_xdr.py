@@ -6,22 +6,20 @@ from conf import settings
 from transaction.get_unsigned_transfer import build_unsigned_transfer
 from transaction.transaction import (get_current_sequence_number, get_signers,
                                      get_threshold_weight)
-from wallet.wallet import get_wallet
+from escrow.get_escrow_wallet import get_escrow_wallet_detail
 
 
 async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Response:
     """AIOHttp Request create account xdr and presigned transaction xdr"""
     escrow_address = request.match_info.get("escrow_address")
-    escrow = await get_wallet(escrow_address)
+    escrow = await get_escrow_wallet_detail(escrow_address)
     try:
-        destination_address = escrow.data["destination_address"]
-        starting_balance = escrow.data["starting_balance"]
-        cost_per_tx = escrow.data["cost_per_tx"]
+        destination_address = escrow["data"]["destination_address"]
+        cost_per_tx = escrow["data"]["cost_per_transaction"]
+        balance = escrow['asset'][settings['ASSET_CODE']]
     except KeyError as e:
         msg = "Parameter {} not found. Please ensure parameters is valid.".format(str(e))
         raise web.HTTPBadRequest(reason=str(msg))
-
-    balance = list(filter(lambda balance: balance['asset_type'] != 'native' and balance['asset_code'] == settings['ASSET_CODE'] and balance['asset_issuer'] == settings['ISSUER'], escrow.balances))[0]['balance']
 
     result = await get_presigned_tx_xdr(
         escrow_address,
