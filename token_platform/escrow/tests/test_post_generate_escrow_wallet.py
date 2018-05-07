@@ -44,7 +44,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
             '@url': f'{self.host}/escrow/{self.escrow_address}/generate-wallet',
             '@transaction_url': f'{self.host}/transaction/tx_hash',
             'signers': [self.escrow_address, self.creator_address, self.provider_address],
-            'unsigned_xdr': 'unsigned_xdr'
+            'xdr': 'xdr'
         }
 
         mock_wallet.return_value = {
@@ -52,7 +52,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
             '@url': f'{self.host}/escrow/{self.escrow_address}/generate-wallet',
             '@transaction_url': f'{self.host}/transaction/tx_hash',
             'signers': [self.escrow_address, self.creator_address, self.provider_address],
-            'unsigned_xdr': 'unsigned_xdr'
+            'xdr': 'xdr'
         }
 
         url = f'/escrow/{self.escrow_address}/generate-wallet'
@@ -250,7 +250,7 @@ class TestGetCreateWallet(BaseTestClass):
 
     async def setUpAsync(self):
         self.tx_hash = 'tx_hash'
-        self.unsigned_xdr = 'unsigned_xdr'
+        self.xdr = 'xdr'
         self.destination_address = 'hotnow'
         self.creator_address = 'creator'
         self.escrow_address = 'escrow'
@@ -265,7 +265,7 @@ class TestGetCreateWallet(BaseTestClass):
     @patch('escrow.post_generate_escrow_wallet.build_generate_escrow_wallet_transaction')
     async def test_generate_escrow_wallet_success(self, mock_build, mock_cal):
 
-        mock_build.return_value = ['unsigned_xdr', 'tx_hash']
+        mock_build.return_value = ['xdr', 'tx_hash']
         mock_cal.return_value = 20
 
         expect = {
@@ -273,7 +273,7 @@ class TestGetCreateWallet(BaseTestClass):
             '@url': f'{self.host}/escrow/{self.escrow_address}/generate-wallet',
             '@transaction_url': f'{self.host}/transaction/tx_hash',
             'signers': [self.escrow_address, self.creator_address, self.provider_address],
-            'unsigned_xdr': 'unsigned_xdr'
+            'xdr': 'xdr'
         }
 
         result = await generate_escrow_wallet(
@@ -294,7 +294,7 @@ class TestGetCreateWallet(BaseTestClass):
 class TestBuildCreateEscrowWalletTransaction(BaseTestClass):
     async def setUpAsync(self):
         self.tx_hash = 'tx_hash'
-        self.unsigned_xdr = 'unsigned_xdr'
+        self.xdr = 'xdr'
         self.destination_address = 'hotnow'
         self.creator_address = 'creator'
         self.escrow_address = 'escrow'

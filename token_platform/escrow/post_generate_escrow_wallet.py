@@ -94,7 +94,7 @@ async def generate_escrow_wallet(escrow_address: str,
     starting_xlm: Decimal = calculate_initial_xlm(8, number_of_transaction)
     starting_custom_asset: Decimal = starting_balance
 
-    unsigned_xdr, tx_hash = await build_generate_escrow_wallet_transaction(escrow_address = escrow_address,
+    xdr, tx_hash = await build_generate_escrow_wallet_transaction(escrow_address = escrow_address,
         provider_address = provider_address,
         creator_address = creator_address,
         destination_address = destination_address,
@@ -110,7 +110,7 @@ async def generate_escrow_wallet(escrow_address: str,
         '@url': f'{host}/escrow/{escrow_address}/generate-wallet',
         '@transaction_url': f'{host}/transaction/{tx_hash}',
         'signers': [escrow_address, creator_address, provider_address],
-        'unsigned_xdr': unsigned_xdr
+        'xdr': xdr
     }
 
 def calculate_initial_xlm(number_of_entries: int, number_of_transaction: int) -> Decimal:
@@ -189,10 +189,10 @@ async def build_generate_escrow_wallet_transaction(escrow_address: str,
                                 amount=starting_custom_asset)
 
     try:
-        unsigned_xdr = builder.gen_xdr()
+        xdr = builder.gen_xdr()
     except Exception as e:
         raise web.HTTPBadRequest(reason='Bad request, Please ensure parameters are valid.')
 
     tx_hash = builder.te.hash_meta()
 
-    return unsigned_xdr.decode(), binascii.hexlify(tx_hash).decode()
+    return xdr.decode(), binascii.hexlify(tx_hash).decode()
