@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import Dict, List
 
 from aiohttp import web
@@ -6,6 +7,7 @@ from transaction.get_unsigned_transfer import build_unsigned_transfer
 from transaction.transaction import (get_current_sequence_number, get_signers,
                                      get_threshold_weight)
 from wallet.wallet import get_wallet
+
 
 async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Response:
     """AIOHttp Request create account xdr and presigned transaction xdr"""
@@ -19,11 +21,13 @@ async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Respons
         msg = "Parameter {} not found. Please ensure parameters is valid.".format(str(e))
         raise web.HTTPBadRequest(reason=str(msg))
 
+    balance = list(filter(lambda balance: balance['asset_type'] != 'native' and balance['asset_code'] == settings['ASSET_CODE'] and balance['asset_issuer'] == settings['ISSUER'], escrow.balances))[0]['balance']
+
     result = await get_presigned_tx_xdr(
         escrow_address,
         destination_address,
-        starting_balance,
-        cost_per_tx
+        Decimal(balance),
+        Decimal(cost_per_tx)
     )
 
     return web.json_response(result)
@@ -32,8 +36,8 @@ async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Respons
 async def get_presigned_tx_xdr(
     stellar_escrow_address:str,
     stellar_destination_address:str,
-    starting_balance:int,
-    cost_per_tx:int
+    starting_balance:Decimal,
+    cost_per_tx:Decimal
 ) -> Dict:
     """Get XDR presigned transaction of promote deal"""
 
@@ -43,7 +47,7 @@ async def get_presigned_tx_xdr(
     async def _get_unsigned_transfer(
         source_address: str,
         destination: str,
-        amount: int,
+        amount: Decimal,
         sequence:int = None
     ) -> Dict:
         """Get unsigned transfer transaction and signers
@@ -62,7 +66,7 @@ async def get_presigned_tx_xdr(
             '@id': source_address,
             '@url': '{}/wallet/{}/transaction/transfer'.format(host, source_address),
             '@transaction_url': '{}/transaction/{}'.format(host, tx_hash),
-            'unsigned_xdr': unsigned_xdr,
+            'xdr': unsigned_xdr,
             'sequence_number': sequence + 1
         }
         return result

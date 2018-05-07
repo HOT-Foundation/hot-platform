@@ -2,7 +2,7 @@ class EscrowWallet(object):
         def __init__(self):
             self.id = 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'
             self.balances = [{
-                    'balance': '500.0000000',
+                    'balance': '10.0000000',
                     'limit': '922337203685.4775807',
                     'asset_type': 'credit_alphanum4',
                     'asset_code': 'HTKN',

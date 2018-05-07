@@ -1,6 +1,10 @@
+from decimal import Decimal
+
 from tests.test_utils import BaseTestClass
 
-from aiohttp.test_utils import unittest_run_loop, make_mocked_request
+import pytest
+from aiohttp import web
+from aiohttp.test_utils import make_mocked_request, unittest_run_loop
 from asynctest import patch
 from conf import settings
 from escrow.generate_pre_signed_tx_xdr import (get_current_sequence_number,
@@ -9,8 +13,7 @@ from escrow.generate_pre_signed_tx_xdr import (get_current_sequence_number,
                                                get_signers,
                                                get_threshold_weight)
 from escrow.tests.factory.escrow_wallet import EscrowWallet
-import pytest
-from aiohttp import web
+
 
 class TestGeneratePreSignedTxXDR(BaseTestClass):
     @unittest_run_loop
@@ -29,8 +32,8 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
         )
 
         stellar_destination_address = "GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6"
-        balance = "500"
-        cost_per_tx = "5"
+        balance = Decimal("10.0000000")
+        cost_per_tx = Decimal("5")
 
         mock_get_transaction.assert_called_once_with(
             escrow_address,
@@ -74,8 +77,8 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
         result = await get_presigned_tx_xdr(
             'GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY',
             'GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6',
-            10,
-            5
+            Decimal('10.0000000'),
+            Decimal('5')
         )
 
         expect = {
@@ -86,14 +89,14 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
                 "@id": "GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY",
                 "@url": "http://hotnow-token-platform:8081/wallet/GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY/transaction/transfer",
                 "@transaction_url": "http://hotnow-token-platform:8081/transaction/hash",
-                "unsigned_xdr": "xdr",
+                "xdr": "xdr",
                 "sequence_number": 2
                 },
                 {
                 "@id": "GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY",
                 "@url": "http://hotnow-token-platform:8081/wallet/GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY/transaction/transfer",
                 "@transaction_url": "http://hotnow-token-platform:8081/transaction/hash",
-                "unsigned_xdr": "xdr",
+                "xdr": "xdr",
                 "sequence_number": 3
                 }
             ]
