@@ -37,7 +37,7 @@ class EscrowWallet(object):
                 'high_threshold': 2
             }
             self.data = {
-                'stellar_destination_address': 'GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6',
+                'destination_address': 'GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6',
                 'starting_balance': '10',
                 'cost_per_tx': '5'
             }

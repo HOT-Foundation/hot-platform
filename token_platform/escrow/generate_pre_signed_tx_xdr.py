@@ -14,7 +14,7 @@ async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Respons
     escrow_address = request.match_info.get("escrow_address")
     escrow = await get_wallet(escrow_address)
     try:
-        destination_address = escrow.data["stellar_destination_address"]
+        destination_address = escrow.data["destination_address"]
         starting_balance = escrow.data["starting_balance"]
         cost_per_tx = escrow.data["cost_per_tx"]
     except KeyError as e:

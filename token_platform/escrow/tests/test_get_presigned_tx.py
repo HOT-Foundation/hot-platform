@@ -61,7 +61,7 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
 
         with pytest.raises(web.HTTPBadRequest) as context:
             await get_presigned_tx_xdr_from_request(req)
-        assert str(context.value) ==  "Parameter 'stellar_destination_address' not found. Please ensure parameters is valid."
+        assert str(context.value) ==  "Parameter 'destination_address' not found. Please ensure parameters is valid."
 
 
     @unittest_run_loop
