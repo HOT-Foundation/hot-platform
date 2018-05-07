@@ -52,7 +52,7 @@ async def get_presigned_tx_xdr(
 
             Args:
                 source_address: Owner of operation
-                destination_address: address of receiveing wallet
+                destination: address of receiving wallet
                 amount: amount of money that would be transferred
                 sequence: sequence number of escrow account
         """
