@@ -22,7 +22,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         self.escrow_address = 'escrow'
         self.provider_address = 'merchant'
         self.expiration_date = '2018-05-03T09:30:06+00:00'
-        self.cost_per_tx = 50
+        self.cost_per_transaction = 50
         self.starting_balance = 500
         self.host = settings['HOST']
 
@@ -35,7 +35,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
             'destination_address': self.destination_address,
             'creator_address': self.creator_address,
             'starting_balance': self.starting_balance,
-            'cost_per_tx': self.cost_per_tx
+            'cost_per_transaction': self.cost_per_transaction
         }
 
         expect = {
@@ -70,7 +70,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
             'destination_address': self.destination_address,
             'creator_address': self.creator_address,
             'starting_balance': 'make-error',
-            'cost_per_tx': 200,
+            'cost_per_transaction': 200,
             'expiration_date': self.expiration_date,
         }
 
@@ -90,7 +90,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
             'destination_address': self.destination_address,
             'creator_address': self.creator_address,
             'starting_balance': self.starting_balance,
-            'cost_per_tx': 200,
+            'cost_per_transaction': 200,
             'expiration_date': self.expiration_date,
         }
         resp = await self.client.request('POST', url, json=data)
@@ -102,7 +102,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
             'provider_address': self.provider_address,
             'creator_address': self.creator_address,
             'starting_balance': self.starting_balance,
-            'cost_per_tx': 200,
+            'cost_per_transaction': 200,
             'expiration_date': self.expiration_date,
         }
         resp = await self.client.request('POST', url, json=data)
@@ -114,7 +114,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
             'provider_address': self.provider_address,
             'destination_address': self.destination_address,
             'starting_balance': self.starting_balance,
-            'cost_per_tx': 200,
+            'cost_per_transaction': 200,
             'expiration_date': self.expiration_date,
         }
         resp = await self.client.request('POST', url, json=data)
@@ -126,7 +126,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
             'provider_address': self.provider_address,
             'destination_address': self.destination_address,
             'creator_address': self.creator_address,
-            'cost_per_tx': 200,
+            'cost_per_transaction': 200,
             'expiration_date': self.expiration_date,
         }
         resp = await self.client.request('POST', url, json=data)
@@ -144,10 +144,10 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter \'cost_per_tx\' not found. Please ensure parameters is valid.'
+        assert body['error'] == 'Parameter \'cost_per_transaction\' not found. Please ensure parameters is valid.'
 
     @unittest_run_loop
-    async def test_post_generate_escrow_wallet_from_request_wrong_cost_per_tx(self):
+    async def test_post_generate_escrow_wallet_from_request_wrong_cost_per_transaction(self):
 
         url = f'/escrow/{self.escrow_address}/generate-wallet'
         data = {
@@ -155,42 +155,42 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
             'destination_address': self.destination_address,
             'creator_address': self.creator_address,
             'starting_balance': 2000,
-            'cost_per_tx': 'make-error',
+            'cost_per_transaction': 'make-error',
             'expiration_date': self.expiration_date,
         }
 
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter cost_per_tx is not valid.'
+        assert body['error'] == 'Parameter cost_per_transaction is not valid.'
 
         data = {
             'provider_address': self.provider_address,
             'destination_address': self.destination_address,
             'creator_address': self.creator_address,
             'starting_balance': 2000,
-            'cost_per_tx': 0,
+            'cost_per_transaction': 0,
             'expiration_date': self.expiration_date,
         }
 
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter cost_per_tx is not valid.'
+        assert body['error'] == 'Parameter cost_per_transaction is not valid.'
 
         data = {
             'provider_address': self.provider_address,
             'destination_address': self.destination_address,
             'creator_address': self.creator_address,
             'starting_balance': 2000,
-            'cost_per_tx': -5,
+            'cost_per_transaction': -5,
             'expiration_date': self.expiration_date,
         }
 
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter cost_per_tx is not valid.'
+        assert body['error'] == 'Parameter cost_per_transaction is not valid.'
 
 
     @unittest_run_loop
@@ -203,7 +203,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
             'destination_address': self.destination_address,
             'creator_address': self.creator_address,
             'starting_balance': 2000,
-            'cost_per_tx': 20,
+            'cost_per_transaction': 20,
             'expiration_date': 'make-error',
         }
 
@@ -222,7 +222,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
             'destination_address': self.destination_address,
             'creator_address': self.creator_address,
             'starting_balance': 'make-error',
-            'cost_per_tx': 200,
+            'cost_per_transaction': 200,
             'expiration_date': self.expiration_date,
         }
 
@@ -236,14 +236,14 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
             'destination_address': self.destination_address,
             'creator_address': self.creator_address,
             'starting_balance': 2000,
-            'cost_per_tx': 3,
+            'cost_per_transaction': 3,
             'expiration_date': self.expiration_date,
         }
 
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter starting_balance is not match with cost_per_tx.'
+        assert body['error'] == 'Parameter starting_balance is not match with cost_per_transaction.'
 
 
 class TestGetCreateWallet(BaseTestClass):
@@ -256,7 +256,7 @@ class TestGetCreateWallet(BaseTestClass):
         self.escrow_address = 'escrow'
         self.provider_address = 'merchant'
         self.expiration_date = '5/10/45'
-        self.cost_per_tx = 50
+        self.cost_per_transaction = 50
         self.starting_balance = 500
         self.host = settings['HOST']
 
@@ -283,7 +283,7 @@ class TestGetCreateWallet(BaseTestClass):
             destination_address=self.destination_address,
             starting_balance=self.starting_balance,
             expiration_date=self.expiration_date,
-            cost_per_transaction=self.cost_per_tx
+            cost_per_transaction=self.cost_per_transaction
         )
 
         assert result == expect
