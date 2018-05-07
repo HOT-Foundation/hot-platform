@@ -29,13 +29,13 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
         )
 
         stellar_destination_address = "GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6"
-        starting_balance = "10"
+        balance = "500"
         cost_per_tx = "5"
 
         mock_get_transaction.assert_called_once_with(
             escrow_address,
             stellar_destination_address,
-            starting_balance,
+            balance,
             cost_per_tx
         )
 
