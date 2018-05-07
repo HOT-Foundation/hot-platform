@@ -61,6 +61,14 @@ class TestCreateWallet(BaseTestClass):
         assert text == expect
 
     @unittest_run_loop
+    async def test_post_genrate_wallet_from_request_json_data_missing(self):
+        url = f'/wallet/{self.wallet_address}/generate-wallet'
+        resp = await self.client.request("POST", url)
+        assert resp.status == 400
+        text = await resp.json()
+        assert 'Bad request, JSON data missing.' in text['error']
+
+    @unittest_run_loop
     async def test_post_generate_wallet_from_request_use_wrong_parameter(self):
         url = f'/wallet/{self.wallet_address}/generate-wallet'
         resp = await self.client.request("POST", url, json={'target':'test'})
