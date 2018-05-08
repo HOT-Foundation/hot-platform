@@ -63,6 +63,43 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         assert body == expect
 
     @unittest_run_loop
+    @patch('escrow.post_generate_escrow_wallet.generate_escrow_wallet')
+    async def test_post_generate_escrow_wallet_from_request_success_with_expiration_date(self, mock_wallet):
+
+        data = {
+            'provider_address': self.provider_address,
+            'destination_address': self.destination_address,
+            'creator_address': self.creator_address,
+            'starting_balance': self.starting_balance,
+            'cost_per_transaction': self.cost_per_transaction,
+            'expiration_date': self.expiration_date
+        }
+
+        expect = {
+            '@id': self.escrow_address,
+            'escrow_address': self.escrow_address,
+            '@url': f'{self.host}/escrow/{self.escrow_address}/generate-wallet',
+            '@transaction_url': f'{self.host}/transaction/tx_hash',
+            'signers': [self.escrow_address, self.creator_address, self.provider_address],
+            'xdr': 'xdr'
+        }
+
+        mock_wallet.return_value = {
+            'escrow_address': self.escrow_address,
+            '@url': f'{self.host}/escrow/{self.escrow_address}/generate-wallet',
+            '@transaction_url': f'{self.host}/transaction/tx_hash',
+            'signers': [self.escrow_address, self.creator_address, self.provider_address],
+            'xdr': 'xdr'
+        }
+
+        url = f'/escrow/{self.escrow_address}/generate-wallet'
+
+        resp = await self.client.request('POST', url, json=data)
+        assert resp.status == 200
+        body = await resp.json()
+        assert body == expect
+
+    @unittest_run_loop
     async def test_post_generate_escrow_wallet_from_request_with_plain_text_data(self):
 
         data = {
@@ -205,6 +242,20 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
             'starting_balance': 2000,
             'cost_per_transaction': 20,
             'expiration_date': 'make-error',
+        }
+
+        resp = await self.client.request('POST', url, json=data)
+        assert resp.status == 400
+        body = await resp.json()
+        assert body['error'] == 'Parameter expiration date is not valid.'
+
+        data = {
+            'provider_address': self.provider_address,
+            'destination_address': self.destination_address,
+            'creator_address': self.creator_address,
+            'starting_balance': 2000,
+            'cost_per_transaction': 20,
+            'expiration_date': '2018-05-08T01:38:25',
         }
 
         resp = await self.client.request('POST', url, json=data)
@@ -404,3 +455,7 @@ class TestCalculateInitialXLM():
     async def test_calculate_initial_xlm_success(self):
         result = calculate_initial_xlm(3, 11)
         assert result == Decimal('2.6')
+
+    async def test_calculate_initial_xlm_wrong_parameter(self):
+        with pytest.raises(ValueError):
+            calculate_initial_xlm(-1, -11)

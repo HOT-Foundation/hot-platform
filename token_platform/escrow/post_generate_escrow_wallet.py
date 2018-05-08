@@ -1,7 +1,7 @@
 import binascii
 from datetime import datetime
 from decimal import ROUND_UP, Decimal
-from typing import Dict, List
+from typing import Dict, List, Tuple, Any
 
 from aiohttp import web
 from dateutil import parser
@@ -87,18 +87,18 @@ async def generate_escrow_wallet(escrow_address: str,
         * starting_balance: startung amount of custom asset(HTKN) in new wallet.
         * expiration_date: date and time in ISO 8601 format. For futher detail see https://www.w3.org/TR/NOTE-datetime.
     '''
-    starting_balance = Decimal(starting_balance)
-    cost_per_transaction = Decimal(cost_per_transaction)
+    starting_custom_asset: Decimal = Decimal(starting_balance)
+    cost_per_tx_decimal: Decimal = Decimal(cost_per_transaction)
 
-    number_of_transaction = (starting_balance / cost_per_transaction) + 2
-    starting_xlm: Decimal = calculate_initial_xlm(8, number_of_transaction)
-    starting_custom_asset: Decimal = starting_balance
+    number_of_transaction: Decimal = (starting_custom_asset / cost_per_tx_decimal) + 2
+    starting_xlm: Decimal = calculate_initial_xlm(Decimal(8), number_of_transaction)
+
 
     xdr, tx_hash = await build_generate_escrow_wallet_transaction(escrow_address = escrow_address,
         provider_address = provider_address,
         creator_address = creator_address,
         destination_address = destination_address,
-        cost_per_transaction = cost_per_transaction,
+        cost_per_transaction = cost_per_tx_decimal,
         expiration_date = expiration_date,
         starting_native_asset = starting_xlm,
         starting_custom_asset = starting_custom_asset
@@ -113,16 +113,21 @@ async def generate_escrow_wallet(escrow_address: str,
         'xdr': xdr
     }
 
-def calculate_initial_xlm(number_of_entries: int, number_of_transaction: int) -> Decimal:
+def calculate_initial_xlm(number_of_entries: Decimal, number_of_transaction: Decimal) -> Decimal:
     '''Calculate starting balance for wallet
     starting balance: minimum balance + transaction fee
     minimum  balance= (2 + number of entries) × base reserve
+
+    Args:
+
+    * number_of_entries: number of entries inclunding trust, data, signers
+    * number_of_transaction: number of transaction that would be used when creating the account
     '''
+    if number_of_entries < 0 or number_of_transaction < 0:
+        raise ValueError
 
     transaction_fee = Decimal('0.00001')
     base_reserve = Decimal('0.5')
-    number_of_transaction = Decimal(number_of_transaction)
-    number_of_entries = Decimal(number_of_entries)
     minumum_balance_raw = ((2 + number_of_entries) * base_reserve) + (number_of_transaction * transaction_fee)
     our_value = Decimal(minumum_balance_raw)
     result = Decimal(our_value.quantize(Decimal('.1'), rounding=ROUND_UP))
@@ -136,7 +141,7 @@ async def build_generate_escrow_wallet_transaction(escrow_address: str,
                                            starting_native_asset: Decimal,
                                            starting_custom_asset: Decimal,
                                            expiration_date: str = None,
-                                           ) -> Dict:
+                                           ) -> Tuple[Any, str]:
     '''Building transaction for generating escrow wallet with minimum balance of lumens
         and return unsigned XDR and transaction hash.
 

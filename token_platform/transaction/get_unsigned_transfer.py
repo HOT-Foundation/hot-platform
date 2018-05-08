@@ -1,11 +1,12 @@
 import binascii
+from decimal import Decimal
 from typing import Any, Dict, List, Mapping, NewType, Optional, Tuple, Union
 
+from aiohttp import web
 from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
 from stellar_base.utils import AccountNotExistError
 
-from aiohttp import web
 from conf import settings
 from transaction.transaction import get_signers, get_threshold_weight
 from wallet.wallet import get_wallet
@@ -50,7 +51,7 @@ async def get_unsigned_transfer(source_address: str, destination: str, amount: i
     return result
 
 
-def build_unsigned_transfer(source_address: str, destination_address: str, amount: int, sequence=None) -> Tuple[str, str]:
+def build_unsigned_transfer(source_address: str, destination_address: str, amount: Union[int, Decimal], sequence=None) -> Tuple[str, str]:
     """"Build unsigned transfer transaction return unsigned XDR and transaction hash.
 
         Args:
