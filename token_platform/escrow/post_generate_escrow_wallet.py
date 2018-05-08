@@ -46,7 +46,7 @@ async def post_generate_escrow_wallet_from_request(request: web.Request) -> web.
 
     if expiration_date:
         try:
-            datetime = parser.isoparse(expiration_date)
+            datetime = parser.isoparse(expiration_date) # type: ignore
         except ValueError as ex:
             raise web.HTTPBadRequest(reason=f'Parameter expiration date is not valid.')
 
