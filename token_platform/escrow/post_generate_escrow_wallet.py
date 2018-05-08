@@ -124,7 +124,7 @@ def calculate_initial_xlm(number_of_entries: Decimal, number_of_transaction: Dec
     * number_of_transaction: number of transaction that would be used when creating the account
     '''
     if number_of_entries < 0 or number_of_transaction < 0:
-        raise ValueError
+        raise ValueError('Number of entries or number of transaction must be more than 0')
 
     transaction_fee = Decimal('0.00001')
     base_reserve = Decimal('0.5')

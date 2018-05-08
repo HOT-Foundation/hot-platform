@@ -25,13 +25,13 @@ async def post_generate_wallet_from_request(request: web.Request):
     try:
         destination_address: str = json_response['target_address']
         balance: int = int(json_response.get('starting_balance', 0))
-    except KeyError:
-        raise web.HTTPBadRequest(reason = 'Bad request, parameter missing.')
+    except KeyError as e:
+        raise web.HTTPBadRequest(reason = 'Bad request, parameter missing {}.'.format(str(e)))
     except (ValueError, TypeError):
         raise ValueError('Invalid, please check your parameter.')
 
     if balance == 0:
-        raise web.HTTPBadRequest(reason = 'Bad request, parameter missing.')
+        raise web.HTTPBadRequest(reason = 'Balance must have more than 0.')
 
     duplicate = wallet_address_is_duplicate(destination_address)
     if duplicate:
