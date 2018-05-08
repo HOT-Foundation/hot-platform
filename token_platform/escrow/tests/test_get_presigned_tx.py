@@ -37,7 +37,7 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
             }
         }
 
-        resp = await self.client.request("POST", "/escrow/{}/genarate-presigned-transections".format(escrow_address), json={})
+        resp = await self.client.request("POST", "/escrow/{}/generate-presigned-transections".format(escrow_address), json={})
         assert resp.status == 200
 
         mock_get_wallet.assert_called_once_with(
@@ -75,7 +75,7 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
             }
         }
 
-        req = make_mocked_request("POST", "/escrow/{}/genarate-presigned-transections".format(escrow_address),
+        req = make_mocked_request("POST", "/escrow/{}/generate-presigned-transections".format(escrow_address),
             match_info={'wallet_address': 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'}
         )
 
