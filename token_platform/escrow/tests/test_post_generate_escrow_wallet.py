@@ -22,8 +22,8 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         self.escrow_address = 'escrow'
         self.provider_address = 'merchant'
         self.expiration_date = '2018-05-03T09:30:06+00:00'
-        self.cost_per_transaction = 50
-        self.starting_balance = 500
+        self.cost_per_transaction = "50.0"
+        self.starting_balance = "500.0"
         self.host = settings['HOST']
 
     @unittest_run_loop
