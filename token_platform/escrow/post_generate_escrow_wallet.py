@@ -29,19 +29,19 @@ async def post_generate_escrow_wallet_from_request(request: web.Request) -> web.
         raise web.HTTPBadRequest(reason=f'Parameter {msg} not found. Please ensure parameters is valid.')
 
     try:
-        int(starting_balance)
+        float(starting_balance)
     except ValueError as ex:
         raise web.HTTPBadRequest(reason=f'Parameter starting_balance is not valid.')
 
     try:
-        int_cost = int(cost_per_transaction)
+        int_cost = float(cost_per_transaction)
     except ValueError as ex:
         raise web.HTTPBadRequest(reason=f'Parameter cost_per_transaction is not valid.')
 
     if int_cost <= 0:
         raise web.HTTPBadRequest(reason=f'Parameter cost_per_transaction is not valid.')
 
-    if int(starting_balance) % int(cost_per_transaction) != 0:
+    if float(starting_balance) % float(cost_per_transaction) != 0:
         raise web.HTTPBadRequest(reason=f'Parameter starting_balance is not match with cost_per_transaction.')
 
     if expiration_date:
