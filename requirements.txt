@@ -2,7 +2,7 @@
 aiohttp==3.1.0
 async-timeout==2.0.1
 stellar-base==0.1.8.1
-
+python-dateutil==2.7.2
 # Development Only
 pytest==3.5.0
 pytest-aiohttp==0.3.0
