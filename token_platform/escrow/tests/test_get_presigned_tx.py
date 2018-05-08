@@ -1,6 +1,10 @@
+from decimal import Decimal
+
 from tests.test_utils import BaseTestClass
 
-from aiohttp.test_utils import unittest_run_loop
+import pytest
+from aiohttp import web
+from aiohttp.test_utils import make_mocked_request, unittest_run_loop
 from asynctest import patch
 from conf import settings
 from escrow.generate_pre_signed_tx_xdr import (get_current_sequence_number,
@@ -8,43 +12,77 @@ from escrow.generate_pre_signed_tx_xdr import (get_current_sequence_number,
                                                get_presigned_tx_xdr_from_request,
                                                get_signers,
                                                get_threshold_weight)
+from escrow.tests.factory.escrow_wallet import EscrowWallet
 
 
 class TestGeneratePreSignedTxXDR(BaseTestClass):
     @unittest_run_loop
+    @patch('escrow.generate_pre_signed_tx_xdr.get_escrow_wallet_detail')
     @patch('escrow.generate_pre_signed_tx_xdr.get_presigned_tx_xdr')
-    async def test_get_presigned_tx_xdr_from_request(self, mock_get_transaction):
-        json_request = {
-            "stellar_escrow_address": 'GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY',
-            "stellar_merchant_address": 'GDR3AGPEISYHLHAB6EVP3HD4COCIT7SPGL7WTSIZR3PNBWKFKZGTUJSNr',
-            "stellar_hotnow_address": 'GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6',
-            "starting_balance": 10,
-            "expiring_date": '2018-05-02',
-            "cost_per_tx": 5
+    async def test_get_presigned_tx_xdr_from_request(self, mock_get_transaction, mock_get_wallet):
+        escrow_address = "GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY"
+        mock_get_transaction.return_value = {}
+        host = settings.get('HOST', None)
+        mock_get_wallet.return_value = {
+            '@id': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+            '@url': f'{host}/escrow/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+            'asset': {
+                'HTKN': '10.0000000',
+                'XLM': '9.9999200'
+            },
+            'generate-wallet': f'{host}/escrow/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD/generate-wallet',
+            'data': {
+                'destination_address': 'GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6',
+                'cost_per_transaction': '5'
+            }
         }
 
-        mock_get_transaction.return_value = {}
-        resp = await self.client.request("POST", "/presigned-transfer", json=json_request)
+        resp = await self.client.request("POST", "/escrow/{}/genarate-presigned-transections".format(escrow_address), json={})
         assert resp.status == 200
-        mock_get_transaction.assert_called_once_with(
-            json_request["stellar_escrow_address"],
-            json_request["stellar_hotnow_address"],
-            json_request["starting_balance"],
-            json_request["cost_per_tx"]
+
+        mock_get_wallet.assert_called_once_with(
+            escrow_address
         )
-    
+
+        destination_address = "GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6"
+        balance = Decimal("10.0000000")
+        cost_per_tx = Decimal("5")
+
+        mock_get_transaction.assert_called_once_with(
+            escrow_address,
+            destination_address,
+            balance,
+            cost_per_tx
+        )
+
     @unittest_run_loop
+    @patch('escrow.generate_pre_signed_tx_xdr.get_escrow_wallet_detail')
     @patch('escrow.generate_pre_signed_tx_xdr.get_presigned_tx_xdr')
-    async def test_get_presigned_tx_xdr_from_request_invalid_json_body(self, mock_get_transaction):
-        json_request = {
-            "stellar_escrow_address": 'GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY',
+    async def test_get_presigned_tx_xdr_cannot_get_value_in_data(self, mock_get_transaction, mock_get_wallet):
+        host = settings.get('HOST', None)
+        escrow_address = "GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY"
+        mock_get_transaction.return_value = {}
+        mock_get_wallet.return_value = {
+            '@id': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+            '@url': f'{host}/escrow/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+            'asset': {
+                'HTKN': '10.0000000',
+                'XLM': '9.9999200'
+            },
+            'generate-wallet': f'{host}/escrow/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD/generate-wallet',
+            'data': {
+                'source': 'GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6'
+            }
         }
 
-        mock_get_transaction.return_value = {}
-        resp = await self.client.request("POST", "/presigned-transfer", json=json_request)
-        assert resp.status == 400
-        text = await resp.json()
-        assert text == {'error': "Parameter 'stellar_hotnow_address' not found. Please ensure parameters is valid."}
+        req = make_mocked_request("POST", "/escrow/{}/genarate-presigned-transections".format(escrow_address),
+            match_info={'wallet_address': 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'}
+        )
+
+        with pytest.raises(web.HTTPBadRequest) as context:
+            await get_presigned_tx_xdr_from_request(req)
+        assert str(context.value) ==  "Parameter 'destination_address' not found. Please ensure parameters is valid."
+
 
     @unittest_run_loop
     @patch('escrow.generate_pre_signed_tx_xdr.get_threshold_weight')
@@ -59,8 +97,8 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
         result = await get_presigned_tx_xdr(
             'GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY',
             'GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6',
-            10,
-            5
+            Decimal('10.0000000'),
+            Decimal('5')
         )
 
         expect = {
@@ -71,14 +109,14 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
                 "@id": "GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY",
                 "@url": "http://hotnow-token-platform:8081/wallet/GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY/transaction/transfer",
                 "@transaction_url": "http://hotnow-token-platform:8081/transaction/hash",
-                "unsigned_xdr": "xdr",
+                "xdr": "xdr",
                 "sequence_number": 2
                 },
                 {
                 "@id": "GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY",
                 "@url": "http://hotnow-token-platform:8081/wallet/GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY/transaction/transfer",
                 "@transaction_url": "http://hotnow-token-platform:8081/transaction/hash",
-                "unsigned_xdr": "xdr",
+                "xdr": "xdr",
                 "sequence_number": 3
                 }
             ]

@@ -6,9 +6,10 @@ from asynctest import patch
 from stellar_base.keypair import Keypair
 from stellar_base.utils import AccountNotExistError, StellarMnemonic
 from tests.test_utils import BaseTestClass
+from aiohttp import web
 
 from conf import settings
-from wallet.wallet import (build_create_wallet_transaction,
+from wallet.wallet import (build_generate_wallet_transaction,
                            wallet_address_is_duplicate)
 
 
@@ -26,19 +27,25 @@ class TestCreateWallet(BaseTestClass):
         kp = Keypair.deterministic(secret_phrase, lang='english')
         self.wallet_address = 'GB6PGEFJSXPRUNYAJXH4OZNIZNCEXC6B2JMV5RUGWJECWVWNCJTMGJB4'
         self.target_address = kp.address().decode()
-        self.starting_amount = 600
+        self.starting_balance = 600
         self.host = settings['HOST']
 
     @unittest_run_loop
-    @patch('wallet.get_create_wallet.Builder')
-    @patch('wallet.get_create_wallet.wallet_address_is_duplicate')
-    @patch('wallet.get_create_wallet.build_create_wallet_transaction')
-    async def test_get_create_wallet_from_request_success(self, mock_xdr, mock_check, mock_te):
+    @patch('wallet.post_generate_wallet.Builder')
+    @patch('wallet.post_generate_wallet.wallet_address_is_duplicate')
+    @patch('wallet.post_generate_wallet.build_generate_wallet_transaction')
+    async def test_post_generate_wallet_from_request_success(self, mock_xdr, mock_check, mock_te):
         mock_te.return_value = MockBuilder()
         mock_xdr.return_value = (b'test-xdr', b'test-transaction-envelop')
         mock_check.return_value = False
-        url = f'/wallet/{self.wallet_address}/create-wallet?target-address={self.target_address}&starting-amount={self.starting_amount}'
-        resp = await self.client.request("GET", url)
+
+        url = f'/wallet/{self.wallet_address}/generate-wallet'
+        json_request = {
+            'target_address' : self.target_address,
+            'starting_balance' : self.starting_balance
+        }
+
+        resp = await self.client.request("POST", url, json=json_request)
         assert resp.status == 200
         text = await resp.json()
         hash = MockBuilder()
@@ -54,24 +61,48 @@ class TestCreateWallet(BaseTestClass):
         assert text == expect
 
     @unittest_run_loop
-    async def test_get_create_wallet_from_request_use_wrong_parameter(self):
-        url = f'/wallet/{self.wallet_address}/create-wallet?target=test'
-        resp = await self.client.request("GET", url)
+    async def test_post_genrate_wallet_from_request_json_data_missing(self):
+        url = f'/wallet/{self.wallet_address}/generate-wallet'
+        resp = await self.client.request("POST", url)
+        assert resp.status == 400
+        text = await resp.json()
+        assert 'Bad request, JSON data missing.' in text['error']
+
+    @unittest_run_loop
+    async def test_post_generate_wallet_from_request_use_wrong_parameter(self):
+        url = f'/wallet/{self.wallet_address}/generate-wallet'
+        resp = await self.client.request("POST", url, json={'target':'test'})
         assert resp.status == 400
         text = await resp.json()
         assert 'Bad request, parameter missing.' in text['error']
 
-        url = f'/wallet/{self.wallet_address}/create-wallet?target=test&value=0'
-        resp = await self.client.request("GET", url)
+        resp = await self.client.request("POST", url, json={
+                                         'target_address' : 'test'})
         assert resp.status == 400
         text = await resp.json()
         assert 'Bad request, parameter missing.' in text['error']
 
-        url = f'/wallet/{self.wallet_address}/create-wallet?value=500'
-        resp = await self.client.request("GET", url)
+        resp = await self.client.request("POST", url, json={
+                                         'target_address' : 'test',
+                                         'starting_balance' : 'not_Integer'})
         assert resp.status == 400
         text = await resp.json()
-        assert 'Bad request, parameter missing.' in text['error']
+        assert 'Invalid, please check your parameter.' in text['error']
+
+    @unittest_run_loop
+    @patch('wallet.post_generate_wallet.wallet_address_is_duplicate', **{'return_value' : True})
+    async def test_post_generate_wallet_from_request_is_duplicate_wallet_address(self, mock):
+        url = f'/wallet/{self.wallet_address}/generate-wallet'
+        json_request = {
+            'target_address' : self.target_address,
+            'starting_balance' : self.starting_balance
+        }
+
+        result = await self.client.request("POST", url, json=json_request)
+        assert result.status == 400
+        text = await result.json()
+        assert 'Target address is already used.' in text['error']
+
 
     @patch('wallet.wallet.StellarAddress.get', **{'side_effect': ValueError})
     def test_wallet_address_is_duplicate_with_value_error(self, mock):
@@ -85,5 +116,5 @@ class TestCreateWallet(BaseTestClass):
 
     @patch('wallet.wallet.StellarAddress.get', **{'return_value': True})
     def test_wallet_address_is_duplicate_fail(self, mock):
-        result = wallet_address_is_duplicate(self.wallet_address)
-        assert result == True
+            result = wallet_address_is_duplicate(self.wallet_address)
+            assert result == True
