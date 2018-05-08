@@ -14,21 +14,26 @@ async def error_middleware(request, handler):
         return web.json_response({'error': 'Request payload must be json format.'}, status=400)
     except AccountNotExistError as ex:
         message = str(ex)
+        print(message)
         print(traceback.format_exc(chain=False))
         return web.json_response({'error': message}, status=400)
     except (TypeError, ValueError, web.HTTPBadRequest) as ex:
         message = str(ex)
+        print(message)
         print(traceback.format_exc(chain=False))
         return web.json_response({'error': message}, status=400)
     except web.HTTPNotFound as ex:
         message = str(ex)
+        print(message)
         print(traceback.format_exc(chain=False))
         return web.json_response({'error': message}, status=404)
     except web.HTTPInternalServerError as ex:
         message = str(ex)
+        print(message)
         return web.json_response({'error': message}, status=500)
     except DecodeError as ex:
         message = str(ex)
+        print(message)
         print(traceback.format_exc(chain=False))
         return web.json_response({'error': message}, status=400)
 

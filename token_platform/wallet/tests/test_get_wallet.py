@@ -155,7 +155,7 @@ async def test_get_wallet_not_found(mock_address):
 
     with pytest.raises(web.HTTPNotFound) as context:
         await get_wallet_detail('GB7D54NKPWYYMMS7JFEQZKDDTW5R7IMXTFN2WIEST2YZVVNO3SHJ3Y7M')
-    assert str(context.value) == 'Not Found'
+    assert str(context.value) == 'Resource Missing: GB7D54NKPWYYMMS7JFEQZKDDTW5R7IMXTFN2WIEST2YZVVNO3SHJ3Y7M'
 
 
 @asyncio.coroutine
@@ -169,4 +169,4 @@ async def test_get_wallet_invalid_address(mock_address):
 
     with pytest.raises(web.HTTPNotFound) as context:
         await get_wallet_detail('XXXX')
-    assert str(context.value) == 'Not Found'
+    assert str(context.value) == 'Resource Missing: XXXX'

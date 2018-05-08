@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Mapping, NewType, Optional, Tuple, Union
 from aiohttp import web
 from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
-from stellar_base.utils import AccountNotExistError
 
 from conf import settings
 from transaction.transaction import get_signers, get_threshold_weight

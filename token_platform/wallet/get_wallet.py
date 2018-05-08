@@ -2,13 +2,12 @@ from functools import reduce
 from typing import Any, Dict, List, Mapping, NewType, Optional, Union
 
 import requests
-from aiohttp import web
 from stellar_base.builder import Builder
-from stellar_base.utils import AccountNotExistError
 
+from aiohttp import web
 from conf import settings
-from wallet.wallet import (build_generate_wallet_transaction,
-                           wallet_address_is_duplicate, get_wallet)
+from wallet.wallet import (build_generate_wallet_transaction, get_wallet,
+                           wallet_address_is_duplicate)
 
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 STELLAR_BALANCE = Dict[str, str]

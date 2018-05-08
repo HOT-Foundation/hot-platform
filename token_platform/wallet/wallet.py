@@ -15,7 +15,8 @@ async def get_wallet(wallet_address: str) -> StellarAddress:
     try:
         wallet.get()
     except AccountNotExistError as ex:
-        raise web.HTTPNotFound(text=str(ex))
+        msg = "{}: {}".format(str(ex), wallet_address)
+        raise web.HTTPNotFound(reason=msg)
 
     return wallet
 
