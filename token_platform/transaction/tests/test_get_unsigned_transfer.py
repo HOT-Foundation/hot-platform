@@ -45,9 +45,9 @@ class TestGetUnsignedTransaction(BaseTestClass):
             match_info={'wallet_address': 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'}
         )
 
-        with pytest.raises(ValueError) as context:
+        with pytest.raises(KeyError) as context:
             await get_unsigned_transfer_from_request(req)
-        assert str(context.value) == 'Invalid, please check your parameter.'
+        assert str(context.value) == '"Key not found: \'destination\'"'
 
 
     @unittest_run_loop

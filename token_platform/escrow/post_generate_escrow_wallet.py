@@ -16,17 +16,13 @@ async def post_generate_escrow_wallet_from_request(request: web.Request) -> web.
     """AIOHTTP Request create account xdr and presigned transaction xdr"""
     body = await request.json()
 
-    try:
-        escrow_address = request.match_info['escrow_address']
-        provider_address = body['provider_address']
-        creator_address = body['creator_address']
-        destination_address = body['destination_address']
-        starting_balance = body['starting_balance']
-        cost_per_transaction = body['cost_per_transaction']
-        expiration_date = body.get('expiration_date', None)
-    except KeyError as e:
-        msg = str(e)
-        raise web.HTTPBadRequest(reason=f'Parameter {msg} not found. Please ensure parameters is valid.')
+    escrow_address = request.match_info['escrow_address']
+    provider_address = body['provider_address']
+    creator_address = body['creator_address']
+    destination_address = body['destination_address']
+    starting_balance = body['starting_balance']
+    cost_per_transaction = body['cost_per_transaction']
+    expiration_date = body.get('expiration_date', None)
 
     try:
         float(starting_balance)

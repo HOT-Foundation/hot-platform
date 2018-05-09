@@ -15,12 +15,10 @@ JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 
 async def get_unsigned_transfer_from_request(request: web.Request) -> web.Response:
     """AIOHttp Request unsigned transfer transaction"""
-    try:
-        source_account = request.match_info.get("wallet_address", "")
-        destination = request.rel_url.query['destination']
-        amount = request.rel_url.query['amount']
-    except KeyError as context:
-        raise ValueError("Invalid, please check your parameter.")
+
+    source_account = request.match_info.get("wallet_address", "")
+    destination = request.rel_url.query['destination']
+    amount = request.rel_url.query['amount']
 
     await get_wallet(source_account)
     await get_wallet(destination)
