@@ -20,7 +20,12 @@ async def error_middleware(request, handler):
     except KeyError as e:
         msg = "Parameter {} not found. Please ensure parameters is valid.".format(str(e))
         return web.json_response({'error': msg}, status=400)
-    except (TypeError, ValueError, web.HTTPBadRequest) as ex:
+    except TypeError as ex:
+        message = "Invalid type of {}, please check your parameter.".format(str(ex))
+        return web.json_response({'error': message}, status=400)
+    except ValueError as ex:
+        return web.json_response({'error': str(ex)}, status=400)
+    except web.HTTPBadRequest as ex:
         message = str(ex)
         print(message)
         print(traceback.format_exc(chain=False))

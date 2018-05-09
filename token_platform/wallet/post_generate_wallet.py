@@ -22,11 +22,8 @@ async def post_generate_wallet_from_request(request: web.Request):
 
     source_address: str = request.match_info.get('wallet_address')
 
-    try:
-        destination_address: str = json_response['target_address']
-        balance: int = int(json_response.get('starting_balance', 0))
-    except (ValueError, TypeError):
-        raise ValueError('Invalid, please check your parameter.')
+    destination_address: str = json_response['target_address']
+    balance: int = int(json_response.get('starting_balance', 0))
 
     if balance == 0:
         raise web.HTTPBadRequest(reason = 'Balance must have more than 0.')

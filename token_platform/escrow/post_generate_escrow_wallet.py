@@ -24,15 +24,7 @@ async def post_generate_escrow_wallet_from_request(request: web.Request) -> web.
     cost_per_transaction = body['cost_per_transaction']
     expiration_date = body.get('expiration_date', None)
 
-    try:
-        float(starting_balance)
-    except ValueError as ex:
-        raise web.HTTPBadRequest(reason=f'Parameter starting_balance is not valid.')
-
-    try:
-        int_cost = float(cost_per_transaction)
-    except ValueError as ex:
-        raise web.HTTPBadRequest(reason=f'Parameter cost_per_transaction is not valid.')
+    int_cost = float(cost_per_transaction)
 
     if int_cost <= 0:
         raise web.HTTPBadRequest(reason=f'Parameter cost_per_transaction is not valid.')

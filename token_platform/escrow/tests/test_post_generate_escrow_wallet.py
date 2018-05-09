@@ -199,7 +199,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter cost_per_transaction is not valid.'
+        assert body['error'] == "could not convert string to float: 'make-error'"
 
         data = {
             'provider_address': self.provider_address,
@@ -280,7 +280,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter starting_balance is not valid.'
+        assert body['error'] == "could not convert string to float: 'make-error'"
 
         data = {
             'provider_address': self.provider_address,
