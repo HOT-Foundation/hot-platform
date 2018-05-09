@@ -247,7 +247,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter expiration date is not valid.'
+        assert body['error'] == "invalid literal for int() with base 10: b'make'"
 
         data = {
             'provider_address': self.provider_address,

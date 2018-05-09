@@ -33,10 +33,7 @@ async def post_generate_escrow_wallet_from_request(request: web.Request) -> web.
         raise web.HTTPBadRequest(reason=f'Parameter starting_balance is not match with cost_per_transaction.')
 
     if expiration_date:
-        try:
-            datetime = parser.isoparse(expiration_date) # type: ignore
-        except ValueError as ex:
-            raise web.HTTPBadRequest(reason=f'Parameter expiration date is not valid.')
+        datetime = parser.isoparse(expiration_date) # type: ignore
 
         timezone_offset = datetime.utcoffset()
         if timezone_offset is None:
