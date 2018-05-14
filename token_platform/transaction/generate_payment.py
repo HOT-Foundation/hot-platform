@@ -15,6 +15,7 @@ JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 
 async def generate_payment_from_request(request: web.Request) -> web.Response:
     """AIOHttp Request unsigned transfer transaction"""
+
     body = await request.json()
     source_account = request.match_info.get("wallet_address", "")
     target_address = body['target_address']

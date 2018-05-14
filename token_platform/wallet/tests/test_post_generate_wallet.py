@@ -87,7 +87,7 @@ class TestCreateWallet(BaseTestClass):
                                          'starting_balance' : 'not_Integer'})
         assert resp.status == 400
         text = await resp.json()
-        assert 'Invalid, please check your parameter.' in text['error']
+        assert "invalid literal for int() with base 10: 'not_Integer'" in text['error']
 
     @unittest_run_loop
     @patch('wallet.post_generate_wallet.wallet_address_is_duplicate', **{'return_value' : True})

@@ -12,7 +12,6 @@ from escrow.generate_pre_signed_tx_xdr import (get_current_sequence_number,
                                                get_presigned_tx_xdr_from_request,
                                                get_signers,
                                                get_threshold_weight)
-from escrow.tests.factory.escrow_wallet import EscrowWallet
 
 
 class TestGeneratePreSignedTxXDR(BaseTestClass):
@@ -79,9 +78,9 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
             match_info={'wallet_address': 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'}
         )
 
-        with pytest.raises(web.HTTPBadRequest) as context:
+        with pytest.raises(KeyError) as context:
             await get_presigned_tx_xdr_from_request(req)
-        assert str(context.value) ==  "Parameter 'destination_address' not found. Please ensure parameters is valid."
+        assert str(context.value) ==  "'destination_address'"
 
 
     @unittest_run_loop

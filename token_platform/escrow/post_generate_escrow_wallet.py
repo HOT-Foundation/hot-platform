@@ -16,27 +16,15 @@ async def post_generate_escrow_wallet_from_request(request: web.Request) -> web.
     """AIOHTTP Request create account xdr and presigned transaction xdr"""
     body = await request.json()
 
-    try:
-        escrow_address = request.match_info['escrow_address']
-        provider_address = body['provider_address']
-        creator_address = body['creator_address']
-        destination_address = body['destination_address']
-        starting_balance = body['starting_balance']
-        cost_per_transaction = body['cost_per_transaction']
-        expiration_date = body.get('expiration_date', None)
-    except KeyError as e:
-        msg = str(e)
-        raise web.HTTPBadRequest(reason=f'Parameter {msg} not found. Please ensure parameters is valid.')
+    escrow_address = request.match_info['escrow_address']
+    provider_address = body['provider_address']
+    creator_address = body['creator_address']
+    destination_address = body['destination_address']
+    starting_balance = body['starting_balance']
+    cost_per_transaction = body['cost_per_transaction']
+    expiration_date = body.get('expiration_date', None)
 
-    try:
-        float(starting_balance)
-    except ValueError as ex:
-        raise web.HTTPBadRequest(reason=f'Parameter starting_balance is not valid.')
-
-    try:
-        int_cost = float(cost_per_transaction)
-    except ValueError as ex:
-        raise web.HTTPBadRequest(reason=f'Parameter cost_per_transaction is not valid.')
+    int_cost = float(cost_per_transaction)
 
     if int_cost <= 0:
         raise web.HTTPBadRequest(reason=f'Parameter cost_per_transaction is not valid.')
@@ -45,10 +33,7 @@ async def post_generate_escrow_wallet_from_request(request: web.Request) -> web.
         raise web.HTTPBadRequest(reason=f'Parameter starting_balance is not match with cost_per_transaction.')
 
     if expiration_date:
-        try:
-            datetime = parser.isoparse(expiration_date) # type: ignore
-        except ValueError as ex:
-            raise web.HTTPBadRequest(reason=f'Parameter expiration date is not valid.')
+        datetime = parser.isoparse(expiration_date) # type: ignore
 
         timezone_offset = datetime.utcoffset()
         if timezone_offset is None:
