@@ -12,7 +12,6 @@ from escrow.generate_pre_signed_tx_xdr import (get_current_sequence_number,
                                                get_presigned_tx_xdr_from_request,
                                                get_signers,
                                                get_threshold_weight)
-from escrow.tests.factory.escrow_wallet import EscrowWallet
 
 
 class TestGeneratePreSignedTxXDR(BaseTestClass):

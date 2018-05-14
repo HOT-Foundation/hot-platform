@@ -3,7 +3,7 @@ from typing import Dict, List
 
 from aiohttp import web
 from conf import settings
-from transaction.get_unsigned_transfer import build_unsigned_transfer
+from transaction.generate_payment import build_unsigned_transfer
 from transaction.transaction import (get_current_sequence_number, get_signers,
                                      get_threshold_weight)
 from escrow.get_escrow_wallet import get_escrow_wallet_detail
