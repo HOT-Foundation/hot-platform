@@ -48,11 +48,11 @@ async def get_wallet_detail(wallet_address: str) -> web.Response:
         return {}
 
     wallet = await get_wallet(wallet_address)
-
     result: Dict[str, Any] = {
         '@id': wallet_address,
         '@url': '{}/wallet/{}'.format(settings['HOST'], wallet_address),
-        'asset': _merge_balance(wallet.balances)
+        'asset': _merge_balance(wallet.balances),
+        'sequence': wallet.sequence
     }
 
     result.update(_trusted_htkn(wallet.balances))

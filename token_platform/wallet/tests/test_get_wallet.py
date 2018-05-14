@@ -58,7 +58,8 @@ async def test_get_wallet_success_trusted_htkn(mock_address):
         'asset': {
             'HTKN': '7.0000000',
             'XLM': '9.9999200'
-        }
+        },
+        'sequence': '1'
     }
     assert actual_data == expect_data
 
@@ -86,7 +87,8 @@ async def test_get_wallet_success_not_trust_htkn(mock_address):
         'trust': '{}/wallet/{}/transaction/change-trust'.format(settings['HOST'], 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'),
         'asset': {
             'XLM': '9.9999200'
-        }
+        },
+        'sequence': '1'
     }
     assert actual_data == expect_data
 
@@ -139,7 +141,8 @@ async def test_get_wallet_success(mock_address):
         "data": {
             "name": "VW5pdFRlc3Q=",
             "age": "MzA="
-        }
+        },
+        "sequence": "1"
     }
     assert result.__dict__ == expect_result
 

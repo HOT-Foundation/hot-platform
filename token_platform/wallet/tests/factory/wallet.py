@@ -29,6 +29,7 @@ class StellarWallet(object):
             'name': 'VW5pdFRlc3Q=',
             'age': 'MzA='
         }
+        self.sequence = "1"
 
     def get(self):
         pass
