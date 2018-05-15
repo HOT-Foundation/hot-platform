@@ -16,18 +16,17 @@ async def post_generate_joint_wallet(request: web.Request) -> web.Response:
     parties = body['parties']
     creator = body['creator_address']
     starting_xlm = body['starting_xlm']
-    expiration_date = body.get('expiration_date', None)
     meta = body.get('meta', None)
 
     result = await generate_joint_wallet(
-        deal_address, parties, creator, starting_xlm, expiration_date, meta
+        deal_address, parties, creator, starting_xlm, meta
     )
     return web.json_response(result)
 
 
-async def generate_joint_wallet(deal_address: str, parties: List, creator: str, starting_xlm: Decimal , exp_date:str=None, meta:str=None) -> Dict:
+async def generate_joint_wallet(deal_address: str, parties: List, creator: str, starting_xlm: Decimal, meta: Dict=None) -> Dict:
     """Making transaction for generate joint wallet with many parties"""
-    xdr, tx_hash = await build_joint_wallet(deal_address, parties, creator, starting_xlm, exp_date, meta)
+    xdr, tx_hash = await build_joint_wallet(deal_address, parties, creator, starting_xlm, meta)
     parties_signer = [{'public_key': party['address'], 'weight': 1} for party in parties]
     signer = parties_signer + [{'public_key': creator, 'weight': 1}, {'public_key': deal_address, 'weight': 1}]
     result = {
@@ -41,7 +40,7 @@ async def generate_joint_wallet(deal_address: str, parties: List, creator: str, 
     return result
 
 
-async def build_joint_wallet(deal_address: str, parties: List, creator: str, starting_xlm: Decimal, exp_date:str=None, meta:str=None):
+async def build_joint_wallet(deal_address: str, parties: List, creator: str, starting_xlm: Decimal, meta:str=None):
     """Build transaction for create joint wallet, trust HTKN and set option signer."""
 
     def _add_signer(builder: Builder, deal_address: str, party: str, amount: Decimal):
@@ -63,11 +62,9 @@ async def build_joint_wallet(deal_address: str, parties: List, creator: str, sta
     for party in parties:
         _add_signer(builder, deal_address, party['address'], party['amount'])
 
-    if exp_date:
-        builder.append_manage_data_op(source=deal_address, data_name="expiration_date", data_value=exp_date)
-    
-    if meta:
-        builder.append_manage_data_op(source=deal_address, data_name="meta", data_value=meta)
+    if meta and isinstance(meta, dict):
+        for key, value in meta.items():
+            builder.append_manage_data_op(source=deal_address, data_name=key, data_value=value)
     
     weight = len(parties) + 1
     builder.append_set_options_op(

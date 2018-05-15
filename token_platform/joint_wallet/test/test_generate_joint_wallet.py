@@ -29,9 +29,7 @@ class TestGenerateJointWallet(BaseTestClass):
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 200
         body = await resp.json()
-        expect = {}
-        assert body == expect
-        mock_joint_wallet.assert_called_once_with(deal_address, data['parties'], data['creator_address'], 5, None, None)
+        mock_joint_wallet.assert_called_once_with(deal_address, data['parties'], data['creator_address'], 5, None)
 
     @unittest_run_loop
     @patch('joint_wallet.generate_joint_wallet.build_joint_wallet')
@@ -87,8 +85,11 @@ class TestGenerateJointWallet(BaseTestClass):
             }
         ]
         creator = 'creator_address'
+        meta = {
+            "expiration_date": "2018-05-15"
+        }
         mock_build.return_value = ('create_joint_wallet_xdr', 'create_joint_wallet_tx_hash')
-        result = await generate_joint_wallet(deal_address, parties, creator, 5, '2018-05-15', 'meta')
+        result = await generate_joint_wallet(deal_address, parties, creator, 5, meta)
 
         expect = {
             "@id": "deal_address",
@@ -157,6 +158,9 @@ class TestGenerateJointWallet(BaseTestClass):
             "address": "GAYIEFTTY52HSXAHKTQGK4K4OQRKMD324WCG4O2HGIQUGVTVE6RZW25F",
             "amount": 15
         }]
-        result_xdr, result_hash = await build_joint_wallet(deal_address, parties, creator, 5, '2018-05-12', 'meta data')
+        meta = {
+            "expiration_date": "2018-05-15"
+        }
+        result_xdr, result_hash = await build_joint_wallet(deal_address, parties, creator, 5, meta)
         assert result_xdr == 'generate-joint-wallet-xdr'
         assert result_hash == '74782d68617368'
