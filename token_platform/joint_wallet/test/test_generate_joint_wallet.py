@@ -52,7 +52,7 @@ class TestGenerateJointWallet(BaseTestClass):
             "@id": "deal_address",
             "@url": "/wallet/deal_address/generate-joint-wallet",
             "@transaction_url": "/transaction/create_joint_wallet_tx_hash",
-            "signer": [{
+            "signers": [{
                     "public_key": "address1",
                     "weight": 1
                 },{
@@ -95,7 +95,7 @@ class TestGenerateJointWallet(BaseTestClass):
             "@id": "deal_address",
             "@url": "/wallet/deal_address/generate-joint-wallet",
             "@transaction_url": "/transaction/create_joint_wallet_tx_hash",
-            "signer": [{
+            "signers": [{
                     "public_key": "address1",
                     "weight": 1
                 },{

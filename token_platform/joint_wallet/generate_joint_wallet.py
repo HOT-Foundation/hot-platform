@@ -28,12 +28,12 @@ async def generate_joint_wallet(deal_address: str, parties: List, creator: str, 
     """Making transaction for generate joint wallet with many parties"""
     xdr, tx_hash = await build_joint_wallet(deal_address, parties, creator, starting_xlm, meta)
     parties_signer = [{'public_key': party['address'], 'weight': 1} for party in parties]
-    signer = parties_signer + [{'public_key': creator, 'weight': 1}, {'public_key': deal_address, 'weight': 1}]
+    signers = parties_signer + [{'public_key': creator, 'weight': 1}, {'public_key': deal_address, 'weight': 1}]
     result = {
         '@id': deal_address,
         '@url': f'/wallet/{deal_address}/generate-joint-wallet',
         '@transaction_url': f'/transaction/{tx_hash}',
-        'signer': signer,
+        'signers': signers,
         'xdr': xdr
     }
 
