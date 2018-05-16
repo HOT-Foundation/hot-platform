@@ -66,12 +66,12 @@ def build_unsigned_transfer(source_address: str, destination_address: str, amoun
     """
     builder = Builder(address=source_address, network=settings['STELLAR_NETWORK'], sequence=sequence)
 
-    if(amount_htkn):
+    if amount_htkn:
         builder.append_payment_op(
             destination_address, amount_htkn, asset_type=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], source=source_address
         )
 
-    if(amount_xlm):
+    if amount_xlm:
         builder.append_payment_op(
             destination_address, amount_xlm, source=source_address
         )
