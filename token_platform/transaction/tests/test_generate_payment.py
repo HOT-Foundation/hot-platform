@@ -32,11 +32,11 @@ class TestGetUnsignedTransaction(BaseTestClass):
         source_address = 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'
         destination_address = 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6'
 
-        data = {'target_address': destination_address, 'amount': 10}
+        data = {'target_address': destination_address, 'amount_xlm': 10, 'amount_htkn': 5}
         url = f'/wallet/{source_address}/generate-payment'
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 200
-        mock_generate_payment.assert_called_once_with(source_address, destination_address, 10, None)
+        mock_generate_payment.assert_called_once_with(source_address, destination_address, 5, 10, None, None)
 
 
     @unittest_run_loop
@@ -60,7 +60,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
     async def test_get_transaction_from_request_account_does_not_exist(self, mock_generate_payment, mock_address):
         source_address = 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'
         destination_address = 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6'
-        data = {'target_address': destination_address, 'amount': 10}
+        data = {'target_address': destination_address, 'amount_htkn': 10}
         url = f'/wallet/{source_address}/generate-payment'
 
         mock_address.side_effect = web.HTTPNotFound()
@@ -84,11 +84,10 @@ class TestGetUnsignedTransaction(BaseTestClass):
             'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6',
             '100', None)
 
-        host = settings.get('HOST', None)
         expect_data = {
             "@id": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
-            "@url": f'{host}/wallet/GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI/generate-payment',
-            "@transaction_url": f'{host}/transaction/dc8616f8013dc8134fe1618f1b667b10e425fed18cd6f36e62b0bd8de1e726fe',
+            "@url": '/wallet/GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI/generate-payment',
+            "@transaction_url": '/transaction/dc8616f8013dc8134fe1618f1b667b10e425fed18cd6f36e62b0bd8de1e726fe',
             "min_signer": 1,
             "signers": [
                 {
@@ -102,6 +101,13 @@ class TestGetUnsignedTransaction(BaseTestClass):
 
     @unittest_run_loop
     async def test_build_unsigned_transfer_with_memo(self):
-
-        result = build_unsigned_transfer('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 1, 'memo')
+        result = build_unsigned_transfer('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 0, 1, 'memo')
         assert result == ('AAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAZAAAAAAAAAACAAAAAAAAAAEAAAAEbWVtbwAAAAEAAAABAAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAAQAAAADZmUaevDbFEdvFYNAKhFBHPxv9Rr4phQFV2Vx/gRzlsQAAAAFIVEtOAAAAAOQdpyPCl4VbPm3G95niwnekSZPOl1L1+IGxwPCmaimmAAAAAAX14QAAAAAAAAAAAA==', '62bcef44d2d06a4657850849e94ada319fe398d5dd091907916876ded24b8167')
+
+    @unittest_run_loop
+    async def test_build_unsigned_transfer_with_xlm_amount(self):
+        result = build_unsigned_transfer('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 0, 10, 1, 'memo')
+        assert result == (
+            'AAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAZAAAAAAAAAACAAAAAAAAAAEAAAAEbWVtbwAAAAEAAAABAAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAAQAAAADZmUaevDbFEdvFYNAKhFBHPxv9Rr4phQFV2Vx/gRzlsQAAAAAAAAAABfXhAAAAAAAAAAAA',
+            'c363b479e6dd1fb149c28251d71315d78144bb44e3daf0617eb07be554b8b59c'
+        )
