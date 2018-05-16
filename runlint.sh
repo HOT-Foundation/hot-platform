@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker-compose run --rm hotnow-token-platform mypy ./token_platform/ --ignore-missing-imports
+docker-compose run --rm hotnow-htkn-platform mypy ./token_platform/ --ignore-missing-imports
