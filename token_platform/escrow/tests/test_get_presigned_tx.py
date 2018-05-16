@@ -106,15 +106,15 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
             "xdr": [
                 {
                 "@id": "GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY",
-                "@url": "http://hotnow-token-platform:8081/wallet/GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY/transaction/transfer",
-                "@transaction_url": "http://hotnow-token-platform:8081/transaction/hash",
+                "@url": "/wallet/GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY/transaction/transfer",
+                "@transaction_url": "/transaction/hash",
                 "xdr": "xdr",
                 "sequence_number": 2
                 },
                 {
                 "@id": "GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY",
-                "@url": "http://hotnow-token-platform:8081/wallet/GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY/transaction/transfer",
-                "@transaction_url": "http://hotnow-token-platform:8081/transaction/hash",
+                "@url": "/wallet/GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY/transaction/transfer",
+                "@transaction_url": "/transaction/hash",
                 "xdr": "xdr",
                 "sequence_number": 3
                 }

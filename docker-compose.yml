@@ -7,13 +7,12 @@ services:
     working_dir: "/usr/src"
     command: "python -u token_platform/server.py"
     ports:
-      - "8081:8081"
+      - "8081:80"
     volumes:
       - "./:/usr/src"
     environment:
       - ASSET_CODE=HTKN
       - ISSUER=GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ
-      - HOST=http://hotnow-token-platform:8081
       - PYTHONPATH=/usr/src/token_platform
     networks:
       - hotnow-network

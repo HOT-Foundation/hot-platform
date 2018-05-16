@@ -17,14 +17,17 @@ from escrow.get_escrow_wallet import get_escrow_wallet_from_request
 
 routes = [
     web.get('/', handle),
-    web.post('/escrow/{escrow_address}/generate-wallet', post_generate_escrow_wallet_from_request),
-    web.post('/escrow/{escrow_address}/generate-presigned-transections', get_presigned_tx_xdr_from_request),
+
     web.get('/wallet/{wallet_address}', get_wallet_from_request),
     web.post('/wallet/{wallet_address}/generate-wallet', post_generate_wallet_from_request),
     web.get('/wallet/{wallet_address}/transaction/current-sequence', get_current_tx_sequence_from_request),
     web.post('/wallet/{wallet_address}/generate-payment', generate_payment_from_request),
     web.get('/wallet/{wallet_address}/transaction/change-trust', get_unsigned_change_trust_from_request),
+
+    web.get('/escrow/{escrow_address}', get_escrow_wallet_from_request),
+    web.post('/escrow/{escrow_address}/generate-wallet', post_generate_escrow_wallet_from_request),
+    web.post('/escrow/{escrow_address}/generate-presigned-transections', get_presigned_tx_xdr_from_request),
+    
     web.get('/transaction/{transaction_hash}', get_transaction_from_request),
     web.put('/transaction/{transaction_hash}', put_transaction_from_request),
-    web.get('/escrow/{escrow_address}', get_escrow_wallet_from_request),
 ]
