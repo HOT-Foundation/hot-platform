@@ -66,7 +66,8 @@ class TestGenerateJointWallet(BaseTestClass):
                     "weight": 1
                 }
             ],
-            "xdr": "create_joint_wallet_xdr"
+            "xdr": "create_joint_wallet_xdr",
+            "transaction_hash": "create_joint_wallet_tx_hash"
         }
 
         assert result == expect
@@ -109,7 +110,8 @@ class TestGenerateJointWallet(BaseTestClass):
                     "weight": 1
                 }
             ],
-            "xdr": "create_joint_wallet_xdr"
+            "xdr": "create_joint_wallet_xdr",
+            "transaction_hash": "create_joint_wallet_tx_hash"
         }
 
         assert result == expect
