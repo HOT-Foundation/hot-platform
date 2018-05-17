@@ -45,7 +45,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
     async def test_get_transaction_from_request_already_submitted(self, mock_address, mock_transaction_by_memo):
 
         mock_transaction_by_memo.return_value = {
-            'message' : 'Target is already submited',
+            'message' : 'Transaction is already submited',
             'url' : '/transaction/0b309e40e40809e34e7765062e8ff393dd4e542d05f59a22719655e84c557257'
         }
 

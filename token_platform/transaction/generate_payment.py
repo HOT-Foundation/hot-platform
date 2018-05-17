@@ -52,7 +52,7 @@ async def get_transaction_by_memo(source_account: str, memo: str, cursor: int = 
 
             if transaction['memo'] == memo:
                 return {
-                    'message' : 'Target is already submited',
+                    'message' : 'Transaction is already submited',
                     'url' : '/transaction/{}'.format(transaction['hash'])
                 }
 
