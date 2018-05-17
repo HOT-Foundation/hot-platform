@@ -101,6 +101,8 @@ async def build_unsigned_transfer(source_address: str, destination_address: str,
     wallet = StellarAddress(address=destination_address, network=settings['STELLAR_NETWORK'])
     try:
         wallet.get()
+        if amount_xlm:
+            builder.append_payment_op(destination_address, amount_xlm, source=source_address)
     except AccountNotExistError as e:
         builder.append_create_account_op(source=source_address, destination=destination_address, starting_balance=amount_xlm)
 
@@ -109,12 +111,7 @@ async def build_unsigned_transfer(source_address: str, destination_address: str,
             destination_address, amount_htkn, asset_type=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], source=source_address
         )
 
-    if amount_xlm:
-        builder.append_payment_op(
-            destination_address, amount_xlm, source=source_address
-        )
-
-    if(memo_text):
+    if memo_text:
         builder.add_text_memo(memo_text)
 
     unsigned_xdr = builder.gen_xdr()
