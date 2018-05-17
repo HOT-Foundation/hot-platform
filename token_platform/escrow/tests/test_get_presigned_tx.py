@@ -109,14 +109,16 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
                 "@url": "/wallet/GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY/transaction/transfer",
                 "@transaction_url": "/transaction/hash",
                 "xdr": "xdr",
-                "sequence_number": 2
+                "sequence_number": 2,
+                "transaction_hash": "hash"
                 },
                 {
                 "@id": "GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY",
                 "@url": "/wallet/GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY/transaction/transfer",
                 "@transaction_url": "/transaction/hash",
                 "xdr": "xdr",
-                "sequence_number": 3
+                "sequence_number": 3,
+                "transaction_hash": "hash"
                 }
             ]
         }
