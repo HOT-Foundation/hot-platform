@@ -2,11 +2,12 @@ import binascii
 from decimal import Decimal
 from typing import Any, Dict, List, Mapping, NewType, Optional, Tuple, Union
 
-from aiohttp import web
 from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
 from stellar_base.horizon import horizon_livenet, horizon_testnet
+from stellar_base.utils import AccountNotExistError
 
+from aiohttp import web
 from conf import settings
 from transaction.transaction import get_signers, get_threshold_weight
 from wallet.wallet import get_wallet
@@ -22,9 +23,7 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
     amount_xlm = body.get('amount_xlm')
     sequence_number = body.get('sequence_number', None)
     meta = body.get('meta', None)
-
     await get_wallet(source_account)
-    await get_wallet(target_address)
 
     if meta:
         url_get_transaction = await get_transaction_by_memo(source_account, meta)
@@ -72,7 +71,7 @@ async def generate_payment(source_address: str, destination: str, amount_htkn: D
             sequence: sequence number for generate transaction [optional]
             meta: memo text [optional]
     """
-    unsigned_xdr, tx_hash = build_unsigned_transfer(source_address, destination, amount_htkn, amount_xlm, sequence, meta)
+    unsigned_xdr, tx_hash = await build_unsigned_transfer(source_address, destination, amount_htkn, amount_xlm, sequence, meta)
     host: str = settings['HOST']
     result = {
         '@id': source_address,
@@ -85,7 +84,7 @@ async def generate_payment(source_address: str, destination: str, amount_htkn: D
     return result
 
 
-def build_unsigned_transfer(source_address: str, destination_address: str, amount_htkn: Decimal, amount_xlm: Decimal, sequence:int=None, memo_text:str=None) -> Tuple[str, str]:
+async def build_unsigned_transfer(source_address: str, destination_address: str, amount_htkn: Decimal, amount_xlm: Decimal, sequence:int=None, memo_text:str=None) -> Tuple[str, str]:
     """"Build unsigned transfer transaction return unsigned XDR and transaction hash.
 
         Args:
@@ -96,7 +95,14 @@ def build_unsigned_transfer(source_address: str, destination_address: str, amoun
             sequence: sequence number for generate transaction [optional]
             meta: memo text [optional]
     """
+
     builder = Builder(address=source_address, network=settings['STELLAR_NETWORK'], sequence=sequence)
+
+    wallet = StellarAddress(address=destination_address, network=settings['STELLAR_NETWORK'])
+    try:
+        wallet.get()
+    except AccountNotExistError as e:
+        builder.append_create_account_op(source=source_address, destination=destination_address, starting_balance=amount_xlm)
 
     if amount_htkn:
         builder.append_payment_op(

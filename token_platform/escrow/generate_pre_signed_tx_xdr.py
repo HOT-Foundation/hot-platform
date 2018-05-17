@@ -53,7 +53,8 @@ async def get_presigned_tx_xdr(
                 amount: amount of money that would be transferred
                 sequence: sequence number of escrow account
         """
-        unsigned_xdr, tx_hash = build_unsigned_transfer(
+
+        unsigned_xdr, tx_hash = await build_unsigned_transfer(
             source_address, destination, amount, Decimal(0), sequence=sequence
         )
         host: str = settings['HOST']
