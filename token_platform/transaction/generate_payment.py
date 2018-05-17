@@ -79,7 +79,8 @@ async def generate_payment(source_address: str, destination: str, amount_htkn: D
         '@transaction_url': '{}/transaction/{}'.format(host, tx_hash),
         'min_signer': await get_threshold_weight(source_address, 'payment'),
         'signers': await get_signers(source_address),
-        'unsigned_xdr': unsigned_xdr
+        'unsigned_xdr': unsigned_xdr,
+        'transaction_hash': tx_hash
     }
     return result
 

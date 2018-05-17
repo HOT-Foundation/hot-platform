@@ -126,7 +126,8 @@ class TestGetUnsignedTransaction(BaseTestClass):
                 "weight": 1
                 }
             ],
-            "unsigned_xdr": "xdr"
+            "unsigned_xdr": "xdr",
+            "transaction_hash": "tx_hash"
         }
         assert result == expect_data
 
