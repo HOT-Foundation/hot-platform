@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Mapping, NewType, Optional, Tuple, Union
 from aiohttp import web
 from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
+from stellar_base.horizon import horizon_livenet, horizon_testnet
 
 from conf import settings
 from transaction.transaction import get_signers, get_threshold_weight
@@ -25,8 +26,32 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
     await get_wallet(source_account)
     await get_wallet(target_address)
 
+    if (meta):
+        await is_already_submit(target_address, meta)
+
     result = await generate_payment(source_account, target_address, amount_htkn, amount_xlm, sequence_number, meta)
     return web.json_response(result)
+
+async def is_already_submit(target_address: str, memo: str, cursor: int = None):
+    horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
+
+    # Get transactions data within key 'records'
+    transactions = horizon.account_transactions(target_address, params={'limit' : 200, 'order' : 'desc', 'cursor' : cursor}).get('_embedded').get('records')
+    # Filter result data on above by 'memo_type' == text
+    transactions_filter = list(filter(lambda transaction : transaction['memo_type'] == 'text', transactions))
+
+
+    if len(transactions) > 0:
+        transacton_paging_token = transactions[len(transactions) - 1]['paging_token']
+
+        for transaction in transactions_filter:
+            transaction.pop('_links')
+
+            if transaction['memo'] == memo:
+                raise web.HTTPBadRequest(reason= 'Target redemption already used')
+
+
+        await is_already_submit(target_address, memo, transacton_paging_token)
 
 
 async def generate_payment(source_address: str, destination: str, amount_htkn: Decimal, amount_xlm:Decimal, sequence:int = None, meta:str = None) -> Dict:
