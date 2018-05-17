@@ -65,7 +65,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
         assert resp.status == 400
         text = await resp.json()
         assert text == mock_transaction_by_memo.return_value
-        mock_transaction_by_memo.assert_called_once_with(destination_address, meta)
+        mock_transaction_by_memo.assert_called_once_with(source_address, meta)
 
 
     @unittest_run_loop
@@ -143,7 +143,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
 
     @unittest_run_loop
     async def test_have_transaction_by_memo(self):
-        result = await get_transaction_by_memo('GBFAIH5WKAJQ77NG6BZG7TGVGXHPX4SQLIJ7BENJMCVCZSUZPSISCLU5', 'testmemo')
+        result = await get_transaction_by_memo('GD3PPDLKXRDM57UV7QDFIHLLRCLM4KGVIA43GEM7ZOT7EHK5TR3Z5G6I', 'testmemo')
         assert 'message' in result.keys()
         assert 'url' in result.keys()
 
