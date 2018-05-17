@@ -54,7 +54,7 @@ async def get_presigned_tx_xdr(
                 sequence: sequence number of escrow account
         """
         unsigned_xdr, tx_hash = build_unsigned_transfer(
-            source_address, destination, amount, Decimal(0), sequence=sequence_number
+            source_address, destination, amount, Decimal(0), sequence=sequence
         )
         host: str = settings['HOST']
         result = {
