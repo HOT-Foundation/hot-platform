@@ -26,17 +26,20 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
     await get_wallet(source_account)
     await get_wallet(target_address)
 
-    if (meta):
-        await is_already_submit(target_address, meta)
+    if meta:
+        url_get_transaction = await get_transaction_by_memo(target_address, meta)
+        if url_get_transaction:
+            return web.json_response(url_get_transaction, status=400)
 
     result = await generate_payment(source_account, target_address, amount_htkn, amount_xlm, sequence_number, meta)
     return web.json_response(result)
 
-async def is_already_submit(target_address: str, memo: str, cursor: int = None):
+async def get_transaction_by_memo(target_address: str, memo: str, cursor: int = None) -> Union[Dict, bool]:
     horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
 
     # Get transactions data within key 'records'
     transactions = horizon.account_transactions(target_address, params={'limit' : 200, 'order' : 'desc', 'cursor' : cursor}).get('_embedded').get('records')
+
     # Filter result data on above by 'memo_type' == text
     transactions_filter = list(filter(lambda transaction : transaction['memo_type'] == 'text', transactions))
 
@@ -48,10 +51,14 @@ async def is_already_submit(target_address: str, memo: str, cursor: int = None):
             transaction.pop('_links')
 
             if transaction['memo'] == memo:
-                raise web.HTTPBadRequest(reason= 'Target redemption already used')
+                return {
+                'message' : 'Target is already submited',
+                'url' : '/transaction/{}'.format(transaction['hash'])
+                }
 
+        await get_transaction_by_memo(target_address, memo, transacton_paging_token)
 
-        await is_already_submit(target_address, memo, transacton_paging_token)
+    return False
 
 
 async def generate_payment(source_address: str, destination: str, amount_htkn: Decimal, amount_xlm:Decimal, sequence:int = None, meta:str = None) -> Dict:
