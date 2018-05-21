@@ -10,16 +10,16 @@ from stellar_base.utils import AccountNotExistError
 from conf import settings
 from escrow.get_escrow_wallet import (get_escrow_wallet_detail,
                                       get_escrow_wallet_from_request)
-from router import routes
 from wallet.tests.factory.wallet import StellarWallet
 from wallet.wallet import StellarAddress, get_wallet
+from router import reverse
 
 
 @patch('escrow.get_escrow_wallet.get_escrow_wallet_detail')
 async def test_get_escrow_wallet_from_request(mock_get_escrow_wallet):
     mock_get_escrow_wallet.return_value = {'account': 'yes'}
     wallet_address = 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'
-    req = make_mocked_request('GET', '/escrow/{}'.format(wallet_address),
+    req = make_mocked_request('GET', reverse('escrow-address', escrow_address=wallet_address),
                               match_info={'wallet_address': wallet_address})
     await get_escrow_wallet_from_request(req)
     assert mock_get_escrow_wallet.call_count == 1
@@ -51,13 +51,13 @@ async def test_get_escrow_wallet_success_trusted_htkn(mock_address):
     host = settings.get('HOST', None)
     expect_data = {
         '@id': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
-        '@url': f'{host}/escrow/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+        '@url': f"{host}{reverse('escrow-address', escrow_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')}",
         'asset': {
             'HTKN': '7.0000000',
             'XLM': '9.9999200'
         },
         'sequence': '1',
-        'generate-wallet': f'{host}/escrow/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD/generate-wallet',
+        'generate-wallet': f"{host}{reverse('escrow-generate-wallet', escrow_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')}",
         'data': {
             'name': 'UnitTest',
             'age': '30'

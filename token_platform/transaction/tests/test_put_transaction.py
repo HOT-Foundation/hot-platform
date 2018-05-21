@@ -3,6 +3,7 @@ from aiohttp.test_utils import unittest_run_loop
 from asynctest import patch
 from tests.test_utils import BaseTestClass
 from aiohttp import web
+from router import reverse
 
 class TestSubmitTransactionFromRequest(BaseTestClass):
 
@@ -18,7 +19,7 @@ class TestSubmitTransactionFromRequest(BaseTestClass):
         mock_get.return_value = expect
         mock_dup.return_value = False
         mock_tx.return_value = {'status': 200}
-        url = f'transaction/transaction-hash'
+        url = reverse('transaction', transaction_hash='transaction-hash')
         resp = await self.client.request("PUT", url, data=b'test data')
         assert resp.status == 200
         text = await resp.json()
@@ -32,7 +33,7 @@ class TestSubmitTransactionFromRequest(BaseTestClass):
     async def test_put_transaction_from_request_with_no_xdr(self, mock_tx, mock_dup) -> None:
         mock_dup.return_value = False
         mock_tx.return_value = {'status': 200}
-        url = f'transaction/transaction-hash'
+        url = reverse('transaction', transaction_hash='transaction-hash')
         resp = await self.client.request("PUT", url)
         assert resp.status == 400
         text = await resp.json()
@@ -48,7 +49,7 @@ class TestSubmitTransactionFromRequest(BaseTestClass):
     async def test_put_transaction_from_request_with_duplicate_transaction(self, mock_tx, mock_dup) -> None:
         mock_dup.return_value = True
         mock_tx.return_value = {'status': 200}
-        url = f'transaction/transaction-hash'
+        url = reverse('transaction', transaction_hash='transaction-hash')
         resp = await self.client.request("PUT", url, data=b'test data')
         assert resp.status == 400
         text = await resp.json()

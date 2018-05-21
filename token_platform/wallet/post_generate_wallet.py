@@ -9,6 +9,7 @@ from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
 
 from conf import settings
+from router import reverse
 from wallet.wallet import (build_generate_wallet_transaction,
                            wallet_address_is_duplicate)
 
@@ -43,8 +44,8 @@ async def post_generate_wallet_from_request(request: web.Request):
     result = {
         'source_address': source_address,
         'signers': signers,
-        'unsigned_xdr': unsigned_xdr,
-        'transaction_url': f'{host}/transaction/{tx_hash}',
+        'xdr': unsigned_xdr,
+        'transaction_url': f"{host}{reverse('transaction', transaction_hash=tx_hash)}",
         '@url': f'{host}{request.path}'
     }
 

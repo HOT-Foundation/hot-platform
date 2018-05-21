@@ -6,6 +6,7 @@ from stellar_base.builder import Builder
 
 from aiohttp import web
 from conf import settings
+from router import reverse
 
 
 async def post_generate_joint_wallet(request: web.Request) -> web.Response:
@@ -31,8 +32,8 @@ async def generate_joint_wallet(deal_address: str, parties: List, creator: str, 
     signers = parties_signer + [{'public_key': creator, 'weight': 1}, {'public_key': deal_address, 'weight': 1}]
     result = {
         '@id': deal_address,
-        '@url': f'/wallet/{deal_address}/generate-joint-wallet',
-        '@transaction_url': f'/transaction/{tx_hash}',
+        '@url': reverse('generate-joint-wallet', wallet_address=deal_address),
+        '@transaction_url': reverse('transaction', transaction_hash=tx_hash),
         'signers': signers,
         'xdr': xdr,
         'transaction_hash': tx_hash
@@ -66,7 +67,7 @@ async def build_joint_wallet(deal_address: str, parties: List, creator: str, sta
     if meta and isinstance(meta, dict):
         for key, value in meta.items():
             builder.append_manage_data_op(source=deal_address, data_name=key, data_value=value)
-    
+
     weight = len(parties) + 1
     builder.append_set_options_op(
         source=deal_address, master_weight=0, low_threshold=weight, med_threshold=weight, high_threshold=weight

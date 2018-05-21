@@ -10,6 +10,7 @@ from stellar_base.utils import DecodeError
 
 from conf import settings
 from transaction.transaction import get_signers, get_threshold_weight
+from router import reverse
 
 
 async def post_generate_escrow_wallet_from_request(request: web.Request) -> web.Response:
@@ -92,8 +93,8 @@ async def generate_escrow_wallet(escrow_address: str,
     host = settings['HOST']
     return {
         'escrow_address': escrow_address,
-        '@url': f'{host}/escrow/{escrow_address}/generate-wallet',
-        '@transaction_url': f'{host}/transaction/{tx_hash}',
+        '@url': f"{host}{reverse('escrow-generate-wallet', escrow_address=escrow_address)}",
+        '@transaction_url': f"{host}{reverse('transaction', transaction_hash=tx_hash)}",
         'signers': [escrow_address, creator_address, provider_address],
         'xdr': xdr,
         'transaction_hash': tx_hash

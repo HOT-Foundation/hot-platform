@@ -9,6 +9,8 @@ from stellar_base.utils import AccountNotExistError
 
 from conf import settings
 from wallet.wallet import get_wallet
+from base64 import b64decode
+from router import reverse
 
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 STELLAR_BALANCE = Dict[str, str]
@@ -47,11 +49,11 @@ async def get_escrow_wallet_detail(escrow_address: str) -> web.Response:
 
     result: Dict[str, Any] = {
         '@id': escrow_address,
-        '@url': '{}/escrow/{}'.format(settings['HOST'], escrow_address),
+        '@url': f"{settings['HOST']}{reverse('escrow-address', escrow_address=escrow_address)}",
         'asset': _merge_balance(wallet.balances),
-        'generate-wallet': '{}/escrow/{}/generate-wallet'.format(settings['HOST'], escrow_address),
+        'generate-wallet': f"{settings['HOST']}{reverse('escrow-generate-wallet', escrow_address=escrow_address)}",
         'sequence': wallet.sequence,
-        'data': _format_data(wallet.data),
+        'data': _format_data(wallet.data)
     }
 
     return result

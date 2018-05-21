@@ -1,6 +1,5 @@
 from aiohttp.test_utils import AioHTTPTestCase
 from aiohttp import web
-from router import routes
 from server import init_app
 
 class BaseTestClass(AioHTTPTestCase):

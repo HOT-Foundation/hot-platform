@@ -11,6 +11,7 @@ from aiohttp import web
 from conf import settings
 from wallet.wallet import (build_generate_wallet_transaction,
                            wallet_address_is_duplicate)
+from router import reverse
 
 
 class MockBuilder():
@@ -39,7 +40,7 @@ class TestCreateWallet(BaseTestClass):
         mock_xdr.return_value = (b'test-xdr', b'test-transaction-envelop')
         mock_check.return_value = False
 
-        url = f'/wallet/{self.wallet_address}/generate-wallet'
+        url = reverse('generate-wallet', wallet_address=self.wallet_address)
         json_request = {
             'target_address' : self.target_address,
             'starting_balance' : self.starting_balance
@@ -54,15 +55,15 @@ class TestCreateWallet(BaseTestClass):
         expect = {
             'source_address': self.wallet_address,
             'signers': [self.wallet_address, self.target_address],
-            'unsigned_xdr': expect_unsigned_xdr,
-            'transaction_url': f'{self.host}/transaction/{expect_tx_hash}',
+            'xdr': expect_unsigned_xdr,
+            'transaction_url': f"{self.host}{reverse('transaction', transaction_hash=expect_tx_hash)}",
             '@url': f'{self.host}{url}'
         }
         assert text == expect
 
     @unittest_run_loop
     async def test_post_genrate_wallet_from_request_json_data_missing(self):
-        url = f'/wallet/{self.wallet_address}/generate-wallet'
+        url = reverse('generate-wallet', wallet_address=self.wallet_address)
         resp = await self.client.request("POST", url)
         assert resp.status == 400
         text = await resp.json()
@@ -70,7 +71,7 @@ class TestCreateWallet(BaseTestClass):
 
     @unittest_run_loop
     async def test_post_generate_wallet_from_request_use_wrong_parameter(self):
-        url = f'/wallet/{self.wallet_address}/generate-wallet'
+        url = reverse('generate-wallet', wallet_address=self.wallet_address)
         resp = await self.client.request("POST", url, json={'target':'test'})
         assert resp.status == 400
         text = await resp.json()
@@ -92,7 +93,7 @@ class TestCreateWallet(BaseTestClass):
     @unittest_run_loop
     @patch('wallet.post_generate_wallet.wallet_address_is_duplicate', **{'return_value' : True})
     async def test_post_generate_wallet_from_request_is_duplicate_wallet_address(self, mock):
-        url = f'/wallet/{self.wallet_address}/generate-wallet'
+        url = reverse('generate-wallet', wallet_address=self.wallet_address)
         json_request = {
             'target_address' : self.target_address,
             'starting_balance' : self.starting_balance

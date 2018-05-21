@@ -11,6 +11,7 @@ from transaction.get_transaction import get_transaction_from_request
 from transaction.tests.factory.horizon import HorizonData
 from transaction.transaction import get_transaction, horizon_testnet
 from conf import settings
+from router import reverse
 
 class TestGetTransactionFromRequest(BaseTestClass):
 
@@ -19,7 +20,7 @@ class TestGetTransactionFromRequest(BaseTestClass):
     async def test_get_transaction_from_request(self, mock_get_transaction) -> None:
         mock_get_transaction.return_value = {}
         tx_hash = '4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9'
-        resp = await self.client.request('GET', '/transaction/{}'.format(tx_hash))
+        resp = await self.client.request('GET', reverse('transaction', transaction_hash=tx_hash))
         assert resp.status == 200
         mock_get_transaction.assert_called_once_with(tx_hash)
 
@@ -34,7 +35,7 @@ class TestGetTransactionFromRequest(BaseTestClass):
         host = settings.get('HOST', None)
         expect_data = {
             '@id': '4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9',
-            '@url': f'{host}/transaction/4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9',
+            '@url': f"{host}{reverse('transaction', transaction_hash='4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9')}",
             'paging_token': '34980756279271424',
             'ledger': 8144592,
             'created_at': '2018-03-28T08:34:22Z',

@@ -12,6 +12,7 @@ from escrow.generate_pre_signed_tx_xdr import (get_current_sequence_number,
                                                get_presigned_tx_xdr_from_request,
                                                get_signers,
                                                get_threshold_weight)
+from router import reverse
 
 
 class TestGeneratePreSignedTxXDR(BaseTestClass):
@@ -24,19 +25,19 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
         host = settings.get('HOST', None)
         mock_get_wallet.return_value = {
             '@id': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
-            '@url': f'{host}/escrow/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+            '@url': f"{host}{reverse('escrow-address', escrow_address='')}",
             'asset': {
                 'HTKN': '10.0000000',
                 'XLM': '9.9999200'
             },
-            'generate-wallet': f'{host}/escrow/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD/generate-wallet',
+            'generate-wallet': f"{host}{reverse('escrow-generate-wallet', escrow_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')}",
             'data': {
                 'destination_address': 'GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6',
                 'cost_per_transaction': '5'
             }
         }
 
-        resp = await self.client.request("POST", "/escrow/{}/generate-presigned-transections".format(escrow_address), json={})
+        resp = await self.client.request("POST", reverse('generate-presigned-transections', escrow_address=escrow_address), json={})
         assert resp.status == 200
 
         mock_get_wallet.assert_called_once_with(
@@ -63,18 +64,18 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
         mock_get_transaction.return_value = {}
         mock_get_wallet.return_value = {
             '@id': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
-            '@url': f'{host}/escrow/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+            '@url': f"{host}{reverse('escrow-address', escrow_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')}",
             'asset': {
                 'HTKN': '10.0000000',
                 'XLM': '9.9999200'
             },
-            'generate-wallet': f'{host}/escrow/GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD/generate-wallet',
+            'generate-wallet': f"{host}{reverse('escrow-generate-wallet', escrow_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')}",
             'data': {
                 'source': 'GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6'
             }
         }
 
-        req = make_mocked_request("POST", "/escrow/{}/generate-presigned-transections".format(escrow_address),
+        req = make_mocked_request("POST", reverse('generate-presigned-transections', escrow_address=escrow_address),
             match_info={'wallet_address': 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'}
         )
 
@@ -107,7 +108,7 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
                 {
                 "@id": "GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY",
                 "@url": "/wallet/GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY/transaction/transfer",
-                "@transaction_url": "/transaction/hash",
+                "@transaction_url": reverse('transaction', transaction_hash='hash'),
                 "xdr": "xdr",
                 "sequence_number": 2,
                 "transaction_hash": "hash"
@@ -115,7 +116,7 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
                 {
                 "@id": "GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY",
                 "@url": "/wallet/GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY/transaction/transfer",
-                "@transaction_url": "/transaction/hash",
+                "@transaction_url": reverse('transaction', transaction_hash='hash'),
                 "xdr": "xdr",
                 "sequence_number": 3,
                 "transaction_hash": "hash"

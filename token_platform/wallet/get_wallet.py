@@ -9,6 +9,7 @@ from stellar_base.builder import Builder
 from conf import settings
 from wallet.wallet import (build_generate_wallet_transaction, get_wallet,
                            wallet_address_is_duplicate)
+from router import reverse
 
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 STELLAR_BALANCE = Dict[str, str]
@@ -45,7 +46,7 @@ async def get_wallet_detail(wallet_address: str) -> web.Response:
     def _trusted_htkn(balances: STELLAR_BALANCES) -> Union[Dict, Dict[str, str]]:
         """Return URL for making trust HTKN"""
         if len(list(filter(lambda b: b.get('asset_code', None) == settings['ASSET_CODE'] and b.get('asset_issuer', None) == settings['ISSUER'], balances))) == 0:
-            return {'trust': '{}/wallet/{}/transaction/change-trust'.format(settings['HOST'], wallet_address)}
+            return {'trust': f"{settings['HOST']}{reverse('change-trust', wallet_address=wallet_address)}"}
         return {}
 
     def _format_data(data: Dict[str, str]) -> Dict:
@@ -53,9 +54,10 @@ async def get_wallet_detail(wallet_address: str) -> web.Response:
         return {k: b64decode(v).decode('utf-8') for k, v in data.items()}
 
     wallet = await get_wallet(wallet_address)
+    url = reverse('wallet-address', wallet_address=wallet_address)
     result: Dict[str, Any] = {
         '@id': wallet_address,
-        '@url': '{}/wallet/{}'.format(settings['HOST'], wallet_address),
+        '@url': f"{settings['HOST']}{url}",
         'asset': _merge_balance(wallet.balances),
         'sequence': wallet.sequence,
         'data': _format_data(wallet.data),
