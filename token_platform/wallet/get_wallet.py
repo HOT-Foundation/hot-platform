@@ -1,10 +1,11 @@
+from base64 import b64decode
 from functools import reduce
 from typing import Any, Dict, List, Mapping, NewType, Optional, Union
 
 import requests
+from aiohttp import web
 from stellar_base.builder import Builder
 
-from aiohttp import web
 from conf import settings
 from wallet.wallet import (build_generate_wallet_transaction, get_wallet,
                            wallet_address_is_duplicate)
@@ -48,13 +49,18 @@ async def get_wallet_detail(wallet_address: str) -> web.Response:
             return {'trust': f"{settings['HOST']}{reverse('change-trust', wallet_address=wallet_address)}"}
         return {}
 
+    def _format_data(data: Dict[str, str]) -> Dict:
+        """ Decode base64 data """
+        return {k: b64decode(v).decode('utf-8') for k, v in data.items()}
+
     wallet = await get_wallet(wallet_address)
     url = reverse('wallet-address', wallet_address=wallet_address)
     result: Dict[str, Any] = {
         '@id': wallet_address,
         '@url': f"{settings['HOST']}{url}",
         'asset': _merge_balance(wallet.balances),
-        'sequence': wallet.sequence
+        'sequence': wallet.sequence,
+        'data': _format_data(wallet.data),
     }
 
     result.update(_trusted_htkn(wallet.balances))

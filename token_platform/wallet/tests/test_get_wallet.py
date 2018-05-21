@@ -60,7 +60,11 @@ async def test_get_wallet_success_trusted_htkn(mock_address):
             'HTKN': '7.0000000',
             'XLM': '9.9999200'
         },
-        'sequence': '1'
+        'sequence': '1',
+        'data': {
+            'age': '30',
+            'name': 'UnitTest'
+        }
     }
     assert actual_data == expect_data
 
@@ -90,7 +94,11 @@ async def test_get_wallet_success_not_trust_htkn(mock_address):
         'asset': {
             'XLM': '9.9999200'
         },
-        'sequence': '1'
+        'sequence': '1',
+        'data': {
+            'age': '30',
+            'name': 'UnitTest'
+        }
     }
     assert actual_data == expect_data
 

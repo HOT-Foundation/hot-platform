@@ -1,3 +1,4 @@
+from base64 import b64decode
 from functools import reduce
 from typing import Any, Dict, List, Union
 
@@ -51,6 +52,7 @@ async def get_escrow_wallet_detail(escrow_address: str) -> web.Response:
         '@url': f"{settings['HOST']}{reverse('escrow-address', escrow_address=escrow_address)}",
         'asset': _merge_balance(wallet.balances),
         'generate-wallet': f"{settings['HOST']}{reverse('escrow-generate-wallet', escrow_address=escrow_address)}",
+        'sequence': wallet.sequence,
         'data': _format_data(wallet.data)
     }
 

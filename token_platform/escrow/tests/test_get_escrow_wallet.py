@@ -56,6 +56,7 @@ async def test_get_escrow_wallet_success_trusted_htkn(mock_address):
             'HTKN': '7.0000000',
             'XLM': '9.9999200'
         },
+        'sequence': '1',
         'generate-wallet': f"{host}{reverse('escrow-generate-wallet', escrow_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')}",
         'data': {
             'name': 'UnitTest',
