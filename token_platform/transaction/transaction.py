@@ -139,7 +139,7 @@ async def get_transaction_by_memo(source_account: str, memo: str, cursor: int = 
         for transaction in transactions_filter:
             transaction.pop('_links')
 
-            if transaction['memo'] == memo:
+            if transaction['memo'] == memo and transaction['source_account'] == source_account:
                 return {
                     'message' : 'Transaction is already submited',
                     'url' : '/transaction/{}'.format(transaction['hash']),
