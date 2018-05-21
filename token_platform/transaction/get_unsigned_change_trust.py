@@ -10,6 +10,7 @@ from wallet.wallet import (build_generate_wallet_transaction,
                            wallet_address_is_duplicate)
 
 from transaction.transaction import get_threshold_weight, get_signers
+from router import reverse
 
 
 async def get_unsigned_change_trust_from_request(request: web.Request) -> web.Response:
@@ -25,11 +26,11 @@ async def get_unsigned_change_trust(source_address: str) -> Dict:
     host: str = settings['HOST']
     result = {
         '@id': source_address,
-        '@url': '{}/wallet/{}/transaction/change-trust'.format(host, source_address),
-        '@transaction_url': '{}/transaction/{}'.format(host, tx_hash),
+        '@url': f"{host}{reverse('change-trust', wallet_address=source_address)}",
+        '@transaction_url': f"{host}{reverse('transaction', transaction_hash=tx_hash)}",
         'min_signer': await get_threshold_weight(source_address, 'change-trust'),
         'signers': await get_signers(source_address),
-        'unsigned_xdr': unsigned_xdr,
+        'xdr': unsigned_xdr,
         'transaction_hash': tx_hash
     }
     return result

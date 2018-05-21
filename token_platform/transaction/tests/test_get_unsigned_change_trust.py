@@ -14,6 +14,7 @@ from transaction.get_unsigned_change_trust import (get_signers,
                                                    get_unsigned_change_trust_from_request,
                                                    build_unsigned_change_trust)
 from wallet.tests.factory.wallet import StellarWallet
+from router import reverse
 
 
 class TestGetUnsignedChangeTrust(BaseTestClass):
@@ -22,7 +23,7 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
     async def test_get_change_trust_from_request_success(self, mock_get_unsigned_change_trust):
         mock_get_unsigned_change_trust.return_value = {}
         wallet_address = 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'
-        resp = await self.client.request('GET', '/wallet/{}/transaction/change-trust'.format(wallet_address))
+        resp = await self.client.request('GET', reverse('change-trust', wallet_address=wallet_address))
         assert resp.status == 200
         mock_get_unsigned_change_trust.assert_called_once_with(wallet_address)
 
@@ -42,8 +43,8 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
 
         expect_data = {
             "@id": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
-            "@url": f"{settings['HOST']}/wallet/GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI/transaction/change-trust",
-            "@transaction_url": f"{settings['HOST']}/transaction/bbf17ffd2de5a1fafd1644b506ad601402426fe0633a168edec05522d30cf09c",
+            "@url": f"{settings['HOST']}{reverse('change-trust', wallet_address='GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI')}",
+            "@transaction_url": f"{settings['HOST']}{reverse('transaction', transaction_hash='bbf17ffd2de5a1fafd1644b506ad601402426fe0633a168edec05522d30cf09c')}",
             "min_signer": 1,
             "signers": [
                 {
@@ -51,7 +52,7 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
                 "weight": 1
                 }
             ],
-            "unsigned_xdr": "AAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAZAB3A5sAAAAGAAAAAAAAAAAAAAABAAAAAQAAAADOf93UUiwNNmwwYj2/XOv/KuhgA2mooc0ID+GYa49siQAAAAYAAAABSFRLTgAAAADkHacjwpeFWz5txveZ4sJ3pEmTzpdS9fiBscDwpmoppn//////////AAAAAAAAAAA=",
+            "xdr": "AAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAZAB3A5sAAAAGAAAAAAAAAAAAAAABAAAAAQAAAADOf93UUiwNNmwwYj2/XOv/KuhgA2mooc0ID+GYa49siQAAAAYAAAABSFRLTgAAAADkHacjwpeFWz5txveZ4sJ3pEmTzpdS9fiBscDwpmoppn//////////AAAAAAAAAAA=",
             "transaction_hash": "bbf17ffd2de5a1fafd1644b506ad601402426fe0633a168edec05522d30cf09c"
         }
 

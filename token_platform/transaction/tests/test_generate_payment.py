@@ -16,6 +16,7 @@ from transaction.generate_payment import (get_signers,
                                                build_unsigned_transfer)
 from transaction.transaction import get_transaction_by_memo
 from wallet.tests.factory.wallet import StellarWallet
+from router import reverse
 
 
 class TestGetUnsignedTransaction(BaseTestClass):
@@ -34,7 +35,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
         destination_address = 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6'
 
         data = {'target_address': destination_address, 'amount_xlm': 10, 'amount_htkn': 5}
-        url = f'/wallet/{source_address}/generate-payment'
+        url = reverse('generate-payment', wallet_address=source_address)
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 200
         mock_generate_payment.assert_called_once_with(source_address, destination_address, 5, 10, None, None)
@@ -46,7 +47,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
 
         mock_transaction_by_memo.return_value = {
             'message' : 'Transaction is already submited',
-            'url' : '/transaction/0b309e40e40809e34e7765062e8ff393dd4e542d05f59a22719655e84c557257'
+            'url' : reverse('transaction', transaction_hash='0b309e40e40809e34e7765062e8ff393dd4e542d05f59a22719655e84c557257')
         }
 
         balances = [
@@ -60,7 +61,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
         meta = 'testmemo'
 
         data = {'target_address': destination_address, 'amount_xlm': 10, 'amount_htkn': 5, 'meta': meta}
-        url = f'/wallet/{source_address}/generate-payment'
+        url = reverse('generate-payment', wallet_address=source_address)
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         text = await resp.json()
@@ -76,7 +77,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
         destination_address = 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6'
 
         data = {'target': destination_address, 'amount': 10}
-        url = f'/wallet/{source_address}/generate-payment'
+        url = reverse('generate-payment', wallet_address=source_address)
         resp = await self.client.request('POST', url, json=data)
         print(resp)
         assert resp.status == 400
@@ -90,7 +91,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
         source_address = 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'
         destination_address = 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6'
         data = {'target_address': destination_address, 'amount_htkn': 10}
-        url = f'/wallet/{source_address}/generate-payment'
+        url = reverse('generate-payment', wallet_address=source_address)
 
         mock_address.side_effect = web.HTTPNotFound()
         resp = await self.client.request('POST', url, json=data)
@@ -117,8 +118,8 @@ class TestGetUnsignedTransaction(BaseTestClass):
 
         expect_data = {
             "@id": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
-            "@url": '/wallet/GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI/generate-payment',
-            "@transaction_url": '/transaction/tx_hash',
+            "@url": reverse('generate-payment', wallet_address='GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'),
+            "@transaction_url": reverse('transaction', transaction_hash='tx_hash'),
             "min_signer": 1,
             "signers": [
                 {
@@ -126,7 +127,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
                 "weight": 1
                 }
             ],
-            "unsigned_xdr": "xdr",
+            "xdr": "xdr",
             "transaction_hash": "tx_hash"
         }
         assert result == expect_data

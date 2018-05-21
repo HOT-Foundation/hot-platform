@@ -1,5 +1,6 @@
 from tests.test_utils import BaseTestClass
 from aiohttp.test_utils import unittest_run_loop
+from router import reverse
 
 import asynctest
 
@@ -7,7 +8,7 @@ import asynctest
 class TestGetTransactionHashFromRequest(BaseTestClass):
     async def setUpAsync(self):
         self.address = 'GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF'
-        self.transaction_url = '/wallet/{}/get-transaction-hash'.format(self.address)
+        self.transaction_url = reverse('get-transaction-hash', wallet_address=self.address)
         self.params = {'meta': '1'}
         self.tx_hash = '4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9'
 

@@ -7,6 +7,7 @@ from stellar_base.transaction_envelope import TransactionEnvelope as Te
 from aiohttp import web, web_request, web_response
 from conf import settings
 from wallet.wallet import get_wallet
+from router import reverse
 
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 
@@ -62,7 +63,7 @@ async def get_transaction(tx_hash: str) -> Dict[str, Union[str, int, List[Dict[s
         """Format transaction detail in pattern dict"""
         return {
             "@id": tx_detail.get("id", None),
-            "@url": "{}/transaction/{}".format(settings.get('HOST', None), tx_detail.get("id")),
+            "@url": f"{settings.get('HOST', None)}{reverse('transaction', transaction_hash=tx_detail.get('id'))}",
             "paging_token": tx_detail.get("paging_token"),
             "ledger": tx_detail.get("ledger"),
             "created_at": tx_detail.get("created_at", None),
@@ -142,7 +143,7 @@ async def get_transaction_by_memo(source_account: str, memo: str, cursor: int = 
             if transaction['memo'] == memo:
                 return {
                     'message' : 'Transaction is already submited',
-                    'url' : '/transaction/{}'.format(transaction['hash']),
+                    'url' : reverse('transaction', transaction_hash=transaction['hash']),
                     'transaction_hash' : transaction['hash']
                 }
 

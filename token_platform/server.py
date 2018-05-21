@@ -3,12 +3,12 @@ from aiohttp import web, ClientSession
 from controller import handle
 import asyncio
 from middleware import error_middleware
-from router import routes
+from router import generate_routes
 
 async def init_app():
     """Initialize the application server."""
     app = web.Application(middlewares=[error_middleware])
-    app.add_routes(routes)
+    app.add_routes(generate_routes())
     return app
 
 

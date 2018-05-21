@@ -3,6 +3,7 @@ from typing import Dict, List
 
 from aiohttp import web
 from conf import settings
+from router import reverse
 from transaction.generate_payment import build_unsigned_transfer
 from transaction.transaction import (get_current_sequence_number, get_signers,
                                      get_threshold_weight)
@@ -61,7 +62,7 @@ async def get_presigned_tx_xdr(
         result = {
             '@id': source_address,
             '@url': '{}/wallet/{}/transaction/transfer'.format(host, source_address),
-            '@transaction_url': '{}/transaction/{}'.format(host, tx_hash),
+            '@transaction_url': f"{host}{reverse('transaction', transaction_hash=tx_hash)}",
             'xdr': unsigned_xdr,
             'sequence_number': sequence + 1,
             'transaction_hash': tx_hash

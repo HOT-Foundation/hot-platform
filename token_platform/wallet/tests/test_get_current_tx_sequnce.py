@@ -2,6 +2,7 @@ from tests.test_utils import BaseTestClass
 from aiohttp.test_utils import unittest_run_loop
 from wallet.get_current_tx_sequence import get_current_tx_sequence_from_request
 from asynctest import patch
+from router import reverse
 # from aiohttp.web_exceptions import HTTPBadRequest
 
 class TestGetcurrentTransactionNumber(BaseTestClass):
@@ -11,7 +12,7 @@ class TestGetcurrentTransactionNumber(BaseTestClass):
     async def test_get_current_tx_sequence_from_request_success(self, mock_seq_no) -> None:
         mock_seq_no.return_value = 12314355345345
         wallet_address = 'GASF2Q2GZMQMMNSYDU34MU4GJKSZPSN7FYKQEMNH4QJMVE3JR3C3I3N5'
-        url = f'/wallet/{wallet_address}/transaction/current-sequence'
+        url = reverse('current-sequence', wallet_address=wallet_address)
 
         resp = await self.client.request("GET", url)
         assert resp.status == 200
@@ -27,7 +28,7 @@ class TestGetcurrentTransactionNumber(BaseTestClass):
     async def test_get_current_tx_sequence_not_found(self, mock_seq_no) -> None:
         mock_seq_no.return_value = None
         wallet_address = 'test'
-        url = f'/wallet/{wallet_address}/transaction/current-sequence'
+        url = reverse('current-sequence', wallet_address=wallet_address)
 
         resp = await self.client.request("GET", url)
         assert resp.status == 404

@@ -5,6 +5,7 @@ from asynctest import patch
 from conf import settings
 from joint_wallet.generate_joint_wallet import (build_joint_wallet,
                                                 generate_joint_wallet)
+from router import reverse
 
 
 class TestGenerateJointWallet(BaseTestClass):
@@ -16,12 +17,12 @@ class TestGenerateJointWallet(BaseTestClass):
     async def test_generate_jount_wallet_from_request(self, mock_joint_wallet):
         mock_joint_wallet.return_value = {}
         deal_address = 'GC5D6IXB2DW3RWU2Y4YBKJMWH3LOAHNWEAN5NDDGNO74AL5IWXK6XJ4O'
-        url = f'/wallet/{deal_address}/generate-joint-wallet'
-        data = { 
+        url = reverse('generate-joint-wallet', wallet_address=deal_address)
+        data = {
             'parties': [{
                 'address': 'address',
                 'amount': 10
-                }], 
+                }],
             'creator_address':'HOTNOW_ADDRESS',
             'starting_xlm': 5
             }
@@ -50,8 +51,8 @@ class TestGenerateJointWallet(BaseTestClass):
 
         expect = {
             "@id": "deal_address",
-            "@url": "/wallet/deal_address/generate-joint-wallet",
-            "@transaction_url": "/transaction/create_joint_wallet_tx_hash",
+            "@url": reverse('generate-joint-wallet', wallet_address='deal_address'),
+            "@transaction_url": reverse('transaction', transaction_hash='create_joint_wallet_tx_hash'),
             "signers": [{
                     "public_key": "address1",
                     "weight": 1
@@ -71,7 +72,7 @@ class TestGenerateJointWallet(BaseTestClass):
         }
 
         assert result == expect
-    
+
     @unittest_run_loop
     @patch('joint_wallet.generate_joint_wallet.build_joint_wallet')
     async def test_generate_joint_wallet_with_meta(self, mock_build):
@@ -94,8 +95,8 @@ class TestGenerateJointWallet(BaseTestClass):
 
         expect = {
             "@id": "deal_address",
-            "@url": "/wallet/deal_address/generate-joint-wallet",
-            "@transaction_url": "/transaction/create_joint_wallet_tx_hash",
+            "@url": reverse('generate-joint-wallet', wallet_address='deal_address'),
+            "@transaction_url": reverse('transaction', transaction_hash='create_joint_wallet_tx_hash'),
             "signers": [{
                     "public_key": "address1",
                     "weight": 1
@@ -115,7 +116,7 @@ class TestGenerateJointWallet(BaseTestClass):
         }
 
         assert result == expect
-    
+
     @unittest_run_loop
     @patch('joint_wallet.generate_joint_wallet.Builder')
     async def test_build_joint_wallet(self, mock_builder):
@@ -139,7 +140,7 @@ class TestGenerateJointWallet(BaseTestClass):
         result_xdr, result_hash = await build_joint_wallet(deal_address, parties, creator, 5)
         assert result_xdr == 'generate-joint-wallet-xdr'
         assert result_hash == '74782d68617368'
-    
+
     @unittest_run_loop
     @patch('joint_wallet.generate_joint_wallet.Builder')
     async def test_build_joint_wallet_with_meta(self, mock_builder):

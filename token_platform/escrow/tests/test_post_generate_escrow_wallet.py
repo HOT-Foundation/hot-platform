@@ -7,6 +7,7 @@ from aiohttp.test_utils import unittest_run_loop
 from asynctest import Mock, patch
 from stellar_base.utils import DecodeError
 from tests.test_utils import BaseTestClass
+from router import reverse
 
 from conf import settings
 from escrow.post_generate_escrow_wallet import (build_generate_escrow_wallet_transaction,
@@ -41,21 +42,21 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         expect = {
             '@id': self.escrow_address,
             'escrow_address': self.escrow_address,
-            '@url': f'{self.host}/escrow/{self.escrow_address}/generate-wallet',
-            '@transaction_url': f'{self.host}/transaction/tx_hash',
+            '@url': f"{self.host}{reverse('escrow-generate-wallet', escrow_address=self.escrow_address)}",
+            '@transaction_url': reverse('transaction', transaction_hash='tx_hash'),
             'signers': [self.escrow_address, self.creator_address, self.provider_address],
             'xdr': 'xdr'
         }
 
         mock_wallet.return_value = {
             'escrow_address': self.escrow_address,
-            '@url': f'{self.host}/escrow/{self.escrow_address}/generate-wallet',
-            '@transaction_url': f'{self.host}/transaction/tx_hash',
+            '@url': f"{self.host}{reverse('escrow-generate-wallet', escrow_address=self.escrow_address)}",
+            '@transaction_url': reverse('transaction', transaction_hash='tx_hash'),
             'signers': [self.escrow_address, self.creator_address, self.provider_address],
             'xdr': 'xdr'
         }
 
-        url = f'/escrow/{self.escrow_address}/generate-wallet'
+        url = reverse('escrow-generate-wallet', escrow_address=self.escrow_address)
 
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 200
@@ -78,21 +79,21 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         expect = {
             '@id': self.escrow_address,
             'escrow_address': self.escrow_address,
-            '@url': f'{self.host}/escrow/{self.escrow_address}/generate-wallet',
-            '@transaction_url': f'{self.host}/transaction/tx_hash',
+            '@url': f"{self.host}{reverse('escrow-generate-wallet', escrow_address=self.escrow_address)}",
+            '@transaction_url': reverse('transaction', transaction_hash='tx_hash'),
             'signers': [self.escrow_address, self.creator_address, self.provider_address],
             'xdr': 'xdr'
         }
 
         mock_wallet.return_value = {
             'escrow_address': self.escrow_address,
-            '@url': f'{self.host}/escrow/{self.escrow_address}/generate-wallet',
-            '@transaction_url': f'{self.host}/transaction/tx_hash',
+            '@url': f"{self.host}{reverse('escrow-generate-wallet', escrow_address=self.escrow_address)}",
+            '@transaction_url': reverse('transaction', transaction_hash='tx_hash'),
             'signers': [self.escrow_address, self.creator_address, self.provider_address],
             'xdr': 'xdr'
         }
 
-        url = f'/escrow/{self.escrow_address}/generate-wallet'
+        url = reverse('escrow-generate-wallet', escrow_address=self.escrow_address)
 
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 200
@@ -111,7 +112,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
             'expiration_date': self.expiration_date,
         }
 
-        url = f'/escrow/{self.escrow_address}/generate-wallet'
+        url = reverse('escrow-generate-wallet', escrow_address=self.escrow_address)
 
         resp = await self.client.request('POST', url, data=data)
         assert resp.status == 400
@@ -121,7 +122,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
     @unittest_run_loop
     async def test_post_generate_escrow_wallet_from_request_missing_parameter(self):
 
-        url = f'/escrow/{self.escrow_address}/generate-wallet'
+        url = reverse('escrow-generate-wallet', escrow_address=self.escrow_address)
 
         data = {
             'destination_address': self.destination_address,
@@ -186,7 +187,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
     @unittest_run_loop
     async def test_post_generate_escrow_wallet_from_request_wrong_cost_per_transaction(self):
 
-        url = f'/escrow/{self.escrow_address}/generate-wallet'
+        url = reverse('escrow-generate-wallet', escrow_address=self.escrow_address)
         data = {
             'provider_address': self.provider_address,
             'destination_address': self.destination_address,
@@ -233,7 +234,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
     @unittest_run_loop
     async def test_post_generate_escrow_wallet_from_request_wrong_expiration_date(self):
 
-        url = f'/escrow/{self.escrow_address}/generate-wallet'
+        url = reverse('escrow-generate-wallet', escrow_address=self.escrow_address)
 
         data = {
             'provider_address': self.provider_address,
@@ -266,7 +267,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
 
     @unittest_run_loop
     async def test_post_generate_escrow_wallet_from_request_wrong_starting_balance(self):
-        url = f'/escrow/{self.escrow_address}/generate-wallet'
+        url = reverse('escrow-generate-wallet', escrow_address=self.escrow_address)
 
         data = {
             'provider_address': self.provider_address,
@@ -321,8 +322,8 @@ class TestGetCreateWallet(BaseTestClass):
 
         expect = {
             'escrow_address': self.escrow_address,
-            '@url': f'{self.host}/escrow/{self.escrow_address}/generate-wallet',
-            '@transaction_url': f'{self.host}/transaction/tx_hash',
+            '@url': f"{self.host}{reverse('escrow-generate-wallet', escrow_address=self.escrow_address)}",
+            '@transaction_url': reverse('transaction', transaction_hash='tx_hash'),
             'signers': [self.escrow_address, self.creator_address, self.provider_address],
             'xdr': 'xdr',
             'transaction_hash': 'tx_hash'

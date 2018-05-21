@@ -11,6 +11,7 @@ from aiohttp import web
 from conf import settings
 from transaction.transaction import get_signers, get_threshold_weight, get_transaction_by_memo
 from wallet.wallet import get_wallet
+from router import reverse
 
 
 async def generate_payment_from_request(request: web.Request) -> web.Response:
@@ -48,11 +49,11 @@ async def generate_payment(source_address: str, destination: str, amount_htkn: D
     host: str = settings['HOST']
     result = {
         '@id': source_address,
-        '@url': '{}/wallet/{}/generate-payment'.format(host, source_address),
-        '@transaction_url': '{}/transaction/{}'.format(host, tx_hash),
+        '@url': f"{host}{reverse('generate-payment', wallet_address=source_address)}",
+        '@transaction_url': f"{host}{reverse('transaction', transaction_hash=tx_hash)}",
         'min_signer': await get_threshold_weight(source_address, 'payment'),
         'signers': await get_signers(source_address),
-        'unsigned_xdr': unsigned_xdr,
+        'xdr': unsigned_xdr,
         'transaction_hash': tx_hash
     }
     return result
