@@ -2,13 +2,14 @@ import binascii
 from decimal import Decimal
 from typing import Any, Dict, List, Mapping, NewType, Optional, Tuple, Union
 
-from aiohttp import web
 from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
 from stellar_base.horizon import horizon_livenet, horizon_testnet
+from stellar_base.utils import AccountNotExistError
 
+from aiohttp import web
 from conf import settings
-from transaction.transaction import get_signers, get_threshold_weight
+from transaction.transaction import get_signers, get_threshold_weight, get_transaction_by_memo
 from wallet.wallet import get_wallet
 
 
@@ -22,9 +23,7 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
     amount_xlm = body.get('amount_xlm')
     sequence_number = body.get('sequence_number', None)
     meta = body.get('meta', None)
-
     await get_wallet(source_account)
-    await get_wallet(target_address)
 
     if meta:
         url_get_transaction = await get_transaction_by_memo(source_account, meta)
@@ -33,33 +32,6 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
 
     result = await generate_payment(source_account, target_address, amount_htkn, amount_xlm, sequence_number, meta)
     return web.json_response(result)
-
-async def get_transaction_by_memo(source_account: str, memo: str, cursor: int = None) -> Union[Dict, bool]:
-    horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
-
-    # Get transactions data within key 'records'
-    transactions = horizon.account_transactions(source_account, params={'limit' : 200, 'order' : 'desc', 'cursor' : cursor}).get('_embedded').get('records')
-
-    # Filter result data on above by 'memo_type' == text
-    transactions_filter = list(filter(lambda transaction : transaction['memo_type'] == 'text', transactions))
-
-
-    if len(transactions) > 0:
-        transacton_paging_token = transactions[len(transactions) - 1]['paging_token']
-
-        for transaction in transactions_filter:
-            transaction.pop('_links')
-
-            if transaction['memo'] == memo:
-                return {
-                    'message' : 'Transaction is already submited',
-                    'url' : '/transaction/{}'.format(transaction['hash'])
-                }
-
-        await get_transaction_by_memo(source_account, memo, transacton_paging_token)
-
-    return False
-
 
 async def generate_payment(source_address: str, destination: str, amount_htkn: Decimal, amount_xlm:Decimal, sequence:int = None, meta:str = None) -> Dict:
     """Get unsigned transfer transaction and signers
@@ -72,7 +44,7 @@ async def generate_payment(source_address: str, destination: str, amount_htkn: D
             sequence: sequence number for generate transaction [optional]
             meta: memo text [optional]
     """
-    unsigned_xdr, tx_hash = build_unsigned_transfer(source_address, destination, amount_htkn, amount_xlm, sequence, meta)
+    unsigned_xdr, tx_hash = await build_unsigned_transfer(source_address, destination, amount_htkn, amount_xlm, sequence, meta)
     host: str = settings['HOST']
     result = {
         '@id': source_address,
@@ -80,12 +52,13 @@ async def generate_payment(source_address: str, destination: str, amount_htkn: D
         '@transaction_url': '{}/transaction/{}'.format(host, tx_hash),
         'min_signer': await get_threshold_weight(source_address, 'payment'),
         'signers': await get_signers(source_address),
-        'unsigned_xdr': unsigned_xdr
+        'unsigned_xdr': unsigned_xdr,
+        'transaction_hash': tx_hash
     }
     return result
 
 
-def build_unsigned_transfer(source_address: str, destination_address: str, amount_htkn: Decimal, amount_xlm: Decimal, sequence:int=None, memo_text:str=None) -> Tuple[str, str]:
+async def build_unsigned_transfer(source_address: str, destination_address: str, amount_htkn: Decimal, amount_xlm: Decimal, sequence:int=None, memo_text:str=None) -> Tuple[str, str]:
     """"Build unsigned transfer transaction return unsigned XDR and transaction hash.
 
         Args:
@@ -96,19 +69,23 @@ def build_unsigned_transfer(source_address: str, destination_address: str, amoun
             sequence: sequence number for generate transaction [optional]
             meta: memo text [optional]
     """
+
     builder = Builder(address=source_address, network=settings['STELLAR_NETWORK'], sequence=sequence)
+
+    wallet = StellarAddress(address=destination_address, network=settings['STELLAR_NETWORK'])
+    try:
+        wallet.get()
+        if amount_xlm:
+            builder.append_payment_op(destination_address, amount_xlm, source=source_address)
+    except AccountNotExistError as e:
+        builder.append_create_account_op(source=source_address, destination=destination_address, starting_balance=amount_xlm)
 
     if amount_htkn:
         builder.append_payment_op(
             destination_address, amount_htkn, asset_type=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], source=source_address
         )
 
-    if amount_xlm:
-        builder.append_payment_op(
-            destination_address, amount_xlm, source=source_address
-        )
-
-    if(memo_text):
+    if memo_text:
         builder.add_text_memo(memo_text)
 
     unsigned_xdr = builder.gen_xdr()

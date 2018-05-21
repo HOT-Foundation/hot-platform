@@ -13,8 +13,8 @@ from transaction.generate_payment import (get_signers,
                                                get_threshold_weight,
                                                generate_payment,
                                                generate_payment_from_request,
-                                               build_unsigned_transfer,
-                                               get_transaction_by_memo)
+                                               build_unsigned_transfer)
+from transaction.transaction import get_transaction_by_memo
 from wallet.tests.factory.wallet import StellarWallet
 
 
@@ -99,24 +99,26 @@ class TestGetUnsignedTransaction(BaseTestClass):
 
 
     @unittest_run_loop
+    @patch('transaction.generate_payment.build_unsigned_transfer')
     @patch('transaction.generate_payment.get_signers')
     @patch('transaction.generate_payment.get_threshold_weight')
-    async def test_generate_payment(self, mock_get_threshold_weight, mock_get_signer):
+    async def test_generate_payment(self, mock_get_threshold_weight, mock_get_signer, mock_build):
         mock_get_threshold_weight.return_value = 1
         mock_get_signer.return_value = [{
             "public_key": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
             "weight": 1
         }]
+        mock_build.return_value = ('xdr', 'tx_hash')
 
         result = await generate_payment(
             'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI',
             'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6',
-            '100', None)
+            '100', '0', None, None)
 
         expect_data = {
             "@id": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
             "@url": '/wallet/GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI/generate-payment',
-            "@transaction_url": '/transaction/dc8616f8013dc8134fe1618f1b667b10e425fed18cd6f36e62b0bd8de1e726fe',
+            "@transaction_url": '/transaction/tx_hash',
             "min_signer": 1,
             "signers": [
                 {
@@ -124,30 +126,41 @@ class TestGetUnsignedTransaction(BaseTestClass):
                 "weight": 1
                 }
             ],
-            "unsigned_xdr": "AAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAZAB3A5sAAAAGAAAAAAAAAAAAAAABAAAAAQAAAADOf93UUiwNNmwwYj2/XOv/KuhgA2mooc0ID+GYa49siQAAAAEAAAAA2ZlGnrw2xRHbxWDQCoRQRz8b/Ua+KYUBVdlcf4Ec5bEAAAABSFRLTgAAAADkHacjwpeFWz5txveZ4sJ3pEmTzpdS9fiBscDwpmoppgAAAAA7msoAAAAAAAAAAAA="
+            "unsigned_xdr": "xdr",
+            "transaction_hash": "tx_hash"
         }
         assert result == expect_data
 
     @unittest_run_loop
-    async def test_build_unsigned_transfer_with_memo(self):
-        result = build_unsigned_transfer('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 0, 1, 'memo')
+    @patch('transaction.generate_payment.StellarAddress')
+    async def test_build_unsigned_transfer_with_memo(self, mock_stellar):
+        result = await build_unsigned_transfer('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 0, 1, 'memo')
         assert result == ('AAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAZAAAAAAAAAACAAAAAAAAAAEAAAAEbWVtbwAAAAEAAAABAAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAAQAAAADZmUaevDbFEdvFYNAKhFBHPxv9Rr4phQFV2Vx/gRzlsQAAAAFIVEtOAAAAAOQdpyPCl4VbPm3G95niwnekSZPOl1L1+IGxwPCmaimmAAAAAAX14QAAAAAAAAAAAA==', '62bcef44d2d06a4657850849e94ada319fe398d5dd091907916876ded24b8167')
 
     @unittest_run_loop
-    async def test_build_unsigned_transfer_with_xlm_amount(self):
-        result = build_unsigned_transfer('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 0, 10, 1, 'memo')
+    @patch('transaction.generate_payment.StellarAddress')
+    async def test_build_unsigned_transfer_with_xlm_amount(self, mock_stellar):
+        result = await build_unsigned_transfer('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 0, 10, 1, 'memo')
         assert result == (
             'AAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAZAAAAAAAAAACAAAAAAAAAAEAAAAEbWVtbwAAAAEAAAABAAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAAQAAAADZmUaevDbFEdvFYNAKhFBHPxv9Rr4phQFV2Vx/gRzlsQAAAAAAAAAABfXhAAAAAAAAAAAA',
             'c363b479e6dd1fb149c28251d71315d78144bb44e3daf0617eb07be554b8b59c'
         )
 
     @unittest_run_loop
-    async def test_have_transaction_by_memo(self):
-        result = await get_transaction_by_memo('GD3PPDLKXRDM57UV7QDFIHLLRCLM4KGVIA43GEM7ZOT7EHK5TR3Z5G6I', 'testmemo')
-        assert 'message' in result.keys()
-        assert 'url' in result.keys()
+    @patch('transaction.generate_payment.Builder')
+    @patch('transaction.generate_payment.StellarAddress')
+    async def test_build_unsigned_transfer_with_target_not_created(self, mock_stellar, mock_builder):
+        class MockAddress(object):
+            def get(self):
+                raise AccountNotExistError('Resource Missing')
 
-    @unittest_run_loop
-    async def test_not_have_transaction_by_memo(self):
-        result = await get_transaction_by_memo('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'testmemo')
-        assert not result
+        mock_stellar.return_value = MockAddress()
+
+        instance = mock_builder.return_value
+        instance.append_create_account_op.return_value = 'test'
+        instance.append_payment_op.return_value = 'test'
+        instance.gen_xdr.return_value = b'unsigned-xdr'
+        instance.te.hash_meta.return_value = b'tx-hash'
+
+        result = await build_unsigned_transfer('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 0, 10, 1, 'memo')
+        assert result == ('unsigned-xdr', '74782d68617368')

@@ -6,7 +6,7 @@ from escrow.post_generate_escrow_wallet import \
     post_generate_escrow_wallet_from_request
 from joint_wallet.generate_joint_wallet import post_generate_joint_wallet
 from transaction.generate_payment import generate_payment_from_request
-from transaction.get_transaction import get_transaction_from_request
+from transaction.get_transaction import get_transaction_from_request, get_transaction_hash_from_request
 from transaction.get_unsigned_change_trust import \
     get_unsigned_change_trust_from_request
 from transaction.put_transaction import put_transaction_from_request
@@ -23,6 +23,7 @@ routes = [
     web.post('/wallet/{wallet_address}/generate-joint-wallet', post_generate_joint_wallet),
     web.get('/wallet/{wallet_address}/transaction/current-sequence', get_current_tx_sequence_from_request),
     web.get('/wallet/{wallet_address}/transaction/change-trust', get_unsigned_change_trust_from_request),
+    web.get('/wallet/{wallet_address}/get-transaction-hash', get_transaction_hash_from_request),
 
     web.get('/escrow/{escrow_address}', get_escrow_wallet_from_request),
     web.post('/escrow/{escrow_address}/generate-wallet', post_generate_escrow_wallet_from_request),
@@ -30,5 +31,4 @@ routes = [
     
     web.get('/transaction/{transaction_hash}', get_transaction_from_request),
     web.put('/transaction/{transaction_hash}', put_transaction_from_request),
-
 ]

@@ -324,7 +324,8 @@ class TestGetCreateWallet(BaseTestClass):
             '@url': f'{self.host}/escrow/{self.escrow_address}/generate-wallet',
             '@transaction_url': f'{self.host}/transaction/tx_hash',
             'signers': [self.escrow_address, self.creator_address, self.provider_address],
-            'xdr': 'xdr'
+            'xdr': 'xdr',
+            'transaction_hash': 'tx_hash'
         }
 
         result = await generate_escrow_wallet(

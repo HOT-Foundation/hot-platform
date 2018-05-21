@@ -29,7 +29,8 @@ async def get_unsigned_change_trust(source_address: str) -> Dict:
         '@transaction_url': '{}/transaction/{}'.format(host, tx_hash),
         'min_signer': await get_threshold_weight(source_address, 'change-trust'),
         'signers': await get_signers(source_address),
-        'unsigned_xdr': unsigned_xdr
+        'unsigned_xdr': unsigned_xdr,
+        'transaction_hash': tx_hash
     }
     return result
 

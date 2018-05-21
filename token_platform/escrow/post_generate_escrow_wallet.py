@@ -95,7 +95,8 @@ async def generate_escrow_wallet(escrow_address: str,
         '@url': f'{host}/escrow/{escrow_address}/generate-wallet',
         '@transaction_url': f'{host}/transaction/{tx_hash}',
         'signers': [escrow_address, creator_address, provider_address],
-        'xdr': xdr
+        'xdr': xdr,
+        'transaction_hash': tx_hash
     }
 
 def calculate_initial_xlm(number_of_entries: Decimal, number_of_transaction: Decimal) -> Decimal:

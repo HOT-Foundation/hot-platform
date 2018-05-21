@@ -34,7 +34,8 @@ async def generate_joint_wallet(deal_address: str, parties: List, creator: str, 
         '@url': f'/wallet/{deal_address}/generate-joint-wallet',
         '@transaction_url': f'/transaction/{tx_hash}',
         'signers': signers,
-        'xdr': xdr
+        'xdr': xdr,
+        'transaction_hash': tx_hash
     }
 
     return result

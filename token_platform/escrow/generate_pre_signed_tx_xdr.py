@@ -53,8 +53,9 @@ async def get_presigned_tx_xdr(
                 amount: amount of money that would be transferred
                 sequence: sequence number of escrow account
         """
-        unsigned_xdr, tx_hash = build_unsigned_transfer(
-            source_address, destination, amount, Decimal(0), sequence=sequence_number
+
+        unsigned_xdr, tx_hash = await build_unsigned_transfer(
+            source_address, destination, amount, Decimal(0), sequence=sequence
         )
         host: str = settings['HOST']
         result = {
@@ -62,7 +63,8 @@ async def get_presigned_tx_xdr(
             '@url': '{}/wallet/{}/transaction/transfer'.format(host, source_address),
             '@transaction_url': '{}/transaction/{}'.format(host, tx_hash),
             'xdr': unsigned_xdr,
-            'sequence_number': sequence + 1
+            'sequence_number': sequence + 1,
+            'transaction_hash': tx_hash
         }
         return result
 
