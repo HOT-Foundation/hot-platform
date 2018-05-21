@@ -7,7 +7,8 @@ from asynctest import patch
 from transaction.transaction import (get_current_sequence_number, get_signers,
                                      get_threshold_weight,
                                      is_duplicate_transaction,
-                                     submit_transaction)
+                                     submit_transaction,
+                                     get_transaction_hash)
 from wallet.tests.factory.wallet import StellarWallet
 
 
@@ -93,6 +94,22 @@ class TestDuplicateTransaction(BaseTestClass):
         tx_hash = 'e11b7a3677fdd45c885'
         result = await is_duplicate_transaction(tx_hash)
         assert result == False
+
+
+class TestGetTransactionHash(BaseTestClass):
+    async def setUpAsync(self):
+        self.address = 'GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF'
+        self.tx_hash = '4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9'
+        self.memo = '1'
+        self.result = {'test'}
+
+    @unittest_run_loop
+    @patch('transaction.transaction.horizon_livenet')
+    async def test_get_transaction_hash_success(self, mock_horizon_livenet):
+        mock_horizon_livenet.return_value = self.result
+
+        result = await get_transaction_hash(self.address, self.memo)
+        assert result == self.result
 
 
 class TestGetcurrentSequenceNumber(BaseTestClass):
