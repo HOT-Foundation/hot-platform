@@ -30,3 +30,11 @@ class TestGetTransactionHashFromRequest(BaseTestClass):
         resp = await response.json()
         assert response.status == 400
         assert not resp['transaction_hash']
+
+    @unittest_run_loop
+    async def test_get_transaction_hash_form_request_not_found_meta(self):
+        response = await self.client.get(self.transaction_url)
+        assert response.status == 400
+        resp = await response.json()
+        assert 'error' in resp.keys()
+
