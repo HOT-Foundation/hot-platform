@@ -9,7 +9,7 @@ from stellar_base.utils import AccountNotExistError
 
 from aiohttp import web
 from conf import settings
-from transaction.transaction import get_signers, get_threshold_weight
+from transaction.transaction import get_signers, get_threshold_weight, get_transaction_by_memo
 from wallet.wallet import get_wallet
 
 
@@ -32,33 +32,6 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
 
     result = await generate_payment(source_account, target_address, amount_htkn, amount_xlm, sequence_number, meta)
     return web.json_response(result)
-
-async def get_transaction_by_memo(source_account: str, memo: str, cursor: int = None) -> Union[Dict, bool]:
-    horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
-
-    # Get transactions data within key 'records'
-    transactions = horizon.account_transactions(source_account, params={'limit' : 200, 'order' : 'desc', 'cursor' : cursor}).get('_embedded').get('records')
-
-    # Filter result data on above by 'memo_type' == text
-    transactions_filter = list(filter(lambda transaction : transaction['memo_type'] == 'text', transactions))
-
-
-    if len(transactions) > 0:
-        transacton_paging_token = transactions[len(transactions) - 1]['paging_token']
-
-        for transaction in transactions_filter:
-            transaction.pop('_links')
-
-            if transaction['memo'] == memo:
-                return {
-                    'message' : 'Transaction is already submited',
-                    'url' : '/transaction/{}'.format(transaction['hash'])
-                }
-
-        await get_transaction_by_memo(source_account, memo, transacton_paging_token)
-
-    return False
-
 
 async def generate_payment(source_address: str, destination: str, amount_htkn: Decimal, amount_xlm:Decimal, sequence:int = None, meta:str = None) -> Dict:
     """Get unsigned transfer transaction and signers

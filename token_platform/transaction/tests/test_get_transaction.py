@@ -18,4 +18,15 @@ class TestGetTransactionHashFromRequest(BaseTestClass):
 
         response = await self.client.get(self.transaction_url, params=self.params)
         resp = await response.json()
-        assert resp == self.tx_hash
+        assert response.status == 200
+        assert resp['transaction_hash'] == self.tx_hash
+
+    @unittest_run_loop
+    @asynctest.patch('transaction.get_transaction.get_transaction_hash')
+    async def test_get_transacion_hash_form_request_fail(self, mock_get_transaction_hash):
+        mock_get_transaction_hash.return_value = None
+
+        response = await self.client.get(self.transaction_url, params=self.params)
+        resp = await response.json()
+        assert response.status == 400
+        assert not resp['transaction_hash']

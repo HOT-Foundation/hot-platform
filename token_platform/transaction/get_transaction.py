@@ -14,6 +14,10 @@ async def get_transaction_hash_from_request(request: web.Request) -> web.Respons
     """Get transaction hash by wallet address and idempotency key in memo."""
     address = request.match_info.get('wallet_address')
     meta = request.rel_url.query['meta']
+    status = 200
 
     result = await get_transaction_hash(address, meta)
-    return web.json_response(result)
+    if not result:
+        status = 400
+
+    return web.json_response({'transaction_hash' : result}, status=status)

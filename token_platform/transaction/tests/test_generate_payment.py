@@ -13,8 +13,8 @@ from transaction.generate_payment import (get_signers,
                                                get_threshold_weight,
                                                generate_payment,
                                                generate_payment_from_request,
-                                               build_unsigned_transfer,
-                                               get_transaction_by_memo)
+                                               build_unsigned_transfer)
+from transaction.transaction import get_transaction_by_memo
 from wallet.tests.factory.wallet import StellarWallet
 
 
@@ -145,7 +145,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
             'AAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAZAAAAAAAAAACAAAAAAAAAAEAAAAEbWVtbwAAAAEAAAABAAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAAQAAAADZmUaevDbFEdvFYNAKhFBHPxv9Rr4phQFV2Vx/gRzlsQAAAAAAAAAABfXhAAAAAAAAAAAA',
             'c363b479e6dd1fb149c28251d71315d78144bb44e3daf0617eb07be554b8b59c'
         )
-    
+
     @unittest_run_loop
     @patch('transaction.generate_payment.Builder')
     @patch('transaction.generate_payment.StellarAddress')
@@ -164,14 +164,3 @@ class TestGetUnsignedTransaction(BaseTestClass):
 
         result = await build_unsigned_transfer('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 0, 10, 1, 'memo')
         assert result == ('unsigned-xdr', '74782d68617368')
-
-    @unittest_run_loop
-    async def test_have_transaction_by_memo(self):
-        result = await get_transaction_by_memo('GD3PPDLKXRDM57UV7QDFIHLLRCLM4KGVIA43GEM7ZOT7EHK5TR3Z5G6I', 'testmemo')
-        assert 'message' in result.keys()
-        assert 'url' in result.keys()
-
-    @unittest_run_loop
-    async def test_not_have_transaction_by_memo(self):
-        result = await get_transaction_by_memo('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'testmemo')
-        assert not result

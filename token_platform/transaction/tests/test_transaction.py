@@ -8,7 +8,8 @@ from transaction.transaction import (get_current_sequence_number, get_signers,
                                      get_threshold_weight,
                                      is_duplicate_transaction,
                                      submit_transaction,
-                                     get_transaction_hash)
+                                     get_transaction_hash,
+                                     get_transaction_by_memo)
 from wallet.tests.factory.wallet import StellarWallet
 
 
@@ -101,15 +102,23 @@ class TestGetTransactionHash(BaseTestClass):
         self.address = 'GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF'
         self.tx_hash = '4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9'
         self.memo = '1'
-        self.result = {'test'}
+        self.result = {'transaction_hash': 'test'}
 
     @unittest_run_loop
-    @patch('transaction.transaction.horizon_livenet')
-    async def test_get_transaction_hash_success(self, mock_horizon_livenet):
-        mock_horizon_livenet.return_value = self.result
+    @patch('transaction.transaction.get_transaction_by_memo')
+    async def test_get_transaction_hash_success(self, mock_transaction_by_memo):
+        mock_transaction_by_memo.return_value = self.result
 
         result = await get_transaction_hash(self.address, self.memo)
-        assert result == self.result
+        assert result == self.result['transaction_hash']
+
+    @unittest_run_loop
+    @patch('transaction.transaction.get_transaction_by_memo')
+    async def test_get_transaction_hash_fail(self, mock_transaction_by_memo):
+        mock_transaction_by_memo.return_value = False
+
+        result = await get_transaction_hash(self.address, self.memo)
+        assert not result
 
 
 class TestGetcurrentSequenceNumber(BaseTestClass):
@@ -195,3 +204,15 @@ class TestGetThreshold(BaseTestClass):
 
         result = await get_threshold_weight('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'set_signer')
         assert result == 2
+
+    @unittest_run_loop
+    async def test_have_transaction_by_memo(self):
+        result = await get_transaction_by_memo('GD3PPDLKXRDM57UV7QDFIHLLRCLM4KGVIA43GEM7ZOT7EHK5TR3Z5G6I', 'testmemo')
+        assert 'message' in result.keys()
+        assert 'url' in result.keys()
+
+    @unittest_run_loop
+    async def test_not_have_transaction_by_memo(self):
+        result = await get_transaction_by_memo('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'testmemo')
+        assert not result
+
