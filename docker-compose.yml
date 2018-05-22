@@ -1,14 +1,22 @@
 version: '3'
 services:
-  hotnow-token-platform:
-    image: hotnow-token-platform
+  hotnow-htkn-platform:
+    image: "${REGISTRY:-hotnow-htkn-platform}:${TAG:-latest}"
     build: .
-    container_name: hotnow-token-platform
+    container_name: hotnow-htkn-platform
     working_dir: "/usr/src"
     command: "python -u token_platform/server.py"
     ports:
-      - "8081:8081"
+      - "8081:80"
     volumes:
       - "./:/usr/src"
     environment:
+      - ASSET_CODE=HTKN
+      - ISSUER=GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ
       - PYTHONPATH=/usr/src/token_platform
+    networks:
+      - hotnow-network
+networks:
+  hotnow-network:
+    external:
+      name: hotnow-network

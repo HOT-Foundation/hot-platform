@@ -5,3 +5,5 @@ htmlcov
 .pytest_cache
 *.pyc
 .directory
+.mypy_cache
+.vscode/
