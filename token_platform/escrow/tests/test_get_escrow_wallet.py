@@ -46,6 +46,12 @@ async def test_get_escrow_wallet_success_trusted_htkn(mock_address):
         'asset_type': 'native'
     }]
     mock_address.return_value = StellarWallet(balances)
+    instance = mock_address.return_value
+    instance.signers = [
+        {'public_key' : 'provider_address', 'weight' : 1},
+        {'public_key' : 'creator_address', 'weight' : 1},
+        {'public_key' : 'destination_address', 'weight' : 0}
+    ]
 
     actual_data = await get_escrow_wallet_detail('GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')
     host = settings.get('HOST', None)
@@ -61,7 +67,11 @@ async def test_get_escrow_wallet_success_trusted_htkn(mock_address):
         'data': {
             'name': 'UnitTest',
             'age': '30'
-        }
+        },
+        'signers': [
+            {'public_key' : 'provider_address', 'weight' : 1},
+            {'public_key' : 'creator_address', 'weight' : 1}
+        ]
     }
     assert actual_data == expect_data
 
