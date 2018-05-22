@@ -24,7 +24,6 @@ class TestPostCloseEscrowWalletFromRequest(BaseTestClass):
 
         mock_generate_claose_escrow_wallet.return_value = {
             'escrow_address' : self.escrow_address,
-            '@url' : reverse('close-escrow-wallet', escrow_address=self.escrow_address),
             'transaction_url' : reverse('transaction', transaction_hash=self.tx_hash),
             'signers' : [self.provider_address, self.creator_address],
             'xdr' : self.unsigned_xdr,
@@ -32,9 +31,8 @@ class TestPostCloseEscrowWalletFromRequest(BaseTestClass):
         }
 
         expect = {
-            '@id' : self.escrow_address,
+            '@id' : reverse('close-escrow-wallet', escrow_address=self.escrow_address),
             'escrow_address' : self.escrow_address,
-            '@url' : reverse('close-escrow-wallet', escrow_address=self.escrow_address),
             'transaction_url' : reverse('transaction', transaction_hash=self.tx_hash),
             'signers' : [self.provider_address, self.creator_address],
             'xdr' : self.unsigned_xdr,
@@ -80,7 +78,6 @@ class TestGenerateCloseEscrowWallet(BaseTestClass):
 
         expect = {
             'escrow_address' : self.escrow_address,
-            '@url' : reverse('close-escrow-wallet', escrow_address=self.escrow_address),
             'transaction_url' : reverse('transaction', transaction_hash=self.tx_hash),
             'signers' : [self.provider_address, self.creator_address],
             'xdr' : self.unsigned_xdr,

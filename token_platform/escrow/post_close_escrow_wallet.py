@@ -13,7 +13,7 @@ async def post_close_escrow_wallet_from_request(request: web.Request) -> web.Res
     escrow_address = request.match_info['escrow_address']
 
     result = await generate_close_escrow_wallet(escrow_address)
-    result['@id'] = escrow_address
+    result['@id'] = reverse('close-escrow-wallet', escrow_address=escrow_address)
 
     return web.json_response(result)
 
@@ -45,7 +45,6 @@ async def generate_close_escrow_wallet(escrow_address: str) -> Dict:
 
     return {
         'escrow_address' : escrow_address,
-        '@url' : reverse('close-escrow-wallet', escrow_address=escrow_address),
         'transaction_url' : reverse('transaction', transaction_hash=tx_hash),
         'signers' : escrow_wallet['signers'],
         'xdr' : unsigned_xdr,
