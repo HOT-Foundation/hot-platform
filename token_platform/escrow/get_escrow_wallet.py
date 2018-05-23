@@ -56,4 +56,12 @@ async def get_escrow_wallet_detail(escrow_address: str) -> web.Response:
         'data': _format_data(wallet.data)
     }
 
+    signers = []
+
+    for value in wallet.signers:
+        if value['weight'] > 0:
+            signers.append(value)
+
+    result['signers'] = signers
+
     return result
