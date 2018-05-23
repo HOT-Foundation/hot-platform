@@ -42,8 +42,8 @@ ROUTER =  {
         "url" : "/escrow/{escrow_address}/generate-wallet",
         "POST" : "escrow.post_generate_escrow_wallet.post_generate_escrow_wallet_from_request"
     },
-    "generate-presigned-transections" : {
-        "url" : "/escrow/{escrow_address}/generate-presigned-transections",
+    "generate-presigned-transactions" : {
+        "url" : "/escrow/{escrow_address}/generate-presigned-transactions",
         "POST" : "escrow.generate_pre_signed_tx_xdr.get_presigned_tx_xdr_from_request"
     },
     "transaction" : {
