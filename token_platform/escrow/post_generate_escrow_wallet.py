@@ -79,7 +79,6 @@ async def generate_escrow_wallet(escrow_address: str,
     number_of_transaction: Decimal = (starting_custom_asset / cost_per_tx_decimal) + 2
     starting_xlm: Decimal = calculate_initial_xlm(Decimal(8), number_of_transaction)
 
-
     xdr, tx_hash = await build_generate_escrow_wallet_transaction(escrow_address = escrow_address,
         provider_address = provider_address,
         creator_address = creator_address,
@@ -100,6 +99,7 @@ async def generate_escrow_wallet(escrow_address: str,
         'transaction_hash': tx_hash
     }
 
+
 def calculate_initial_xlm(number_of_entries: Decimal, number_of_transaction: Decimal) -> Decimal:
     '''Calculate starting balance for wallet
     starting balance: minimum balance + transaction fee
@@ -119,6 +119,7 @@ def calculate_initial_xlm(number_of_entries: Decimal, number_of_transaction: Dec
     our_value = Decimal(minumum_balance_raw)
     result = Decimal(our_value.quantize(Decimal('.1'), rounding=ROUND_UP))
     return result
+
 
 async def build_generate_escrow_wallet_transaction(escrow_address: str,
                                            creator_address: str,
@@ -172,7 +173,6 @@ async def build_generate_escrow_wallet_transaction(escrow_address: str,
         source=escrow_address, signer_address=provider_address, signer_type='ed25519PublicKey', signer_weight=1)
     builder.append_set_options_op(source=escrow_address,
                                   master_weight=0, low_threshold=2, med_threshold=2, high_threshold=2)
-
 
     builder.append_payment_op(source=provider_address,
                                 destination=escrow_address,

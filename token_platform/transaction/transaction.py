@@ -52,6 +52,7 @@ async def get_transaction_hash(address: str, memo: str) -> str:
     else:
         return None
 
+
 async def get_transaction(tx_hash: str) -> Dict[str, Union[str, int, List[Dict[str, str]]]]:
     """Retrieve transaction detail from transaction hash
 
@@ -75,14 +76,11 @@ async def get_transaction(tx_hash: str) -> Dict[str, Union[str, int, List[Dict[s
 
     def _get_operation_data_of_transaction(tx_hash: str, horizon: Horizon) -> List[Dict[str, str]]:
         """Get operation list of transaction"""
-
         operations = copy.deepcopy(horizon.transaction_operations(tx_hash).get("_embedded").get("records"))
 
         for operation in operations:
             operation.pop("_links")
-
         return operations
-
 
     horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
     transaction = horizon.transaction(tx_hash)
@@ -124,6 +122,7 @@ async def get_threshold_weight(wallet_address:str, operation_type:str) -> int:
     level = _get_threshould_level(operation_type)
     return wallet.thresholds[level]
 
+
 async def get_transaction_by_memo(source_account: str, memo: str, cursor: int = None) -> Union[Dict, bool]:
     horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
 
@@ -145,5 +144,4 @@ async def get_transaction_by_memo(source_account: str, memo: str, cursor: int = 
     if len(transactions) > 0:
         transaction_paging_token = transactions[-1]['paging_token']
         return await get_transaction_by_memo(source_account, memo, transaction_paging_token)
-
     return False

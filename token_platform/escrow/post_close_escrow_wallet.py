@@ -8,6 +8,7 @@ from router import reverse
 
 import binascii
 
+
 async def post_close_escrow_wallet_from_request(request: web.Request) -> web.Response:
     """ AIOHTTP Request create close escrow wallet xdr """
     escrow_address = request.match_info['escrow_address']
@@ -17,9 +18,9 @@ async def post_close_escrow_wallet_from_request(request: web.Request) -> web.Res
 
     return web.json_response(result)
 
-async def generate_close_escrow_wallet(escrow_address: str) -> Dict:
 
-    ''' Generate close escrow wallet function by escrow address then get escrow wallet detail by that address then build generate for return xdr and transaction hash
+async def generate_close_escrow_wallet(escrow_address: str) -> Dict:
+    """ Generate close escrow wallet function by escrow address then get escrow wallet detail by that address then build generate for return xdr and transaction hash
 
     Args;
         escrow_address :  Address of escrow wallet
@@ -30,7 +31,7 @@ async def generate_close_escrow_wallet(escrow_address: str) -> Dict:
         signers : Array of signers use for sign xdr
         xdr : Xdr for sign
         transaction_hash: Transaction hash number for get transaction detail
-    '''
+    """
     escrow_wallet = await get_escrow_wallet_detail(escrow_address)
     provider_address = escrow_wallet['data']['provider_address']
     creator_address = escrow_wallet['data']['creator_address']

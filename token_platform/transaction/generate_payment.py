@@ -34,6 +34,7 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
     result = await generate_payment(source_account, target_address, amount_htkn, amount_xlm, sequence_number, memo)
     return web.json_response(result)
 
+
 async def generate_payment(source_address: str, destination: str, amount_htkn: Decimal, amount_xlm:Decimal, sequence:int = None, memo:str = None) -> Dict:
     """Get unsigned transfer transaction and signers
 
