@@ -13,5 +13,4 @@ async def put_transaction_from_request(request: web.Request) -> web.Response:
         raise web.HTTPBadRequest(reason='Duplicate transaction.')
 
     await submit_transaction(signed_xdr)
-    response = await get_transaction(tx_hash)
-    return web.json_response(response)
+    return web.Response(status=202)
