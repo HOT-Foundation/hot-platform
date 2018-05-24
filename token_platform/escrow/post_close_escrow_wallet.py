@@ -5,7 +5,6 @@ from conf import settings
 from typing import Tuple, Any, Dict
 from decimal import Decimal
 from router import reverse
-from utils.platform_manage_data import PlatformManageData
 
 import binascii
 
@@ -71,12 +70,7 @@ async def build_generate_close_escrow_wallet_transaction(escrow_wallet: Dict) ->
     builder.append_trust_op(settings['ISSUER'], settings['ASSET_CODE'], limit=0, source=escrow_address)
 
     for name in escrow_data.keys():
-        opts = {
-            'data_name' : name,
-            'source' : escrow_address
-        }
-        manage_data = PlatformManageData(opts)
-        builder.append_op(manage_data)
+        builder.append_manage_data_op(name, None, source=escrow_address)
 
     builder.append_account_merge_op(destination=creator_address, source=escrow_address)
 
