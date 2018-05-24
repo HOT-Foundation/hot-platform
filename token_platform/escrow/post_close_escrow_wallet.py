@@ -5,8 +5,11 @@ from conf import settings
 from typing import Tuple, Any, Dict
 from decimal import Decimal
 from router import reverse
+from utils.platform_manage_data import PlatformManageData
 
 import binascii
+
+
 
 async def post_close_escrow_wallet_from_request(request: web.Request) -> web.Response:
     """ AIOHTTP Request create close escrow wallet xdr """
@@ -53,6 +56,7 @@ async def build_generate_close_escrow_wallet_transaction(escrow_wallet: Dict) ->
         creator_address: an address of source wallet which is owner of the transaction.
         remain_custom_asset: remain custom amount within escrow wallet
     """
+
     escrow_address = escrow_wallet['@id']
     escrow_data = escrow_wallet['data']
     provider_address = escrow_data['provider_address']
@@ -67,8 +71,13 @@ async def build_generate_close_escrow_wallet_transaction(escrow_wallet: Dict) ->
     builder.append_trust_op(settings['ISSUER'], settings['ASSET_CODE'], limit=0, source=escrow_address)
 
     for name in escrow_data.keys():
-        builder.append_manage_data_op(data_name=name, data_value=None, source=escrow_address)
-    # await remove_data_from_builder(builder, escrow_address, escrow_data.keys())
+        opts = {
+            'data_name' : name,
+            'source' : escrow_address
+        }
+        manage_data = PlatformManageData(opts)
+        builder.append_op(manage_data)
+
     builder.append_account_merge_op(destination=creator_address, source=escrow_address)
 
     try:
