@@ -46,27 +46,29 @@ class TestGetUnsignedTransaction(BaseTestClass):
     async def test_get_transaction_from_request_already_submitted(self, mock_address, mock_transaction_by_memo):
 
         mock_transaction_by_memo.return_value = {
-            'message' : 'Transaction is already submited',
-            'url' : reverse('transaction', transaction_hash='0b309e40e40809e34e7765062e8ff393dd4e542d05f59a22719655e84c557257')
+            'message': 'Transaction is already submited', 
+            'url': '/transaction/db2c17818a6eeaae5f7e7a0a858fb62db4835509aa6d932c3fdd298e6e97d787', 
+            'transaction_hash': 'db2c17818a6eeaae5f7e7a0a858fb62db4835509aa6d932c3fdd298e6e97d787'
         }
 
         balances = [
             {
                 'balance': '9.9999200',
                 'asset_type': 'native'
-            }]
+            }
+        ]
         mock_address.return_value = StellarWallet(balances)
         source_address = 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'
         destination_address = 'GBFAIH5WKAJQ77NG6BZG7TGVGXHPX4SQLIJ7BENJMCVCZSUZPSISCLU5'
-        meta = 'testmemo'
+        memo = 'testmemo'
 
-        data = {'target_address': destination_address, 'amount_xlm': 10, 'amount_htkn': 5, 'meta': meta}
+        data = {'target_address': destination_address, 'amount_xlm': 10, 'amount_htkn': 5, 'memo': memo}
         url = reverse('generate-payment', wallet_address=source_address)
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         text = await resp.json()
         assert text == mock_transaction_by_memo.return_value
-        mock_transaction_by_memo.assert_called_once_with(source_address, meta)
+        mock_transaction_by_memo.assert_called_once_with(source_address, memo)
 
 
     @unittest_run_loop

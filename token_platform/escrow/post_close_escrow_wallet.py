@@ -8,8 +8,6 @@ from router import reverse
 
 import binascii
 
-
-
 async def post_close_escrow_wallet_from_request(request: web.Request) -> web.Response:
     """ AIOHTTP Request create close escrow wallet xdr """
     escrow_address = request.match_info['escrow_address']
@@ -19,9 +17,9 @@ async def post_close_escrow_wallet_from_request(request: web.Request) -> web.Res
 
     return web.json_response(result)
 
-async def generate_close_escrow_wallet(escrow_address: str) -> Dict:
 
-    ''' Generate close escrow wallet function by escrow address then get escrow wallet detail by that address then build generate for return xdr and transaction hash
+async def generate_close_escrow_wallet(escrow_address: str) -> Dict:
+    """ Generate close escrow wallet function by escrow address then get escrow wallet detail by that address then build generate for return xdr and transaction hash
 
     Args;
         escrow_address :  Address of escrow wallet
@@ -32,7 +30,7 @@ async def generate_close_escrow_wallet(escrow_address: str) -> Dict:
         signers : Array of signers use for sign xdr
         xdr : Xdr for sign
         transaction_hash: Transaction hash number for get transaction detail
-    '''
+    """
     escrow_wallet = await get_escrow_wallet_detail(escrow_address)
 
     unsigned_xdr, tx_hash = await build_generate_close_escrow_wallet_transaction(escrow_wallet=escrow_wallet)
@@ -50,10 +48,7 @@ async def build_generate_close_escrow_wallet_transaction(escrow_wallet: Dict) ->
     """ Builder transaction close escrow wallet by payment remaining HTKN from escrow_wallet to provider_wallet and merge account from escrow_wallet to creator_wallet, Finally, return xdr and transaction_hash
 
     Args:
-        escrow_address: an ddress of escrow wallet
-        provider_address: an address which provides custom_asset to new wallet
-        creator_address: an address of source wallet which is owner of the transaction.
-        remain_custom_asset: remain custom amount within escrow wallet
+        escrow_wallet: escrow wallet response from get_escrow_wallet_detail
     """
 
     escrow_address = escrow_wallet['@id']
@@ -87,10 +82,3 @@ async def build_generate_close_escrow_wallet_transaction(escrow_wallet: Dict) ->
 
 
     return xdr.decode(), binascii.hexlify(tx_hash).decode()
-
-# async def payment_remainting_asset_to_creator(builder)
-
-async def remove_data_from_builder(builder: Builder, source_address: str, data: list):
-    pass
-
-
