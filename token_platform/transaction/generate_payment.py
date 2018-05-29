@@ -12,6 +12,7 @@ from conf import settings
 from transaction.transaction import get_signers, get_threshold_weight, get_transaction_by_memo
 from wallet.wallet import get_wallet
 from router import reverse
+from stellar_base.utils import decode_check, DecodeError
 
 
 async def generate_payment_from_request(request: web.Request) -> web.Response:
@@ -25,6 +26,11 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
     sequence_number = body.get('sequence_number', None)
     memo = body.get('memo', None)
     await get_wallet(source_account)
+
+    try:
+        decode_check('account', target_address)
+    except DecodeError as e:
+        raise web.HTTPBadRequest(reason='Invalid value : {}'.format(target_address))
 
     if memo:
         url_get_transaction = await get_transaction_by_memo(source_account, memo)

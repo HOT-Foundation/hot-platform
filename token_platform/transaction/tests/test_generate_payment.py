@@ -41,6 +41,26 @@ class TestGetUnsignedTransaction(BaseTestClass):
         mock_generate_payment.assert_called_once_with(source_address, destination_address, 5, 10, None, None)
 
     @unittest_run_loop
+    @patch('transaction.generate_payment.get_wallet')
+    @patch('transaction.generate_payment.generate_payment')
+    async def test_get_transaction_from_request_with_invalid_target(self, mock_generate_payment, mock_address):
+        mock_generate_payment.return_value = {}
+        balances = [
+            {
+                'balance': '9.9999200',
+                'asset_type': 'native'
+            }]
+        mock_address.return_value = StellarWallet(balances)
+        source_address = 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'
+        destination_address = 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6'
+
+        data = {'target_address': 'invalid', 'amount_xlm': 10, 'amount_htkn': 5}
+        url = reverse('generate-payment', wallet_address=source_address)
+        resp = await self.client.request('POST', url, json=data)
+        assert resp.status == 400
+        mock_generate_payment.assert_not_called()
+
+    @unittest_run_loop
     @patch('transaction.generate_payment.get_transaction_by_memo')
     @patch('transaction.generate_payment.get_wallet')
     async def test_get_transaction_from_request_already_submitted(self, mock_address, mock_transaction_by_memo):
