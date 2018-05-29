@@ -14,4 +14,5 @@ async def put_transaction_from_request(request: web.Request) -> web.Response:
 
     await submit_transaction(signed_xdr)
     response = await get_transaction(tx_hash)
-    return web.json_response(response)
+    return web.json_response(response, status=202)
+
