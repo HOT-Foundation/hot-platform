@@ -21,11 +21,7 @@ class TestSubmitTransactionFromRequest(BaseTestClass):
         mock_tx.return_value = {'status': 200}
         url = reverse('transaction', transaction_hash='transaction-hash')
         resp = await self.client.request("PUT", url, data=b'test data')
-        assert resp.status == 200
-        text = await resp.json()
-        mock_get.return_value = expect
-
-        assert text == expect
+        assert resp.status == 202
 
     @unittest_run_loop
     @patch('transaction.put_transaction.is_duplicate_transaction')

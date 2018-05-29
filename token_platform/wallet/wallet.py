@@ -17,9 +17,7 @@ async def get_wallet(wallet_address: str) -> StellarAddress:
     except AccountNotExistError as ex:
         msg = "{}: {}".format(str(ex), wallet_address)
         raise web.HTTPNotFound(reason=msg)
-
     return wallet
-
 
 
 def wallet_address_is_duplicate(destination_address: str) -> bool:

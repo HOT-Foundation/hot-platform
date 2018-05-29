@@ -12,6 +12,7 @@ from conf import settings
 from transaction.transaction import get_signers, get_threshold_weight, get_transaction_by_memo
 from wallet.wallet import get_wallet
 from router import reverse
+from stellar_base.utils import decode_check, DecodeError
 
 
 async def generate_payment_from_request(request: web.Request) -> web.Response:
@@ -23,18 +24,24 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
     amount_htkn = body.get('amount_htkn')
     amount_xlm = body.get('amount_xlm')
     sequence_number = body.get('sequence_number', None)
-    meta = body.get('meta', None)
+    memo = body.get('memo', None)
     await get_wallet(source_account)
 
-    if meta:
-        url_get_transaction = await get_transaction_by_memo(source_account, meta)
+    try:
+        decode_check('account', target_address)
+    except DecodeError as e:
+        raise web.HTTPBadRequest(reason='Invalid value : {}'.format(target_address))
+
+    if memo:
+        url_get_transaction = await get_transaction_by_memo(source_account, memo)
         if url_get_transaction:
             return web.json_response(url_get_transaction, status=400)
 
-    result = await generate_payment(source_account, target_address, amount_htkn, amount_xlm, sequence_number, meta)
+    result = await generate_payment(source_account, target_address, amount_htkn, amount_xlm, sequence_number, memo)
     return web.json_response(result)
 
-async def generate_payment(source_address: str, destination: str, amount_htkn: Decimal, amount_xlm:Decimal, sequence:int = None, meta:str = None) -> Dict:
+
+async def generate_payment(source_address: str, destination: str, amount_htkn: Decimal, amount_xlm:Decimal, sequence:int = None, memo:str = None) -> Dict:
     """Get unsigned transfer transaction and signers
 
         Args:
@@ -43,9 +50,9 @@ async def generate_payment(source_address: str, destination: str, amount_htkn: D
             amount_htkn: amount of HoToken that would be transferred
             amount_xlm: amount of XLM that would be transferred
             sequence: sequence number for generate transaction [optional]
-            meta: memo text [optional]
+            memo: memo text [optional]
     """
-    unsigned_xdr, tx_hash = await build_unsigned_transfer(source_address, destination, amount_htkn, amount_xlm, sequence, meta)
+    unsigned_xdr, tx_hash = await build_unsigned_transfer(source_address, destination, amount_htkn, amount_xlm, sequence, memo)
     host: str = settings['HOST']
     result = {
         '@id': source_address,
@@ -68,7 +75,7 @@ async def build_unsigned_transfer(source_address: str, destination_address: str,
             amount_htkn: amount of htkn that would be transfer
             amount_xlm: amount of xlm that would be transfer
             sequence: sequence number for generate transaction [optional]
-            meta: memo text [optional]
+            memo: memo text [optional]
     """
 
     builder = Builder(address=source_address, network=settings['STELLAR_NETWORK'], sequence=sequence)

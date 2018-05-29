@@ -430,14 +430,11 @@ class TestBuildCreateEscrowWalletTransaction(BaseTestClass):
     @patch('escrow.post_generate_escrow_wallet.Builder')
     async def test_build_generate_escrow_wallet_cannot_gen_xdr(self, mock_builder):
 
-        def _raiseError(source, destination, code):
-            raise Exception('Parameter is not valid.')
-
         instance = mock_builder.return_value
         instance.append_create_account_op.return_value = 'test'
         instance.append_trust_op.return_value = 'test'
         instance.append_set_options_op.return_value = 'test'
-        instance.gen_xdr = _raiseError
+        instance.gen_xdr = Exception('Parameter is not valid.')
         instance.te.hash_meta.return_value = b'tx-hash'
 
         with pytest.raises(web.HTTPBadRequest):
