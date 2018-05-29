@@ -54,6 +54,10 @@ ROUTER =  {
     "close-escrow-wallet" : {
         "url" : "/escrow/{escrow_address}/generate-close-escrow-wallet",
         "POST" : "escrow.post_close_escrow_wallet.post_close_escrow_wallet_from_request"
+    },
+    "close-joint-wallet" : {
+        "url" : "/wallet/{wallet_address}/generate-close-joint-wallet",
+        "POST" : "joint_wallet.post_close_joint_wallet.post_close_joint_wallet_from_request"
     }
 }
 
