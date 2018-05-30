@@ -17,11 +17,13 @@ from router import reverse
 
 @patch('wallet.get_wallet.get_wallet_detail')
 async def test_get_wallet_from_request(mock_get_wallet):
+    mock_get_wallet.return_value = {}
     wallet_address = 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'
     req = make_mocked_request('GET', reverse('wallet-address', wallet_address=wallet_address),
                               match_info={'wallet_address': wallet_address})
     await get_wallet_from_request(req)
     assert mock_get_wallet.call_count == 1
+
 
 
 @asyncio.coroutine
@@ -48,9 +50,6 @@ async def test_get_wallet_success_trusted_htkn(mock_address):
 
     result = await get_wallet_detail('GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')
 
-    assert result.status == 200
-
-    actual_data = json.loads(result.text)
     host = settings.get('HOST', None)
     url = reverse('wallet-address', wallet_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')
     expect_data = {
@@ -66,7 +65,7 @@ async def test_get_wallet_success_trusted_htkn(mock_address):
             'name': 'UnitTest'
         }
     }
-    assert actual_data == expect_data
+    assert result == expect_data
 
 
 @asyncio.coroutine
@@ -82,9 +81,6 @@ async def test_get_wallet_success_not_trust_htkn(mock_address):
 
     result = await get_wallet_detail('GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')
 
-    assert result.status == 200
-
-    actual_data = json.loads(result.text)
     host = host = settings.get('HOST', None)
     url = reverse('wallet-address', wallet_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')
     expect_data = {
@@ -100,7 +96,7 @@ async def test_get_wallet_success_not_trust_htkn(mock_address):
             'name': 'UnitTest'
         }
     }
-    assert actual_data == expect_data
+    assert result == expect_data
 
 
 @asyncio.coroutine

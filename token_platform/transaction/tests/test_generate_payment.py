@@ -41,6 +41,26 @@ class TestGetUnsignedTransaction(BaseTestClass):
         mock_generate_payment.assert_called_once_with(source_address, destination_address, 5, 10, None, None)
 
     @unittest_run_loop
+    @patch('transaction.generate_payment.get_wallet')
+    @patch('transaction.generate_payment.generate_payment')
+    async def test_get_transaction_from_request_with_invalid_target(self, mock_generate_payment, mock_address):
+        mock_generate_payment.return_value = {}
+        balances = [
+            {
+                'balance': '9.9999200',
+                'asset_type': 'native'
+            }]
+        mock_address.return_value = StellarWallet(balances)
+        source_address = 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'
+        destination_address = 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6'
+
+        data = {'target_address': 'invalid', 'amount_xlm': 10, 'amount_htkn': 5}
+        url = reverse('generate-payment', wallet_address=source_address)
+        resp = await self.client.request('POST', url, json=data)
+        assert resp.status == 400
+        mock_generate_payment.assert_not_called()
+
+    @unittest_run_loop
     @patch('transaction.generate_payment.get_transaction_by_memo')
     @patch('transaction.generate_payment.get_wallet')
     async def test_get_transaction_from_request_already_submitted(self, mock_address, mock_transaction_by_memo):
@@ -135,19 +155,39 @@ class TestGetUnsignedTransaction(BaseTestClass):
         assert result == expect_data
 
     @unittest_run_loop
-    @patch('transaction.generate_payment.StellarAddress')
-    async def test_build_unsigned_transfer_with_memo(self, mock_stellar):
+    @patch('transaction.generate_payment.get_wallet_detail')
+    async def test_build_unsigned_transfer_with_memo(self, mock_wallet):
+        mock_wallet.return_value = {'asset': {}}
         result = await build_unsigned_transfer('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 0, 1, 'memo')
         assert result == ('AAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAZAAAAAAAAAACAAAAAAAAAAEAAAAEbWVtbwAAAAEAAAABAAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAAQAAAADZmUaevDbFEdvFYNAKhFBHPxv9Rr4phQFV2Vx/gRzlsQAAAAFIVEtOAAAAAOQdpyPCl4VbPm3G95niwnekSZPOl1L1+IGxwPCmaimmAAAAAAX14QAAAAAAAAAAAA==', '62bcef44d2d06a4657850849e94ada319fe398d5dd091907916876ded24b8167')
 
     @unittest_run_loop
-    @patch('transaction.generate_payment.StellarAddress')
-    async def test_build_unsigned_transfer_with_xlm_amount(self, mock_stellar):
+    @patch('transaction.generate_payment.get_wallet_detail')
+    async def test_build_unsigned_transfer_with_xlm_amount(self, mock_wallet):
+        mock_wallet.return_value = {'asset': {}}
         result = await build_unsigned_transfer('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 0, 10, 1, 'memo')
         assert result == (
             'AAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAZAAAAAAAAAACAAAAAAAAAAEAAAAEbWVtbwAAAAEAAAABAAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAAQAAAADZmUaevDbFEdvFYNAKhFBHPxv9Rr4phQFV2Vx/gRzlsQAAAAAAAAAABfXhAAAAAAAAAAAA',
             'c363b479e6dd1fb149c28251d71315d78144bb44e3daf0617eb07be554b8b59c'
         )
+
+    @unittest_run_loop
+    @patch('transaction.generate_payment.get_wallet_detail')
+    async def test_build_unsigned_transfer_with_xlm_and_htkn_amount_with_trust(self, mock_wallet):
+        mock_wallet.return_value = {'asset': {settings['ASSET_CODE']: 10}}
+        result = await build_unsigned_transfer('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 10, 1, 'memo')
+        print(result)
+        assert result == (
+            'AAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAyAAAAAAAAAACAAAAAAAAAAEAAAAEbWVtbwAAAAIAAAABAAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAAQAAAADZmUaevDbFEdvFYNAKhFBHPxv9Rr4phQFV2Vx/gRzlsQAAAAAAAAAABfXhAAAAAAEAAAAAzn/d1FIsDTZsMGI9v1zr/yroYANpqKHNCA/hmGuPbIkAAAABAAAAANmZRp68NsUR28Vg0AqEUEc/G/1GvimFAVXZXH+BHOWxAAAAAUhUS04AAAAA5B2nI8KXhVs+bcb3meLCd6RJk86XUvX4gbHA8KZqKaYAAAAABfXhAAAAAAAAAAAA',
+            '6a4e2357e0d1c297fce0420815c37265c0247eceed2a19633f434f592f556198'
+        )
+
+    @unittest_run_loop
+    @patch('transaction.generate_payment.get_wallet_detail')
+    async def test_build_unsigned_transfer_with_invalid_account_and_htkn(self, mock_wallet):
+        mock_wallet.side_effect = web.HTTPNotFound()
+        with pytest.raises(web.HTTPBadRequest) as context:
+            result = await build_unsigned_transfer('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 10, 1, 'memo')
 
     @unittest_run_loop
     @patch('transaction.generate_payment.Builder')
