@@ -5,14 +5,15 @@ from typing import Any, Dict, List, Mapping, NewType, Optional, Tuple, Union
 from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
 from stellar_base.horizon import horizon_livenet, horizon_testnet
-from stellar_base.utils import AccountNotExistError
+from stellar_base.utils import AccountNotExistError, DecodeError, decode_check
 
 from aiohttp import web
 from conf import settings
-from transaction.transaction import get_signers, get_threshold_weight, get_transaction_by_memo
-from wallet.wallet import get_wallet
 from router import reverse
-from stellar_base.utils import decode_check, DecodeError
+from transaction.transaction import (get_signers, get_threshold_weight,
+                                     get_transaction_by_memo)
+from wallet.get_wallet import get_wallet_detail
+from wallet.wallet import get_wallet
 
 
 async def generate_payment_from_request(request: web.Request) -> web.Response:
@@ -80,12 +81,19 @@ async def build_unsigned_transfer(source_address: str, destination_address: str,
 
     builder = Builder(address=source_address, network=settings['STELLAR_NETWORK'], sequence=sequence)
 
-    wallet = StellarAddress(address=destination_address, network=settings['STELLAR_NETWORK'])
     try:
-        wallet.get()
+        wallet = await get_wallet_detail(destination_address)
         if amount_xlm:
             builder.append_payment_op(destination_address, amount_xlm, source=source_address)
-    except AccountNotExistError as e:
+
+        if amount_htkn and wallet['asset'].get(settings['ASSET_CODE'], False):
+            builder.append_payment_op(
+                destination_address, amount_htkn, asset_type=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], source=source_address
+            )
+
+    except web.HTTPNotFound as e:
+        if amount_htkn:
+            raise web.HTTPBadRequest(reason="{} is not trusted {}".format(destination_address, settings['ASSET_CODE']))
         builder.append_create_account_op(source=source_address, destination=destination_address, starting_balance=amount_xlm)
 
     if amount_htkn:
