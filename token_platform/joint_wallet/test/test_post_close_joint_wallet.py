@@ -20,9 +20,9 @@ class TestPostCloseJointWalletFromRequest(BaseTestClass):
 
     @unittest_run_loop
     @patch('joint_wallet.post_close_joint_wallet.generate_merge_transaction')
-    async def test_post_cloase_joint_wallet_from_request_success(self, mock_genrate_merge_transaction):
+    async def test_post_cloase_joint_wallet_from_request_success(self, mock_generate_merge_transaction):
 
-        mock_genrate_merge_transaction.return_value = {
+        mock_generate_merge_transaction.return_value = {
             'wallet_address' : self.wallet_address,
             'transaction_url' : reverse('transaction', transaction_hash=self.tx_hash),
             'signers' : self.singers,

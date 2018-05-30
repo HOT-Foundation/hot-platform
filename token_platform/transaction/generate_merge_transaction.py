@@ -15,6 +15,7 @@ async def generate_merge_transaction(wallet_address: str, parties_wallet: List=N
 
     Args;
         escrow_address :  Address of escrow wallet
+        parties_walles : list of provider address and amount for payback
     return Dict type
         escrow_address : Address of escrow wallet
         @url : Current POST url
@@ -41,6 +42,7 @@ async def build_generate_merge_transaction(wallet_detail: Dict, parties_wallet: 
 
     Args:
         escrow_wallet: escrow wallet response from get_escrow_wallet_detail
+        parties_walles : list of provider address and amount for payback
     """
 
     wallet_address = wallet_detail['@id']
@@ -54,7 +56,7 @@ async def build_generate_merge_transaction(wallet_detail: Dict, parties_wallet: 
 
     balance = Decimal(wallet_detail['asset'][settings['ASSET_CODE']])
     if not await is_match_balance(parties_wallet, balance):
-        raise web.HTTPConflict(reason='Total amount not match wallet balance')
+        raise web.HTTPBadRequest(reason='Total amount not match wallet balance')
 
     await build_payment_operation(builder, wallet_address, parties_wallet)
     await build_remove_trustlines_operation(builder, wallet_address)
@@ -72,12 +74,20 @@ async def build_generate_merge_transaction(wallet_detail: Dict, parties_wallet: 
 
 
 async def get_creator_address(wallet_address: str) -> str:
+    ''' Get creator address from Stellar via Horizon account operations and then return that address
+
+    Args:
+        wallet_address: address for search creator address  '''
     horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
     result = horizon.account_operations(wallet_address, params={'limit' : 1, 'order' : 'asc'}).get('_embedded').get('records')[0]
     return result['source_account']
 
 
 async def generate_parties_wallet(wallet_detail: Dict) -> List:
+    ''' Generate parties wallet from wallet detail and then return list of address provider and amount of payback
+
+    Args:
+        wallet_detail: wallet detail dict it's result of escrow.get_escrow_wallet.get_escrow_wallet_detail '''
     parties_wallet = []
     wallet = {
         'address' : wallet_detail['data']['provider_address'],
@@ -88,6 +98,11 @@ async def generate_parties_wallet(wallet_detail: Dict) -> List:
 
 
 async def is_match_balance(parties_wallet: List, balance: Decimal) -> bool:
+    ''' Check match balance between total payback amount of list provider and wallet amount and then return True of False
+
+    Args:
+        parties_wallet: list of  provider
+        balance: balance of wallet'''
     amount: Decimal = Decimal(0)
 
     for wallet in parties_wallet:

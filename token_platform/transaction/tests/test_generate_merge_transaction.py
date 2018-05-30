@@ -143,7 +143,7 @@ class TestBuildGenerateMergeTransaction(BaseTestClass):
 
         mock_is_match.return_value = False
 
-        with pytest.raises(web.HTTPConflict):
+        with pytest.raises(web.HTTPBadRequest):
             await build_generate_merge_transaction(self.wallet_detail, self.parties_wallet)
 
 
