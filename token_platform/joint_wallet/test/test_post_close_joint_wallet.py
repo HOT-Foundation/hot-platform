@@ -40,7 +40,7 @@ class TestPostCloseJointWalletFromRequest(BaseTestClass):
         }
 
         url = reverse('close-joint-wallet', wallet_address=self.wallet_address)
-        resp = self.client.request('POST', url, json=self.parties_wallet)
+        resp = await self.client.request('POST', url, json=self.parties_wallet)
 
         assert resp.status == 200
         text = await resp.json()

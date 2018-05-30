@@ -10,7 +10,7 @@ from decimal import Decimal
 from typing import List
 from stellar_base.builder import Builder
 from stellar_base.stellarxdr import StellarXDR_const as const
-from transaction.generate_merge_transaction import (generate_merge_transaction, build_payment_operation, build_remove_trustlines_operation, build_remove_manage_data_operation, build_account_merge_operation, build_generate_merge_transaction, generate_parties_wallet)
+from transaction.generate_merge_transaction import (generate_merge_transaction, build_payment_operation, build_remove_trustlines_operation, build_remove_manage_data_operation, build_account_merge_operation, build_generate_merge_transaction, generate_parties_wallet, is_match_balance, get_creator_address)
 
 
 class TestGenerateMergeTransaction(BaseTestClass):
@@ -84,36 +84,89 @@ class TestBuildGenerateMergeTransaction(BaseTestClass):
         }
 
     @unittest_run_loop
+    @patch('transaction.generate_merge_transaction.is_match_balance')
     @patch('transaction.generate_merge_transaction.Builder')
-    async def test_build_generate_merge_transaction_success(self, mock_builder):
+    async def test_build_generate_merge_transaction_success(self, mock_builder, mock_is_match):
         instance = mock_builder.return_value
         instance.gen_xdr.return_value = b'unsigned-xdr'
         instance.te.hash_meta.return_value = b'tx-hash'
+        mock_is_match.return_value = True
 
         result = await build_generate_merge_transaction(self.wallet_detail, self.parties_wallet)
         expect = ('unsigned-xdr', '74782d68617368')
         assert result == expect
 
     @unittest_run_loop
+    @patch('transaction.generate_merge_transaction.get_creator_address')
+    @patch('transaction.generate_merge_transaction.is_match_balance')
     @patch('transaction.generate_merge_transaction.Builder')
-    async def test_build_generate_merge_transaction_none_parties(self, mock_builder):
+    async def test_build_generate_merge_transaction_creator_is_none(self, mock_builder, mock_is_match, mock_get_creator):
         instance = mock_builder.return_value
         instance.gen_xdr.return_value = b'unsigned-xdr'
         instance.te.hash_meta.return_value = b'tx-hash'
+        mock_is_match.return_value = True
+        mock_get_creator.return_value = self.creator_address
+        self.wallet_detail['data'] = {}
+
+        result = await build_generate_merge_transaction(self.wallet_detail, self.parties_wallet)
+        expect = ('unsigned-xdr', '74782d68617368')
+        assert result == expect
+
+    @unittest_run_loop
+    @patch('transaction.generate_merge_transaction.is_match_balance')
+    @patch('transaction.generate_merge_transaction.Builder')
+    async def test_build_generate_merge_transaction_none_parties(self, mock_builder, mock_is_match):
+        instance = mock_builder.return_value
+        instance.gen_xdr.return_value = b'unsigned-xdr'
+        instance.te.hash_meta.return_value = b'tx-hash'
+        mock_is_match.return_value = True
 
         result = await build_generate_merge_transaction(self.wallet_detail)
         expect = ('unsigned-xdr', '74782d68617368')
         assert result == expect
 
     @unittest_run_loop
+    @patch('transaction.generate_merge_transaction.is_match_balance')
     @patch('transaction.generate_merge_transaction.Builder')
-    async def test_build_generate_merge_transaction_cannot_gen_xdr(self, mock_builder):
+    async def test_build_generate_merge_transaction_cannot_gen_xdr(self, mock_builder, mock_is_match):
         instance = mock_builder.return_value
         instance.gen_xdr = Exception('Parameter is not valid.')
         instance.te.hash_meta.return_value = b'tx-hash'
+        mock_is_match.return_value = True
 
         with pytest.raises(web.HTTPBadRequest):
             await build_generate_merge_transaction(self.wallet_detail, self.parties_wallet)
+
+    @unittest_run_loop
+    @patch('transaction.generate_merge_transaction.is_match_balance')
+    async def test_build_generate_merge_transaction_balance_not_match(self, mock_is_match):
+
+        mock_is_match.return_value = False
+
+        with pytest.raises(web.HTTPConflict):
+            await build_generate_merge_transaction(self.wallet_detail, self.parties_wallet)
+
+
+class TestGetCreatorAddress(BaseTestClass):
+    async def setUpAsync(self):
+        self.wallet_address = 'wallet_address'
+        self.result = { "_embedded": {"records": [
+                            {'source_account' : 'source_account'}
+                      ]}}
+
+    @unittest_run_loop
+    @patch('transaction.generate_merge_transaction.horizon_livenet')
+    @patch('transaction.generate_merge_transaction.horizon_testnet')
+    async def test_get_creator_address_success(self, mock_testnet, mock_livenet):
+        instance = mock_testnet.return_value
+        instance.account_operations.return_value = self.result
+
+        instance = mock_livenet.return_value
+        instance.account_operations.return_value = self.result
+
+        result = await get_creator_address(self.wallet_address)
+
+        assert result == 'source_account'
 
 
 class TestGeneratePartiesWallet(BaseTestClass):
@@ -144,6 +197,28 @@ class TestGeneratePartiesWallet(BaseTestClass):
 
         assert isinstance(result, List)
         assert result == expect
+
+
+class TestIsMatchBalance(BaseTestClass):
+    async def setUpAsync(self):
+        self.parties_wallet = [
+            {'address' : 'wallet1', 'amount' : '15'},
+            {'address' : 'wallet2', 'amount' : '20'}
+        ]
+
+    @unittest_run_loop
+    async def test_is_match_balance_success(self):
+        balance = Decimal('35')
+        result = await is_match_balance(self.parties_wallet, balance)
+
+        assert result is True
+
+    @unittest_run_loop
+    async def test_is_match_balance_fail(self):
+        balance = Decimal('40')
+        result = await is_match_balance(self.parties_wallet, balance)
+
+        assert result is False
 
 
 class TestBuildPaymentOperation(BaseTestClass):
@@ -215,7 +290,7 @@ class TestBuildAccountMergeOperation(BaseTestClass):
         self.destination_address = 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE'
 
     @unittest_run_loop
-    async def build_account_merge_operation_success(self):
+    async def test_build_account_merge_operation_success(self):
         await build_account_merge_operation(self.builder, self.source_address, self.destination_address)
         operation = self.builder.ops[-1].to_xdr_object()
 

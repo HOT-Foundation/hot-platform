@@ -44,6 +44,9 @@ async def error_middleware(request, handler):
         print(message)
         print(traceback.format_exc(chain=False))
         return web.json_response({'error': message}, status=400)
+    except web.HTTPConflict as ex:
+        message = str(ex)
+        return web.json_response({'error' : message}, status=409)
     except Exception as ex:
         message = str(ex)
         print(traceback.format_exc(chain=False))

@@ -5,7 +5,7 @@ from router import reverse
 from decimal import Decimal
 from conf import settings
 from aiohttp import web
-from typing import List
+from stellar_base.horizon import horizon_testnet, horizon_livenet
 
 import binascii
 
@@ -45,12 +45,16 @@ async def build_generate_merge_transaction(wallet_detail: Dict, parties_wallet: 
 
     wallet_address = wallet_detail['@id']
     wallet_data = wallet_detail['data']
-    creator_address = wallet_data['creator_address']
+    creator_address = wallet_data['creator_address'] if wallet_data and 'creator_address' in wallet_data.keys() else await get_creator_address(wallet_address)
 
     builder = Builder(address=creator_address, network=settings['STELLAR_NETWORK'])
 
     if not parties_wallet:
         parties_wallet = await generate_parties_wallet(wallet_detail)
+
+    balance = Decimal(wallet_detail['asset'][settings['ASSET_CODE']])
+    if not await is_match_balance(parties_wallet, balance):
+        raise web.HTTPConflict(reason='Total amount not match wallet balance')
 
     await build_payment_operation(builder, wallet_address, parties_wallet)
     await build_remove_trustlines_operation(builder, wallet_address)
@@ -67,6 +71,12 @@ async def build_generate_merge_transaction(wallet_detail: Dict, parties_wallet: 
     return xdr.decode(), binascii.hexlify(tx_hash).decode()
 
 
+async def get_creator_address(wallet_address: str) -> str:
+    horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
+    result = horizon.account_operations(wallet_address, params={'limit' : 1, 'order' : 'asc'}).get('_embedded').get('records')[0]
+    return result['source_account']
+
+
 async def generate_parties_wallet(wallet_detail: Dict) -> List:
     parties_wallet = []
     wallet = {
@@ -75,6 +85,15 @@ async def generate_parties_wallet(wallet_detail: Dict) -> List:
     }
     parties_wallet.append(wallet)
     return parties_wallet
+
+
+async def is_match_balance(parties_wallet: List, balance: Decimal) -> bool:
+    amount: Decimal = Decimal(0)
+
+    for wallet in parties_wallet:
+        amount += Decimal(wallet['amount'])
+
+    return amount == balance
 
 
 async def build_payment_operation(builder: Builder, source: str, parties_wallet: List):
