@@ -81,25 +81,17 @@ async def build_unsigned_transfer(source_address: str, destination_address: str,
 
     builder = Builder(address=source_address, network=settings['STELLAR_NETWORK'], sequence=sequence)
 
-    try:
-        wallet = await get_wallet_detail(destination_address)
-        if amount_xlm:
-            builder.append_payment_op(destination_address, amount_xlm, source=source_address)
-
-        if amount_htkn and wallet['asset'].get(settings['ASSET_CODE'], False):
-            builder.append_payment_op(
-                destination_address, amount_htkn, asset_type=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], source=source_address
-            )
-
-    except web.HTTPNotFound as e:
-        if amount_htkn:
-            raise web.HTTPBadRequest(reason="{} is not trusted {}".format(destination_address, settings['ASSET_CODE']))
-        builder.append_create_account_op(source=source_address, destination=destination_address, starting_balance=amount_xlm)
-
-    if amount_htkn:
+    wallet = await get_wallet_detail(destination_address)
+    if amount_xlm:
+        builder.append_payment_op(destination_address, amount_xlm, source=source_address)
+    if amount_htkn and wallet['asset'].get(settings['ASSET_CODE'], False):
         builder.append_payment_op(
             destination_address, amount_htkn, asset_type=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], source=source_address
         )
+
+    if amount_htkn and not wallet['asset'].get(settings['ASSET_CODE'], False):
+        raise web.HTTPBadRequest(reason="{} is not trusted {}".format(destination_address, settings['ASSET_CODE']))
+
 
     if memo_text:
         builder.add_text_memo(memo_text)

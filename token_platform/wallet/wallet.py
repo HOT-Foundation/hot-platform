@@ -34,7 +34,7 @@ def wallet_address_is_duplicate(destination_address: str) -> bool:
         return True
 
 
-def build_generate_wallet_transaction(source_address: str, destination_address: str, amount: int) -> Tuple[bytes, bytes]:
+def build_generate_trust_wallet_transaction(source_address: str, destination_address: str, amount: int) -> Tuple[bytes, bytes]:
     """"Build transaction return unsigned XDR and transaction hash.
 
         Args:
@@ -50,6 +50,36 @@ def build_generate_wallet_transaction(source_address: str, destination_address: 
     try:
         builder.append_trust_op(
             source=destination_address, destination=settings['ISSUER'], code=settings['ASSET_CODE'])
+    except DecodeError:
+        raise web.HTTPBadRequest(reason='Parameter values are not valid.')
+    except Exception as e:
+        msg = str(e)
+        raise web.HTTPInternalServerError(reason=msg)
+
+    try:
+        unsigned_xdr = builder.gen_xdr()
+    except Exception as e:
+        raise web.HTTPBadRequest(reason='Bad request, Please ensure parameters are valid.')
+
+    tx_hash = builder.te.hash_meta()
+
+    return unsigned_xdr, tx_hash
+
+def build_generate_wallet_transaction(source_address: str, destination_address: str, amount: int) -> Tuple[bytes, bytes]:
+    """"Build transaction return unsigned XDR and transaction hash.
+
+        Args:
+            source_address: Owner of
+            destination_address: wallet id of new wallet
+            amount: starting balance of new wallet
+            builder(optional): Builder object
+    """
+    builder = Builder(address=source_address,
+                      network=settings['STELLAR_NETWORK'])
+
+    try:
+        builder.append_create_account_op(
+        source=source_address, destination=destination_address, starting_balance=amount)
     except DecodeError:
         raise web.HTTPBadRequest(reason='Parameter values are not valid.')
     except Exception as e:

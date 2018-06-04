@@ -6,7 +6,7 @@ from stellar_base.builder import Builder
 
 from aiohttp import web
 from conf import settings
-from wallet.wallet import (build_generate_wallet_transaction,
+from wallet.wallet import (build_generate_trust_wallet_transaction,
                            wallet_address_is_duplicate)
 
 from transaction.transaction import get_threshold_weight, get_signers

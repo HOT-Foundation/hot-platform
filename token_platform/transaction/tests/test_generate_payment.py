@@ -66,8 +66,8 @@ class TestGetUnsignedTransaction(BaseTestClass):
     async def test_get_transaction_from_request_already_submitted(self, mock_address, mock_transaction_by_memo):
 
         mock_transaction_by_memo.return_value = {
-            'message': 'Transaction is already submited', 
-            'url': '/transaction/db2c17818a6eeaae5f7e7a0a858fb62db4835509aa6d932c3fdd298e6e97d787', 
+            'message': 'Transaction is already submited',
+            'url': '/transaction/db2c17818a6eeaae5f7e7a0a858fb62db4835509aa6d932c3fdd298e6e97d787',
             'transaction_hash': 'db2c17818a6eeaae5f7e7a0a858fb62db4835509aa6d932c3fdd298e6e97d787'
         }
 
@@ -157,7 +157,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
     @unittest_run_loop
     @patch('transaction.generate_payment.get_wallet_detail')
     async def test_build_unsigned_transfer_with_memo(self, mock_wallet):
-        mock_wallet.return_value = {'asset': {}}
+        mock_wallet.return_value = {'asset': {settings['ASSET_CODE']: 10}}
         result = await build_unsigned_transfer('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 0, 1, 'memo')
         assert result == ('AAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAZAAAAAAAAAACAAAAAAAAAAEAAAAEbWVtbwAAAAEAAAABAAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAAQAAAADZmUaevDbFEdvFYNAKhFBHPxv9Rr4phQFV2Vx/gRzlsQAAAAFIVEtOAAAAAOQdpyPCl4VbPm3G95niwnekSZPOl1L1+IGxwPCmaimmAAAAAAX14QAAAAAAAAAAAA==', '62bcef44d2d06a4657850849e94ada319fe398d5dd091907916876ded24b8167')
 
@@ -184,26 +184,20 @@ class TestGetUnsignedTransaction(BaseTestClass):
 
     @unittest_run_loop
     @patch('transaction.generate_payment.get_wallet_detail')
-    async def test_build_unsigned_transfer_with_invalid_account_and_htkn(self, mock_wallet):
-        mock_wallet.side_effect = web.HTTPNotFound()
+    async def test_build_unsigned_transfer_with_invalid_htkn(self, mock_wallet):
+        mock_wallet.return_value = {'asset': {}}
         with pytest.raises(web.HTTPBadRequest) as context:
             result = await build_unsigned_transfer('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 10, 1, 'memo')
 
     @unittest_run_loop
-    @patch('transaction.generate_payment.Builder')
     @patch('transaction.generate_payment.StellarAddress')
-    async def test_build_unsigned_transfer_with_target_not_created(self, mock_stellar, mock_builder):
-        class MockAddress(object):
-            def get(self):
-                raise AccountNotExistError('Resource Missing')
+    async def test_build_unsigned_transfer_with_target_not_created(self, mock_stellar):
+        # class MockAddress(object):
+        #     def get(self):
+        #         raise AccountNotExistError('Resource Missing')
 
-        mock_stellar.return_value = MockAddress()
+        mock_stellar.side_effect = web.HTTPNotFound()
 
-        instance = mock_builder.return_value
-        instance.append_create_account_op.return_value = 'test'
-        instance.append_payment_op.return_value = 'test'
-        instance.gen_xdr.return_value = b'unsigned-xdr'
-        instance.te.hash_meta.return_value = b'tx-hash'
-
-        result = await build_unsigned_transfer('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 0, 10, 1, 'memo')
-        assert result == ('unsigned-xdr', '74782d68617368')
+        with pytest.raises(web.HTTPNotFound):
+            result = await build_unsigned_transfer('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 0, 10, 1, 'memo')
+        # assert result == ('unsigned-xdr', '74782d68617368')
