@@ -87,10 +87,10 @@ class TestCreateTrustWallet(BaseTestClass):
 
         resp = await self.client.request("POST", url, json={
                                          'target_address' : 'test',
-                                         'starting_balance' : 'not_Integer'})
+                                         'starting_balance' : 'not_Decimal'})
         assert resp.status == 400
         text = await resp.json()
-        assert "invalid literal for int() with base 10: 'not_Integer'" in text['error']
+        assert "not_Decimal is not decimal" in text['error']
 
     @unittest_run_loop
     @patch('wallet.post_generate_trust_wallet.wallet_address_is_duplicate', **{'return_value' : True})

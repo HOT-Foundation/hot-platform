@@ -5,6 +5,7 @@ from aiohttp import web
 
 from conf import settings
 from router import reverse
+from decimal import Decimal, InvalidOperation
 from transaction.transaction import get_signers
 from wallet.wallet import (build_generate_wallet_transaction,
                            wallet_address_is_duplicate)
@@ -20,7 +21,10 @@ async def post_generate_wallet_from_request(request: web.Request):
     source_address: str = request.match_info.get('wallet_address')
 
     destination_address: str = json_response['target_address']
-    balance: int = int(json_response.get('amount_xlm', 0))
+    try:
+        balance: Decimal = Decimal(json_response.get('amount_xlm', 0))
+    except InvalidOperation:
+        raise web.HTTPBadRequest(reason = f"{json_response.get('amount_xlm')} is not decimal type")
 
     if balance == 0:
         raise web.HTTPBadRequest(reason = 'Balance must have more than 0.')

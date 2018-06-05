@@ -6,6 +6,7 @@ from asynctest import patch
 from stellar_base.keypair import Keypair
 from stellar_base.utils import AccountNotExistError, StellarMnemonic
 from tests.test_utils import BaseTestClass
+from aiohttp import web
 
 from conf import settings
 from wallet.wallet import (build_generate_wallet_transaction,
@@ -84,12 +85,13 @@ class TestCreateWallet(BaseTestClass):
         text = await resp.json()
         assert 'Balance must have more than 0.' in text['error']
 
+
         resp = await self.client.request("POST", url, json={
                                          'target_address' : 'test',
-                                         'amount_xlm' : 'not_Integer'})
+                                         'amount_xlm' : 'not_Decimal'})
         assert resp.status == 400
         text = await resp.json()
-        assert "invalid literal for int() with base 10: 'not_Integer'" in text['error']
+        assert "not_Decimal is not decimal" in text['error']
 
     @unittest_run_loop
     @patch('wallet.post_generate_wallet.wallet_address_is_duplicate', **{'return_value' : True})

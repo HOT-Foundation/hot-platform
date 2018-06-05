@@ -192,12 +192,8 @@ class TestGetUnsignedTransaction(BaseTestClass):
     @unittest_run_loop
     @patch('transaction.generate_payment.StellarAddress')
     async def test_build_unsigned_transfer_with_target_not_created(self, mock_stellar):
-        # class MockAddress(object):
-        #     def get(self):
-        #         raise AccountNotExistError('Resource Missing')
 
         mock_stellar.side_effect = web.HTTPNotFound()
 
         with pytest.raises(web.HTTPNotFound):
             result = await build_unsigned_transfer('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 0, 10, 1, 'memo')
-        # assert result == ('unsigned-xdr', '74782d68617368')
