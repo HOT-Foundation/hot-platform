@@ -18,6 +18,7 @@ async def get_transaction_hash_from_request(request: web.Request) -> web.Respons
 
     result = await get_transaction_hash(address, memo)
     if not result:
-        status = 400
+        status = 404
+        result= 'Not Found'
 
     return web.json_response({'transaction_hash' : result}, status=status)

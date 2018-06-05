@@ -7,7 +7,7 @@ from aiohttp import web
 from stellar_base.builder import Builder
 
 from conf import settings
-from wallet.wallet import (build_generate_wallet_transaction, get_wallet,
+from wallet.wallet import (build_generate_trust_wallet_transaction, get_wallet,
                            wallet_address_is_duplicate)
 from router import reverse
 

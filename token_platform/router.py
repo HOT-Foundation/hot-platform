@@ -14,6 +14,10 @@ ROUTER =  {
         "url" : "/wallet/{wallet_address}/generate-wallet",
         "POST" : "wallet.post_generate_wallet.post_generate_wallet_from_request"
     },
+    "generate-trust-wallet" : {
+        "url" : "/wallet/{wallet_address}/generate-trust-wallet",
+        "POST" : "wallet.post_generate_trust_wallet.post_generate_trust_wallet_from_request"
+    },
     "generate-payment" : {
         "url" : "/wallet/{wallet_address}/generate-payment",
         "POST" : "transaction.generate_payment.generate_payment_from_request"
