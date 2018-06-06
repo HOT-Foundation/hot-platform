@@ -14,6 +14,7 @@ class TestPostCloseEscrowWalletFromRequest(BaseTestClass):
         self.escrow_address = 'escrow'
         self.provider_address = 'provider'
         self.creator_address = 'creator'
+        self.transaction_source_address = 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ'
         self.tx_hash = 'tx_tash'
         self.unsigned_xdr = 'xdr'
         self.host = settings['HOST']
@@ -39,8 +40,12 @@ class TestPostCloseEscrowWalletFromRequest(BaseTestClass):
             'transaction_hash' : self.tx_hash
         }
 
+        json = {
+            'transaction_source_address': self.transaction_source_address
+        }
+
         url = f"{self.host}{reverse('close-escrow-wallet', escrow_address=self.escrow_address)}"
-        resp = await self.client.request('POST', url)
+        resp = await self.client.request('POST', url, json=json)
         assert resp.status == 200
         text = await resp.json()
         assert text == expect

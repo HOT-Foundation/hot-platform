@@ -15,7 +15,8 @@ class TestPostCloseJointWalletFromRequest(BaseTestClass):
             'parties' : [
                 {'address' : 'wallet1', 'amount' : '15'},
                 {'address' : 'wallet2', 'amount' : '20'}
-            ]
+            ],
+            'transaction_source_address' : 'transaction_source_address'
         }
 
     @unittest_run_loop

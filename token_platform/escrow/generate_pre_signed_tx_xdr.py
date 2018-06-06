@@ -1,20 +1,26 @@
 from decimal import Decimal
+from json import JSONDecodeError
 from typing import Dict, List
 
 from aiohttp import web
 from conf import settings
+from escrow.get_escrow_wallet import get_escrow_wallet_detail
 from router import reverse
 from transaction.generate_payment import build_unsigned_transfer
 from transaction.transaction import (get_current_sequence_number, get_signers,
                                      get_threshold_weight)
-from escrow.get_escrow_wallet import get_escrow_wallet_detail
 
 
 async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Response:
     """AIOHttp Request create account xdr and presigned transaction xdr"""
+
+    try:
+        json_response = await request.json()
+    except JSONDecodeError:
+        raise web.HTTPBadRequest(reason='Bad request, JSON data missing.')
+
     escrow_address = request.match_info.get("escrow_address")
-    body = await request.json()
-    transaction_source_address = body['transaction_source_address']
+    transaction_source_address = json_response['transaction_source_address']
     escrow = await get_escrow_wallet_detail(escrow_address)
 
     destination_address = escrow["data"]["destination_address"]

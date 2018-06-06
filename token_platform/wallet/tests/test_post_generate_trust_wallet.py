@@ -27,6 +27,7 @@ class TestCreateTrustWallet(BaseTestClass):
         secret_phrase = sm.generate()
         kp = Keypair.deterministic(secret_phrase, lang='english')
         self.wallet_address = 'GB6PGEFJSXPRUNYAJXH4OZNIZNCEXC6B2JMV5RUGWJECWVWNCJTMGJB4'
+        self.transaction_source_address = 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ'
         self.target_address = kp.address().decode()
         self.starting_balance = 600
         self.host = settings['HOST']
@@ -43,6 +44,7 @@ class TestCreateTrustWallet(BaseTestClass):
         url = reverse('generate-trust-wallet', wallet_address=self.wallet_address)
         json_request = {
             'target_address' : self.target_address,
+            'transaction_source_address': self.transaction_source_address,
             'starting_balance' : self.starting_balance
         }
 
@@ -54,7 +56,8 @@ class TestCreateTrustWallet(BaseTestClass):
         expect_unsigned_xdr = mock_xdr.return_value[0].decode()
         expect = {
             'source_address': self.wallet_address,
-            'signers': [self.wallet_address, self.target_address],
+            'transaction_source_address': self.transaction_source_address,
+            'signers': [self.wallet_address, self.target_address, self.transaction_source_address],
             'xdr': expect_unsigned_xdr,
             'transaction_url': f"{self.host}{reverse('transaction', transaction_hash=expect_tx_hash)}",
             'transaction_hash': expect_tx_hash,
@@ -74,19 +77,20 @@ class TestCreateTrustWallet(BaseTestClass):
     @unittest_run_loop
     async def test_post_generate_trust_wallet_from_request_use_wrong_parameter(self):
         url = reverse('generate-trust-wallet', wallet_address=self.wallet_address)
-        resp = await self.client.request("POST", url, json={'target':'test'})
+        resp = await self.client.request("POST", url, json={'target':'test', 'transaction_source_address': 'test'})
         assert resp.status == 400
         text = await resp.json()
         assert "Parameter 'target_address' not found. Please ensure parameters is valid." in text['error']
 
         resp = await self.client.request("POST", url, json={
-                                         'target_address' : 'test'})
+                                         'target_address' : 'test', 'transaction_source_address': 'test'})
         assert resp.status == 400
         text = await resp.json()
         assert 'Balance must have more than 0.' in text['error']
 
         resp = await self.client.request("POST", url, json={
                                          'target_address' : 'test',
+                                         'transaction_source_address': 'test',
                                          'starting_balance' : 'not_Decimal'})
         assert resp.status == 400
         text = await resp.json()
@@ -98,6 +102,7 @@ class TestCreateTrustWallet(BaseTestClass):
         url = reverse('generate-trust-wallet', wallet_address=self.wallet_address)
         json_request = {
             'target_address' : self.target_address,
+            'transaction_source_address': self.transaction_source_address,
             'starting_balance' : self.starting_balance
         }
 

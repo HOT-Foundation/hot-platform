@@ -22,6 +22,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         self.creator_address = 'creator'
         self.escrow_address = 'escrow'
         self.provider_address = 'merchant'
+        self.transaction_source_address = 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ'
         self.expiration_date = '2018-05-03T09:30:06+00:00'
         self.cost_per_transaction = "50.0"
         self.starting_balance = "500.0"
@@ -33,6 +34,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
 
         data = {
             'provider_address': self.provider_address,
+            'transaction_source_address': self.transaction_source_address,
             'destination_address': self.destination_address,
             'creator_address': self.creator_address,
             'starting_balance': self.starting_balance,
@@ -69,6 +71,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
 
         data = {
             'provider_address': self.provider_address,
+            'transaction_source_address': self.transaction_source_address,
             'destination_address': self.destination_address,
             'creator_address': self.creator_address,
             'starting_balance': self.starting_balance,
@@ -105,6 +108,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
 
         data = {
             'provider_address': self.provider_address,
+            'transaction_source_address': self.transaction_source_address,
             'destination_address': self.destination_address,
             'creator_address': self.creator_address,
             'starting_balance': 'make-error',
@@ -126,6 +130,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
 
         data = {
             'destination_address': self.destination_address,
+            'transaction_source_address': self.transaction_source_address,
             'creator_address': self.creator_address,
             'starting_balance': self.starting_balance,
             'cost_per_transaction': 200,
@@ -138,6 +143,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
 
         data = {
             'provider_address': self.provider_address,
+            'transaction_source_address': self.transaction_source_address,
             'creator_address': self.creator_address,
             'starting_balance': self.starting_balance,
             'cost_per_transaction': 200,
@@ -150,6 +156,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
 
         data = {
             'provider_address': self.provider_address,
+            'transaction_source_address': self.transaction_source_address,
             'destination_address': self.destination_address,
             'starting_balance': self.starting_balance,
             'cost_per_transaction': 200,
@@ -162,6 +169,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
 
         data = {
             'provider_address': self.provider_address,
+            'transaction_source_address': self.transaction_source_address,
             'destination_address': self.destination_address,
             'creator_address': self.creator_address,
             'cost_per_transaction': 200,
@@ -174,6 +182,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
 
         data = {
             'provider_address': self.provider_address,
+            'transaction_source_address': self.transaction_source_address,
             'destination_address': self.destination_address,
             'starting_balance': self.starting_balance,
             'creator_address': self.creator_address,
@@ -190,6 +199,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         url = reverse('escrow-generate-wallet', escrow_address=self.escrow_address)
         data = {
             'provider_address': self.provider_address,
+            'transaction_source_address': self.transaction_source_address,
             'destination_address': self.destination_address,
             'creator_address': self.creator_address,
             'starting_balance': 2000,
@@ -204,6 +214,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
 
         data = {
             'provider_address': self.provider_address,
+            'transaction_source_address': self.transaction_source_address,
             'destination_address': self.destination_address,
             'creator_address': self.creator_address,
             'starting_balance': 2000,
@@ -218,6 +229,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
 
         data = {
             'provider_address': self.provider_address,
+            'transaction_source_address': self.transaction_source_address,
             'destination_address': self.destination_address,
             'creator_address': self.creator_address,
             'starting_balance': 2000,
@@ -238,6 +250,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
 
         data = {
             'provider_address': self.provider_address,
+            'transaction_source_address': self.transaction_source_address,
             'destination_address': self.destination_address,
             'creator_address': self.creator_address,
             'starting_balance': 2000,
@@ -252,6 +265,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
 
         data = {
             'provider_address': self.provider_address,
+            'transaction_source_address': self.transaction_source_address,
             'destination_address': self.destination_address,
             'creator_address': self.creator_address,
             'starting_balance': 2000,
@@ -271,6 +285,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
 
         data = {
             'provider_address': self.provider_address,
+            'transaction_source_address': self.transaction_source_address,
             'destination_address': self.destination_address,
             'creator_address': self.creator_address,
             'starting_balance': 'make-error',
@@ -285,6 +300,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
 
         data = {
             'provider_address': self.provider_address,
+            'transaction_source_address': self.transaction_source_address,
             'destination_address': self.destination_address,
             'creator_address': self.creator_address,
             'starting_balance': 2000,
@@ -304,6 +320,7 @@ class TestGetCreateWallet(BaseTestClass):
         self.tx_hash = 'tx_hash'
         self.xdr = 'xdr'
         self.destination_address = 'hotnow'
+        self.transaction_source_address = 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ'
         self.creator_address = 'creator'
         self.escrow_address = 'escrow'
         self.provider_address = 'merchant'
@@ -331,6 +348,7 @@ class TestGetCreateWallet(BaseTestClass):
 
         result = await generate_escrow_wallet(
             escrow_address=self.escrow_address,
+            transaction_source_address=self.transaction_source_address,
             creator_address=self.creator_address,
             provider_address=self.provider_address,
             destination_address=self.destination_address,
@@ -350,6 +368,7 @@ class TestBuildCreateEscrowWalletTransaction(BaseTestClass):
         self.xdr = 'xdr'
         self.destination_address = 'hotnow'
         self.creator_address = 'creator'
+        self.transaction_source_address = 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ'
         self.escrow_address = 'escrow'
         self.provider_address = 'merchant'
         self.expiration_date = '2018-05-03T09:30:06+00:00'
@@ -371,6 +390,7 @@ class TestBuildCreateEscrowWalletTransaction(BaseTestClass):
 
         result = await build_generate_escrow_wallet_transaction(
             escrow_address=self.escrow_address,
+            transaction_source_address=self.transaction_source_address,
             creator_address=self.creator_address,
             provider_address=self.provider_address,
             destination_address=self.destination_address,
@@ -404,6 +424,7 @@ class TestBuildCreateEscrowWalletTransaction(BaseTestClass):
         with pytest.raises(web.HTTPBadRequest):
             await build_generate_escrow_wallet_transaction(
                 escrow_address=self.escrow_address,
+                transaction_source_address=self.transaction_source_address,
                 creator_address=self.creator_address,
                 provider_address=self.provider_address,
                 destination_address=self.destination_address,
@@ -417,6 +438,7 @@ class TestBuildCreateEscrowWalletTransaction(BaseTestClass):
         with pytest.raises(web.HTTPInternalServerError):
             await build_generate_escrow_wallet_transaction(
                 escrow_address=self.escrow_address,
+                transaction_source_address=self.transaction_source_address,
                 creator_address=self.creator_address,
                 provider_address=self.provider_address,
                 destination_address=self.destination_address,
@@ -440,6 +462,7 @@ class TestBuildCreateEscrowWalletTransaction(BaseTestClass):
         with pytest.raises(web.HTTPBadRequest):
             await build_generate_escrow_wallet_transaction(
                 escrow_address=self.escrow_address,
+                transaction_source_address=self.transaction_source_address,
                 creator_address=self.creator_address,
                 provider_address=self.provider_address,
                 destination_address=self.destination_address,

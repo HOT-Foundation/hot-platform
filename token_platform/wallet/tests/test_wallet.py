@@ -14,6 +14,7 @@ class TestBuildCreateTrustWalletTx(BaseTestClass):
     async def setUpAsync(self):
         self.source_address = 'GASF2Q2GZMQMMNSYDU34MU4GJKSZPSN7FYKQEMNH4QJMVE3JR3C3I3N5'
         self.destination_address = 'GAL7IFYTLS3KRGLDDN3BO77EE5PL7UPHMWJAAZQXXEBM4LA63UE54HDF'
+        self.transaction_source_address = 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ'
         self.starting_amount = 500
 
     class TeMock():
@@ -43,6 +44,7 @@ class TestBuildCreateTrustWalletTx(BaseTestClass):
         te = self.TeMock()
         mock_builder.return_value = self.BuilderMock(te)
         actual = build_generate_trust_wallet_transaction(
+            self.transaction_source_address,
             self.source_address,
             self.destination_address,
             self.starting_amount)
@@ -59,6 +61,7 @@ class TestBuildCreateTrustWalletTx(BaseTestClass):
             build_generate_trust_wallet_transaction(
                 'decode-error',
                 'decode-error',
+                'decode-error',
                 self.starting_amount)
 
     @unittest_run_loop
@@ -68,6 +71,7 @@ class TestBuildCreateTrustWalletTx(BaseTestClass):
         mock_builder.return_value = self.BuilderMock(te)
         with pytest.raises(web.HTTPInternalServerError):
             build_generate_trust_wallet_transaction(
+                'error',
                 'error',
                 'error',
                 self.starting_amount)
@@ -81,6 +85,7 @@ class TestBuildCreateTrustWalletTx(BaseTestClass):
         instance.gen_xdr = Exception('cannot find sequence')
         with pytest.raises(web.HTTPBadRequest):
             build_generate_trust_wallet_transaction(
+                self.transaction_source_address,
                 self.source_address,
                 self.destination_address,
                 self.starting_amount)
@@ -90,6 +95,7 @@ class TestBuildCreateWalletTx(BaseTestClass):
     async def setUpAsync(self):
         self.source_address = 'GASF2Q2GZMQMMNSYDU34MU4GJKSZPSN7FYKQEMNH4QJMVE3JR3C3I3N5'
         self.destination_address = 'GAL7IFYTLS3KRGLDDN3BO77EE5PL7UPHMWJAAZQXXEBM4LA63UE54HDF'
+        self.transaction_source_address = 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ'
         self.starting_amount = 500
 
     class TeMock():
