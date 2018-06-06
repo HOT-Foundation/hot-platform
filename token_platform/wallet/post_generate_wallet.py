@@ -1,11 +1,10 @@
 import binascii
-
+from decimal import Decimal, InvalidOperation
 from json import JSONDecodeError
-from aiohttp import web
 
+from aiohttp import web
 from conf import settings
 from router import reverse
-from decimal import Decimal, InvalidOperation
 from transaction.transaction import get_signers
 from wallet.wallet import (build_generate_wallet_transaction,
                            wallet_address_is_duplicate)
