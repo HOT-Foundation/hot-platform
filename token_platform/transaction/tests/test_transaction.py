@@ -8,7 +8,6 @@ from transaction.tests.factory.horizon import HorizonData
 from transaction.transaction import (get_current_sequence_number, get_signers,
                                      get_threshold_weight,
                                      get_transaction_by_memo,
-                                     get_transaction_by_memo_two_ways,
                                      get_transaction_hash,
                                      is_duplicate_transaction,
                                      submit_transaction)
@@ -217,20 +216,3 @@ class TestGetThreshold(BaseTestClass):
     async def test_get_transaction_by_memo_not_found(self):
         result = await get_transaction_by_memo('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'testmemo')
         assert not result
-
-
-class TestGetTransactionByMemo(BaseTestClass):
-    @unittest_run_loop
-    async def test_get_transaction_by_memo_two_ways(self):
-        result = await get_transaction_by_memo_two_ways('GDT2ZVUK5NBR3CM2U5DCJF4T4MZ62T2ZWATFVRU6SYGIRFVZGAAOFCYZ', 'FUND-MERCHANT-1')
-        expect = {
-            'message': 'Transaction is already submited',
-            'transaction_hash': '3ce3e6492348cdc56c352e459b9b75b564321d2613acca314799f3d57be2aa1f',
-            'url': '/transaction/3ce3e6492348cdc56c352e459b9b75b564321d2613acca314799f3d57be2aa1f'
-        }
-        self.assertEqual(result, expect)
-
-    @unittest_run_loop
-    async def test_can_not_get_transaction_by_memo_two_ways(self):
-        result = await get_transaction_by_memo_two_ways('GDT2ZVUK5NBR3CM2U5DCJF4T4MZ62T2ZWATFVRU6SYGIRFVZGAAOFCYZ', 'hello')
-        self.assertEqual(result, False)

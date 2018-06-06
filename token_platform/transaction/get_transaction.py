@@ -3,8 +3,8 @@ from typing import Dict
 from aiohttp import web, web_request, web_response
 from conf import settings
 from transaction.transaction import (get_transaction,
-                                     get_transaction_by_memo_two_ways,
-                                     get_transaction_hash)
+                                     get_transaction_hash,
+                                     get_transaction_by_memo)
 
 
 async def get_transaction_from_request(request: web_request.Request) ->  web_response.Response:
@@ -32,6 +32,6 @@ async def get_transaction_hash_from_memo_from_reqeust(request: web.Request) -> w
     """AIOHttp Request transaction hash from memo"""
     address = request.match_info.get('wallet_address')
     memo = request.match_info.get('memo')
-    transaction = await get_transaction_by_memo_two_ways(address, memo)
+    transaction = await get_transaction_by_memo(address, memo)
 
     return web.json_response(transaction)

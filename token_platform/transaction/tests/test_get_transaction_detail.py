@@ -9,7 +9,7 @@ from aiohttp.test_utils import make_mocked_request, unittest_run_loop
 from asynctest import patch
 from transaction.get_transaction import get_transaction_from_request
 from transaction.tests.factory.horizon import HorizonData
-from transaction.transaction import get_transaction, horizon_testnet, get_transaction_by_memo_two_ways
+from transaction.transaction import get_transaction, horizon_testnet
 from conf import settings
 from router import reverse
 
@@ -95,7 +95,7 @@ class TestGetTransactionFromRequest(BaseTestClass):
         assert str(context.value) == 'Not Found'
 
     @unittest_run_loop
-    @patch('transaction.get_transaction.get_transaction_by_memo_two_ways')
+    @patch('transaction.get_transaction.get_transaction_by_memo')
     async def test_get_transaction_hash_from_memo_from_reqeust(self, mock_get_transaction) -> None:
         mock_get_transaction.return_value = {}
         resp = await self.client.request('GET', reverse('get-transaction-hash-memo', wallet_address='address', memo='hello'))
