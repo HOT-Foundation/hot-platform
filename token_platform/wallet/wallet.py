@@ -35,7 +35,7 @@ def wallet_address_is_duplicate(destination_address: str) -> bool:
         return True
 
 
-def build_generate_trust_wallet_transaction(source_address: str, destination_address: str, amount: Decimal) -> Tuple[bytes, bytes]:
+def build_generate_trust_wallet_transaction(transaction_source_address: str, source_address: str, destination_address: str, amount: Decimal) -> Tuple[bytes, bytes]:
     """"Build transaction return unsigned XDR and transaction hash.
 
         Args:
@@ -43,7 +43,7 @@ def build_generate_trust_wallet_transaction(source_address: str, destination_add
             destination_address: wallet id of new wallet
             amount: starting balance of new wallet
     """
-    builder = Builder(address=source_address,
+    builder = Builder(address=transaction_source_address,
                       network=settings['STELLAR_NETWORK'])
     builder.append_create_account_op(
         source=source_address, destination=destination_address, starting_balance=amount)
