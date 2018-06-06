@@ -28,7 +28,7 @@ async def get_transaction_hash_from_request(request: web.Request) -> web.Respons
     return web.json_response({'transaction_hash' : result}, status=status)
 
 
-async def get_transaction_hash_from_memo_from_reqeust(request: web.Request) -> web.Response:
+async def get_transaction_hash_by_memo_from_reqeust(request: web.Request) -> web.Response:
     """AIOHttp Request transaction hash from memo"""
     address = request.match_info.get('wallet_address')
     memo = request.match_info.get('memo')

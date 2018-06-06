@@ -96,7 +96,7 @@ class TestGetTransactionFromRequest(BaseTestClass):
 
     @unittest_run_loop
     @patch('transaction.get_transaction.get_transaction_by_memo')
-    async def test_get_transaction_hash_from_memo_from_reqeust(self, mock_get_transaction) -> None:
+    async def test_get_transaction_hash_by_memo_from_reqeust(self, mock_get_transaction) -> None:
         mock_get_transaction.return_value = {}
         resp = await self.client.request('GET', reverse('get-transaction-hash-memo', wallet_address='address', memo='hello'))
         assert resp.status == 200
