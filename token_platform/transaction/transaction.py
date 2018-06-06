@@ -71,7 +71,8 @@ async def get_transaction(tx_hash: str) -> Dict[str, Union[str, int, List[Dict[s
             "source_account": tx_detail.get("source_account", None),
             "source_account_sequence": tx_detail.get("source_account_sequence", None),
             "fee_paid": tx_detail.get("fee_paid", None),
-            "signatures": tx_detail.get("signatures", None)
+            "signatures": tx_detail.get("signatures", None),
+            "memo": tx_detail.get("memo", None)
         }
 
     def _get_operation_data_of_transaction(tx_hash: str, horizon: Horizon) -> List[Dict[str, str]]:
@@ -134,7 +135,7 @@ async def get_transaction_by_memo(source_account: str, memo: str, cursor: int = 
 
     for transaction in transactions_filter:
 
-        if transaction['memo'] == memo and transaction['source_account'] == source_account:
+        if transaction['memo'] == memo:
             return {
                 'message' : 'Transaction is already submited',
                 'url' : '/transaction/{}'.format(transaction['hash']),
