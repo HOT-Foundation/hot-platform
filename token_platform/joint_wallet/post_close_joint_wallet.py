@@ -8,7 +8,7 @@ async def post_close_joint_wallet_from_request(request: web.Request) -> web.Resp
     parties = body['parties']
     transaction_source_address = body['transaction_source_address']
 
-    resp = await generate_merge_transaction(wallet_address, parties, transaction_source_address)
+    resp = await generate_merge_transaction(transaction_source_address, wallet_address, parties)
     resp['@id'] = reverse('close-joint-wallet', wallet_address=wallet_address)
 
     return web.json_response(resp)
