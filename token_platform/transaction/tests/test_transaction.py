@@ -4,12 +4,13 @@ import pytest
 from aiohttp.test_utils import unittest_run_loop
 from aiohttp.web_exceptions import HTTPBadRequest, HTTPInternalServerError
 from asynctest import patch
+from transaction.tests.factory.horizon import HorizonData
 from transaction.transaction import (get_current_sequence_number, get_signers,
                                      get_threshold_weight,
-                                     is_duplicate_transaction,
-                                     submit_transaction,
+                                     get_transaction_by_memo,
                                      get_transaction_hash,
-                                     get_transaction_by_memo)
+                                     is_duplicate_transaction,
+                                     submit_transaction)
 from wallet.tests.factory.wallet import StellarWallet
 
 
@@ -215,4 +216,3 @@ class TestGetThreshold(BaseTestClass):
     async def test_get_transaction_by_memo_not_found(self):
         result = await get_transaction_by_memo('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'testmemo')
         assert not result
-

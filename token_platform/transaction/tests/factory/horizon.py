@@ -8,6 +8,7 @@ class HorizonData(object):
             "source_account": "GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF",
             "source_account_sequence": "33497802856202246",
             "fee_paid": 200,
+            "memo": "memo",
             "signatures": [
                 "Fy+wn01aXyIYbmbnt/lUcqDEElIqeNoISByLRYQYQhB1To23bR32RApsz/QS/zqPFnK75zoNScmDHfGt9AVtBg==",
                 "kGrXKXqXdfeY0zkT4YsgZWfoA6j1wD3vmEBvW0hfEOozogG8jpIDqPksgZy16KmFHKYjyQporHsiBx4gqGr9Cg==",
