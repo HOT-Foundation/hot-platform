@@ -58,3 +58,5 @@ async def post_generate_trust_wallet_from_request(request: web.Request):
     }
 
     return web.json_response(result)
+
+
