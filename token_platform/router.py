@@ -14,6 +14,10 @@ ROUTER =  {
         "url" : "/wallet/{wallet_address}/generate-wallet",
         "POST" : "wallet.post_generate_wallet.post_generate_wallet_from_request"
     },
+    "generate-trust-wallet" : {
+        "url" : "/wallet/{wallet_address}/generate-trust-wallet",
+        "POST" : "wallet.post_generate_trust_wallet.post_generate_trust_wallet_from_request"
+    },
     "generate-payment" : {
         "url" : "/wallet/{wallet_address}/generate-payment",
         "POST" : "transaction.generate_payment.generate_payment_from_request"
@@ -33,6 +37,10 @@ ROUTER =  {
     "get-transaction-hash" : {
         "url" : "/wallet/{wallet_address}/get-transaction-hash",
         "GET" : "transaction.get_transaction.get_transaction_hash_from_request"
+    },
+    "get-transaction-hash-memo": {
+        "url" : "/wallet/{wallet_address}/tranasaction-memo/{memo}",
+        "GET" : "transaction.get_transaction.get_transaction_hash_by_memo_from_reqeust"
     },
     "escrow-address" : {
         "url" : "/escrow/{escrow_address}",
@@ -54,6 +62,10 @@ ROUTER =  {
     "close-escrow-wallet" : {
         "url" : "/escrow/{escrow_address}/generate-close-escrow-wallet",
         "POST" : "escrow.post_close_escrow_wallet.post_close_escrow_wallet_from_request"
+    },
+    "close-joint-wallet" : {
+        "url" : "/wallet/{wallet_address}/generate-close-joint-wallet",
+        "POST" : "joint_wallet.post_close_joint_wallet.post_close_joint_wallet_from_request"
     }
 }
 
