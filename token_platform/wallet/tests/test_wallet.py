@@ -123,6 +123,7 @@ class TestBuildCreateWalletTx(BaseTestClass):
         te = self.TeMock()
         mock_builder.return_value = self.BuilderMock(te)
         actual = build_generate_wallet_transaction(
+            self.transaction_source_address,
             self.source_address,
             self.destination_address,
             self.starting_amount)
@@ -139,6 +140,7 @@ class TestBuildCreateWalletTx(BaseTestClass):
             build_generate_wallet_transaction(
                 'decode-error',
                 'decode-error',
+                'decode-error',
                 self.starting_amount)
 
 
@@ -149,6 +151,7 @@ class TestBuildCreateWalletTx(BaseTestClass):
         mock_builder.return_value = self.BuilderMock(te)
         with pytest.raises(web.HTTPInternalServerError):
             build_generate_wallet_transaction(
+                'error',
                 'error',
                 'error',
                 self.starting_amount)
@@ -163,6 +166,7 @@ class TestBuildCreateWalletTx(BaseTestClass):
         instance.gen_xdr = Exception('cannot find sequence')
         with pytest.raises(web.HTTPBadRequest):
             build_generate_wallet_transaction(
+                self.transaction_source_address,
                 self.source_address,
                 self.destination_address,
                 self.starting_amount)
