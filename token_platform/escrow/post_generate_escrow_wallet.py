@@ -1,6 +1,6 @@
 import binascii
 from datetime import datetime
-from decimal import ROUND_UP, Decimal
+from decimal import ROUND_UP, Decimal, InvalidOperation
 from typing import Dict, List, Tuple, Any
 
 from aiohttp import web
@@ -25,12 +25,17 @@ async def post_generate_escrow_wallet_from_request(request: web.Request) -> web.
     cost_per_transaction = body['cost_per_transaction']
     expiration_date = body.get('expiration_date', None)
 
-    int_cost = float(cost_per_transaction)
+
+    try:
+        int_cost = Decimal(cost_per_transaction)
+        decimal_starting_balance = Decimal(starting_balance)
+    except InvalidOperation:
+        raise web.HTTPBadRequest(reason = f"Can not convert to destination_address or cost_per_transaction to Decimal")
 
     if int_cost <= 0:
         raise web.HTTPBadRequest(reason=f'Parameter cost_per_transaction is not valid.')
 
-    if float(starting_balance) % float(cost_per_transaction) != 0:
+    if Decimal(starting_balance) % Decimal(cost_per_transaction) != 0:
         raise web.HTTPBadRequest(reason=f'Parameter starting_balance is not match with cost_per_transaction.')
 
     if expiration_date:
