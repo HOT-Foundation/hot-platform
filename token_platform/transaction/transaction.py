@@ -131,7 +131,7 @@ async def get_transaction_by_memo(source_account: str, memo: str, cursor: int = 
     transactions = horizon.account_transactions(source_account, params={'limit' : 200, 'order' : 'desc', 'cursor' : cursor}).get('_embedded').get('records')
 
     # Filter result data on above by 'memo_type' == text
-    transactions_filter = list(filter(lambda transaction : transaction['memo_type'] == 'text', transactions))
+    transactions_filter = list([transaction for transaction in transactions if transaction['memo_type'] == 'text' ])
 
     for transaction in transactions_filter:
 
