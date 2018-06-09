@@ -124,7 +124,7 @@ async def get_threshold_weight(wallet_address:str, operation_type:str) -> int:
     return wallet.thresholds[level]
 
 
-async def get_transaction_by_memo(source_account: str, memo: str, cursor: int = None) -> Union[Dict, bool]:
+async def get_transaction_by_memo(source_account: str, memo: str, cursor: int = None) -> Dict:
     horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
 
     # Get transactions data within key 'records'
@@ -145,4 +145,4 @@ async def get_transaction_by_memo(source_account: str, memo: str, cursor: int = 
     if len(transactions) > 0:
         transaction_paging_token = transactions[-1]['paging_token']
         return await get_transaction_by_memo(source_account, memo, transaction_paging_token)
-    return False
+    return {}
