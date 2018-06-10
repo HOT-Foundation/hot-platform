@@ -32,6 +32,7 @@ async def get_transaction_hash_by_memo_from_reqeust(request: web.Request) -> web
     """AIOHttp Request transaction hash from memo"""
     address = request.match_info.get('wallet_address')
     memo = request.match_info.get('memo')
-    transaction = await get_transaction_by_memo(address, memo)
-
+    transaction: Dict = await get_transaction_by_memo(address, memo)
+    if not transaction:
+        return web.Response(status=204)
     return web.json_response(transaction)
