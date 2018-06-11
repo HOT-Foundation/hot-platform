@@ -99,5 +99,5 @@ class TestGetTransactionFromRequest(BaseTestClass):
     async def test_get_transaction_hash_by_memo_from_reqeust(self, mock_get_transaction) -> None:
         mock_get_transaction.return_value = {}
         resp = await self.client.request('GET', reverse('get-transaction-hash-memo', wallet_address='address', memo='hello'))
-        assert resp.status == 200
+        assert resp.status == 204
         mock_get_transaction.assert_called_once_with('address', 'hello')
