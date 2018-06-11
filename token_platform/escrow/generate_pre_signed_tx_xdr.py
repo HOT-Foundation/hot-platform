@@ -20,7 +20,7 @@ async def get_presigned_tx_xdr_from_request(request: web.Request) -> web.Respons
         raise web.HTTPBadRequest(reason='Bad request, JSON data missing.')
 
     escrow_address = request.match_info.get("escrow_address")
-    transaction_source_address = json_response['transaction_source_address']
+    transaction_source_address = json_response.get('transaction_source_address', escrow_address)
     escrow = await get_escrow_wallet_detail(escrow_address)
 
     destination_address = escrow["data"]["destination_address"]
