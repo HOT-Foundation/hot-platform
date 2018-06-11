@@ -39,7 +39,7 @@ ROUTER =  {
         "GET" : "transaction.get_transaction.get_transaction_hash_from_request"
     },
     "get-transaction-hash-memo": {
-        "url" : "/wallet/{wallet_address}/tranasaction-memo/{memo}",
+        "url" : "/wallet/{wallet_address}/transaction-memo/{memo}",
         "GET" : "transaction.get_transaction.get_transaction_hash_by_memo_from_reqeust"
     },
     "escrow-address" : {
