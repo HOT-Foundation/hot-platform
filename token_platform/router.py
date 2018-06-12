@@ -11,7 +11,7 @@ ROUTER =  {
         "GET" : "wallet.get_wallet.get_wallet_from_request"
     },
     "wallet-history" : {
-        "url" : "/wallet/{wallet_address}/wallet-history",
+        "url" : "/wallet/{wallet_address}/history",
         "GET" : "wallet.get_wallet_history.get_wallet_history_from_request"
     },
     "generate-wallet" : {
