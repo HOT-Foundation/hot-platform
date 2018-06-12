@@ -21,7 +21,7 @@ class TestPostCloseJointWalletFromRequest(BaseTestClass):
 
     @unittest_run_loop
     @patch('joint_wallet.post_close_joint_wallet.generate_merge_transaction')
-    async def test_post_cloase_joint_wallet_from_request_success(self, mock_generate_merge_transaction):
+    async def test_post_close_joint_wallet_from_request_success(self, mock_generate_merge_transaction):
 
         mock_generate_merge_transaction.return_value = {
             'wallet_address' : self.wallet_address,
@@ -47,4 +47,30 @@ class TestPostCloseJointWalletFromRequest(BaseTestClass):
         text = await resp.json()
         assert text == expect
 
+
+    @unittest_run_loop
+    @patch('joint_wallet.post_close_joint_wallet.generate_merge_transaction')
+    async def test_post_close_joint_wallet_from_request_missing_param(self, mock_generate_merge_transaction):
+
+        mock_generate_merge_transaction.return_value = {
+            'wallet_address' : self.wallet_address,
+            'transaction_url' : reverse('transaction', transaction_hash=self.tx_hash),
+            'signers' : self.singers,
+            'xdr' : self.unsigned_xdr,
+            'transaction_hash' : self.tx_hash
+        }
+
+        self.missing_param_parties_wallet = {
+            'parties' : [
+                {'address' : 'wallet1', 'amount' : '15'},
+                {'address' : 'wallet2', 'amount' : '20'}
+            ],
+        }
+
+        url = reverse('close-joint-wallet', wallet_address=self.wallet_address)
+        resp = await self.client.request('POST', url, json=self.missing_param_parties_wallet)
+
+        assert resp.status == 400
+        text = await resp.json()
+        assert text['error'] == 'Parameter \'transaction_source_address\' not found. Please ensure parameters is valid.'
 

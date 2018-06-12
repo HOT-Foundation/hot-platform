@@ -74,6 +74,14 @@ class TestCreateWallet(BaseTestClass):
         assert 'Bad request, JSON data missing.' in text['error']
 
     @unittest_run_loop
+    async def test_post_generate_wallet_from_request_missing_param(self):
+        url = reverse('generate-wallet', wallet_address=self.wallet_address)
+        resp = await self.client.request("POST", url, json={'target_address':'test', 'amount_xlm':'10'})
+        assert resp.status == 400
+        text = await resp.json()
+        assert text['error'] == 'Parameter \'transaction_source_address\' not found. Please ensure parameters is valid.'
+
+    @unittest_run_loop
     async def test_post_generate_wallet_from_request_use_wrong_parameter(self):
         url = reverse('generate-wallet', wallet_address=self.wallet_address)
         resp = await self.client.request("POST", url, json={'target':'test', 'transaction_source_address': 'test'})

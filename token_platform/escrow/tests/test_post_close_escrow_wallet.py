@@ -49,3 +49,22 @@ class TestPostCloseEscrowWalletFromRequest(BaseTestClass):
         assert resp.status == 200
         text = await resp.json()
         assert text == expect
+
+
+    @unittest_run_loop
+    @patch('escrow.post_close_escrow_wallet.generate_merge_transaction')
+    async def test_post_close_escrow_wallet_from_request_dont_have_payload(self, mock_generate_claose_escrow_wallet):
+
+        mock_generate_claose_escrow_wallet.return_value = {
+            'wallet_address' : self.escrow_address,
+            'transaction_url' : reverse('transaction', transaction_hash=self.tx_hash),
+            'signers' : [self.provider_address, self.creator_address],
+            'xdr' : self.unsigned_xdr,
+            'transaction_hash' : self.tx_hash
+        }
+
+        url = f"{self.host}{reverse('close-escrow-wallet', escrow_address=self.escrow_address)}"
+        resp = await self.client.request('POST', url, json={})
+        assert resp.status == 400
+        text = await resp.json()
+        assert text['error'] == 'Parameter \'transaction_source_address\' not found. Please ensure parameters is valid.'

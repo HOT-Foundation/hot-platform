@@ -193,6 +193,19 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         body = await resp.json()
         assert body['error'] == 'Parameter \'cost_per_transaction\' not found. Please ensure parameters is valid.'
 
+        data = {
+            'provider_address': self.provider_address,
+            'destination_address': self.destination_address,
+            'creator_address': self.creator_address,
+            'starting_balance': 'make-error',
+            'cost_per_transaction': 200,
+            'expiration_date': self.expiration_date,
+        }
+        resp = await self.client.request('POST', url, json=data)
+        assert resp.status == 400
+        body = await resp.json()
+        assert body['error'] == 'Parameter \'transaction_source_address\' not found. Please ensure parameters is valid.'
+
     @unittest_run_loop
     async def test_post_generate_escrow_wallet_from_request_wrong_cost_per_transaction(self):
 
