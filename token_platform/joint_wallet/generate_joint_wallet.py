@@ -69,6 +69,8 @@ async def build_joint_wallet(transaction_source_address: str, deal_address: str,
         for key, value in meta.items():
             builder.append_manage_data_op(source=deal_address, data_name=key, data_value=value)
 
+    builder.append_manage_data_op(source=deal_address, data_name='creator_address', data_value=creator)
+
     weight = len(parties) + 1
     builder.append_set_options_op(
         source=deal_address, master_weight=0, low_threshold=weight, med_threshold=weight, high_threshold=weight
