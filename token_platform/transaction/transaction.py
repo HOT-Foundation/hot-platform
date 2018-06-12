@@ -124,20 +124,20 @@ async def get_threshold_weight(wallet_address:str, operation_type:str) -> int:
     return wallet.thresholds[level]
 
 
-async def get_transaction_by_memo(source_account: str, memo: str, cursor: int = None) -> Union[Dict, bool]:
+async def get_transaction_by_memo(source_account: str, memo: str, cursor: int = None) -> Dict:
     horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
 
     # Get transactions data within key 'records'
     transactions = horizon.account_transactions(source_account, params={'limit' : 200, 'order' : 'desc', 'cursor' : cursor}).get('_embedded').get('records')
 
     # Filter result data on above by 'memo_type' == text
-    transactions_filter = list(filter(lambda transaction : transaction['memo_type'] == 'text', transactions))
+    transactions_filter = list([transaction for transaction in transactions if transaction['memo_type'] == 'text' ])
 
     for transaction in transactions_filter:
 
         if transaction['memo'] == memo:
             return {
-                'message' : 'Transaction is already submited',
+                'error' : 'Transaction is already submited',
                 'url' : '/transaction/{}'.format(transaction['hash']),
                 'transaction_hash' : transaction['hash']
             }
@@ -145,4 +145,4 @@ async def get_transaction_by_memo(source_account: str, memo: str, cursor: int = 
     if len(transactions) > 0:
         transaction_paging_token = transactions[-1]['paging_token']
         return await get_transaction_by_memo(source_account, memo, transaction_paging_token)
-    return False
+    return {}
