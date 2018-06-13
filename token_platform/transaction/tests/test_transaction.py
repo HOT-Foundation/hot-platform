@@ -209,7 +209,7 @@ class TestGetThreshold(BaseTestClass):
     @unittest_run_loop
     async def test_get_transaction_by_memo_success(self):
         result = await get_transaction_by_memo('GD3PPDLKXRDM57UV7QDFIHLLRCLM4KGVIA43GEM7ZOT7EHK5TR3Z5G6I', 'testmemo')
-        assert 'message' in result.keys()
+        assert 'error' in result.keys()
         assert 'url' in result.keys()
 
     @unittest_run_loop
