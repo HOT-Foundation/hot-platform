@@ -58,7 +58,7 @@ async def get_wallet_history(wallet_address: str, sort: str='asc', limit: int=10
     if settings['STELLAR_NETWORK'] == 'PUBLIC':
         horizon = HORIZON_LIVE
 
-    params = { 'order': 'asc', 'limit': limit}
+    params = { 'order': sort, 'limit': limit}
     if offset:
         params['cursor'] = offset
     address = Address(address=wallet_address, horizon=horizon)
