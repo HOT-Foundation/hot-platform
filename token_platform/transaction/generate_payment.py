@@ -21,6 +21,7 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
 
     body = await request.json()
     source_account = request.match_info.get("wallet_address", "")
+    transaction_source_address = body['transaction_source_address']
     target_address = body['target_address']
     amount_htkn = body.get('amount_htkn')
     amount_xlm = body.get('amount_xlm')
@@ -38,11 +39,11 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
         if url_get_transaction:
             return web.json_response(url_get_transaction, status=400)
 
-    result = await generate_payment(source_account, target_address, amount_htkn, amount_xlm, sequence_number, memo)
+    result = await generate_payment(transaction_source_address, source_account, target_address, amount_htkn, amount_xlm, sequence_number, memo)
     return web.json_response(result)
 
 
-async def generate_payment(source_address: str, destination: str, amount_htkn: Decimal, amount_xlm:Decimal, sequence:int = None, memo:str = None) -> Dict:
+async def generate_payment(transaction_source_address: str, source_address: str, destination: str, amount_htkn: Decimal, amount_xlm:Decimal, sequence:int = None, memo:str = None) -> Dict:
     """Get unsigned transfer transaction and signers
 
         Args:
@@ -53,7 +54,7 @@ async def generate_payment(source_address: str, destination: str, amount_htkn: D
             sequence: sequence number for generate transaction [optional]
             memo: memo text [optional]
     """
-    unsigned_xdr, tx_hash = await build_unsigned_transfer(source_address, destination, amount_htkn, amount_xlm, sequence, memo)
+    unsigned_xdr, tx_hash = await build_unsigned_transfer(transaction_source_address, source_address, destination, amount_htkn, amount_xlm, sequence, memo)
     host: str = settings['HOST']
     result = {
         '@id': source_address,
@@ -67,7 +68,7 @@ async def generate_payment(source_address: str, destination: str, amount_htkn: D
     return result
 
 
-async def build_unsigned_transfer(source_address: str, destination_address: str, amount_htkn: Decimal, amount_xlm: Decimal, sequence:int=None, memo_text:str=None) -> Tuple[str, str]:
+async def build_unsigned_transfer(transaction_source_address: str, source_address: str, destination_address: str, amount_htkn: Decimal, amount_xlm: Decimal, sequence:int=None, memo_text:str=None) -> Tuple[str, str]:
     """"Build unsigned transfer transaction return unsigned XDR and transaction hash.
 
         Args:
@@ -79,7 +80,7 @@ async def build_unsigned_transfer(source_address: str, destination_address: str,
             memo: memo text [optional]
     """
 
-    builder = Builder(address=source_address, network=settings['STELLAR_NETWORK'], sequence=sequence)
+    builder = Builder(address=transaction_source_address, network=settings['STELLAR_NETWORK'], sequence=sequence)
 
     wallet = await get_wallet_detail(destination_address)
     if amount_xlm:

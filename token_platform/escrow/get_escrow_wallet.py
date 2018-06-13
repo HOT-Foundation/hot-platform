@@ -3,14 +3,13 @@ from functools import reduce
 from typing import Any, Dict, List, Union
 
 import requests
-from aiohttp import web
 from stellar_base.builder import Builder
 from stellar_base.utils import AccountNotExistError
 
+from aiohttp import web
 from conf import settings
-from wallet.wallet import get_wallet
-from base64 import b64decode
 from router import reverse
+from wallet.wallet import get_wallet
 
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 STELLAR_BALANCE = Dict[str, str]

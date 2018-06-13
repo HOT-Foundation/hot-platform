@@ -24,6 +24,9 @@ async def post_generate_trust_wallet_from_request(request: web.Request):
     source_address: str = request.match_info.get('wallet_address')
 
     destination_address: str = json_response['target_address']
+
+    transaction_source_address: str = json_response['transaction_source_address']
+
     try:
         balance: Decimal = Decimal(json_response.get('starting_balance', 0))
     except InvalidOperation:
@@ -36,16 +39,22 @@ async def post_generate_trust_wallet_from_request(request: web.Request):
     if duplicate:
         raise web.HTTPBadRequest(reason = 'Target address is already used.')
 
-    unsigned_xdr_byte, tx_hash_byte = build_generate_trust_wallet_transaction(source_address, destination_address, balance)
+    unsigned_xdr_byte, tx_hash_byte = build_generate_trust_wallet_transaction(transaction_source_address, source_address, destination_address, balance)
 
     unsigned_xdr: str = unsigned_xdr_byte.decode()
     tx_hash: str = binascii.hexlify(tx_hash_byte).decode()
 
-    signers: List[str] = [source_address, destination_address]
+    signers: List[str] = []
+    if (source_address == transaction_source_address):
+        signers = [source_address, destination_address]
+    else:
+        signers = [source_address, destination_address, transaction_source_address]
+    
     host: str = settings['HOST']
 
     result = {
         'source_address': source_address,
+        'transaction_source_address': transaction_source_address,
         'signers': signers,
         'xdr': unsigned_xdr,
         'transaction_url': f"{host}{reverse('transaction', transaction_hash=tx_hash)}",

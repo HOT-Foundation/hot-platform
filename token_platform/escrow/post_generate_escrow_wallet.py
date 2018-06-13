@@ -18,6 +18,7 @@ async def post_generate_escrow_wallet_from_request(request: web.Request) -> web.
     body = await request.json()
 
     escrow_address = request.match_info['escrow_address']
+    transaction_source_address = body['transaction_source_address']
     provider_address = body['provider_address']
     creator_address = body['creator_address']
     destination_address = body['destination_address']
@@ -45,7 +46,9 @@ async def post_generate_escrow_wallet_from_request(request: web.Request) -> web.
         if timezone_offset is None:
             raise web.HTTPBadRequest(reason=f'Parameter expiration date is not valid.')
 
-    result = await generate_escrow_wallet(escrow_address,
+    result = await generate_escrow_wallet(
+                                escrow_address,
+                                transaction_source_address,
                                 creator_address,
                                 destination_address,
                                 provider_address,
@@ -58,20 +61,22 @@ async def post_generate_escrow_wallet_from_request(request: web.Request) -> web.
 
 
 async def generate_escrow_wallet(escrow_address: str,
-                                           creator_address: str,
-                                           destination_address: str,
-                                           provider_address: str,
-                                           starting_balance: str,
-                                           cost_per_transaction: str,
-                                           expiration_date: str = None,
-                                           ) -> Dict:
+                                transaction_source_address: str,
+                                creator_address: str,
+                                destination_address: str,
+                                provider_address: str,
+                                starting_balance: str,
+                                cost_per_transaction: str,
+                                expiration_date: str = None,
+                                ) -> Dict:
     '''Making transaction for creating escrow wallet
 
         number_of_transaction + 2 due to transfer to merchant and merge back to hotnow
         number of entries is 8 due to escrow account have 1 trust line, add 2 signers and 5 data entries
 
         Args:
-        * escrow_address: an address of new escrow account
+        * escrow_address: an address of new escrow account.
+        * transaction_source_address an address from wallet pool
         * creator_address: an address of transaction owner.
         * destination_address: an address of transaction owner.
         * provider_address: an address of ,
@@ -84,7 +89,9 @@ async def generate_escrow_wallet(escrow_address: str,
     number_of_transaction: Decimal = (starting_custom_asset / cost_per_tx_decimal) + 2
     starting_xlm: Decimal = calculate_initial_xlm(Decimal(8), number_of_transaction)
 
-    xdr, tx_hash = await build_generate_escrow_wallet_transaction(escrow_address = escrow_address,
+    xdr, tx_hash = await build_generate_escrow_wallet_transaction(
+        escrow_address = escrow_address,
+        transaction_source_address = transaction_source_address,
         provider_address = provider_address,
         creator_address = creator_address,
         destination_address = destination_address,
@@ -126,15 +133,17 @@ def calculate_initial_xlm(number_of_entries: Decimal, number_of_transaction: Dec
     return result
 
 
-async def build_generate_escrow_wallet_transaction(escrow_address: str,
-                                           creator_address: str,
-                                           destination_address: str,
-                                           provider_address: str,
-                                           cost_per_transaction: Decimal,
-                                           starting_native_asset: Decimal,
-                                           starting_custom_asset: Decimal,
-                                           expiration_date: str = None,
-                                           ) -> Tuple[Any, str]:
+async def build_generate_escrow_wallet_transaction(
+                                        escrow_address: str,
+                                        transaction_source_address: str,
+                                        creator_address: str,
+                                        destination_address: str,
+                                        provider_address: str,
+                                        cost_per_transaction: Decimal,
+                                        starting_native_asset: Decimal,
+                                        starting_custom_asset: Decimal,
+                                        expiration_date: str = None,
+                                        ) -> Tuple[Any, str]:
     '''Building transaction for generating escrow wallet with minimum balance of lumens
         and return unsigned XDR and transaction hash.
 
@@ -142,6 +151,7 @@ async def build_generate_escrow_wallet_transaction(escrow_address: str,
 
         * escrow_address: an address of new wallet
         * destination_address: an address of wallet which is target
+        * transaction_source_address an address from wallet pool 
         * provider_address: an address which provides custom_asset to new wallet
         * creator_address: an address of source wallet which is owner of the transaction.
         * cost_per_transaction: cost for each promotion deals.
@@ -150,7 +160,7 @@ async def build_generate_escrow_wallet_transaction(escrow_address: str,
         * expiration_date: a date when escrow address is terminated.
     '''
 
-    builder = Builder(address=creator_address,
+    builder = Builder(address=transaction_source_address,
                       network=settings['STELLAR_NETWORK'])
     builder.append_create_account_op(
         source=creator_address, destination=escrow_address, starting_balance=starting_native_asset)
