@@ -20,6 +20,7 @@ class TestGenerateMergeTransaction(BaseTestClass):
         self.remain_custom_asset = '100.0000'
         self.provider_address = 'provider_address'
         self.creator_address = 'creator_address'
+        self.transaction_source_address = 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ'
         self.tx_hash = 'tx_tash'
         self.unsigned_xdr = 'xdr'
         self.parties_wallet = [
@@ -47,7 +48,7 @@ class TestGenerateMergeTransaction(BaseTestClass):
         mock_wallet_detail.return_value = self.wallet_detail
         mock_merge_transaction.return_value = self.unsigned_xdr, self.tx_hash
 
-        result = await generate_merge_transaction(self.wallet_address, self.parties_wallet)
+        result = await generate_merge_transaction(self.transaction_source_address, self.wallet_address, self.parties_wallet)
 
         expect = {
             'wallet_address' : self.wallet_address,
@@ -65,6 +66,7 @@ class TestBuildGenerateMergeTransaction(BaseTestClass):
         self.wallet_address = 'wallet_address'
         self.provider_address = 'provider_address'
         self.creator_address = 'creator_address'
+        self.transaction_source_address = 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ'
         self.parties_wallet = [
             {'address' : 'wallet1', 'amount' : '15'},
             {'address' : 'wallet2', 'amount' : '20'}
@@ -92,7 +94,7 @@ class TestBuildGenerateMergeTransaction(BaseTestClass):
         instance.te.hash_meta.return_value = b'tx-hash'
         mock_is_match.return_value = True
 
-        result = await build_generate_merge_transaction(self.wallet_detail, self.parties_wallet)
+        result = await build_generate_merge_transaction(self.transaction_source_address, self.wallet_detail, self.parties_wallet)
         expect = ('unsigned-xdr', '74782d68617368')
         assert result == expect
 
@@ -108,7 +110,7 @@ class TestBuildGenerateMergeTransaction(BaseTestClass):
         mock_get_creator.return_value = self.creator_address
         self.wallet_detail['data'] = {}
 
-        result = await build_generate_merge_transaction(self.wallet_detail, self.parties_wallet)
+        result = await build_generate_merge_transaction(self.transaction_source_address, self.wallet_detail, self.parties_wallet)
         expect = ('unsigned-xdr', '74782d68617368')
         assert result == expect
 
@@ -121,7 +123,7 @@ class TestBuildGenerateMergeTransaction(BaseTestClass):
         instance.te.hash_meta.return_value = b'tx-hash'
         mock_is_match.return_value = True
 
-        result = await build_generate_merge_transaction(self.wallet_detail)
+        result = await build_generate_merge_transaction(self.transaction_source_address, self.wallet_detail)
         expect = ('unsigned-xdr', '74782d68617368')
         assert result == expect
 
@@ -135,7 +137,7 @@ class TestBuildGenerateMergeTransaction(BaseTestClass):
         mock_is_match.return_value = True
 
         with pytest.raises(web.HTTPBadRequest):
-            await build_generate_merge_transaction(self.wallet_detail, self.parties_wallet)
+            await build_generate_merge_transaction(self.transaction_source_address, self.wallet_detail, self.parties_wallet)
 
     @unittest_run_loop
     @patch('transaction.generate_merge_transaction.is_match_balance')
@@ -144,7 +146,7 @@ class TestBuildGenerateMergeTransaction(BaseTestClass):
         mock_is_match.return_value = False
 
         with pytest.raises(web.HTTPBadRequest):
-            await build_generate_merge_transaction(self.wallet_detail, self.parties_wallet)
+            await build_generate_merge_transaction(self.transaction_source_address, self.wallet_detail, self.parties_wallet)
 
 
 class TestGetCreatorAddress(BaseTestClass):

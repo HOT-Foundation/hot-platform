@@ -17,17 +17,18 @@ async def post_generate_joint_wallet(request: web.Request) -> web.Response:
     parties = body['parties']
     creator = body['creator_address']
     starting_xlm = body['starting_xlm']
+    transaction_source_address = body['transaction_source_address']
     meta = body.get('meta', None)
 
     result = await generate_joint_wallet(
-        deal_address, parties, creator, starting_xlm, meta
+        transaction_source_address, deal_address, parties, creator, starting_xlm, meta
     )
     return web.json_response(result)
 
 
-async def generate_joint_wallet(deal_address: str, parties: List, creator: str, starting_xlm: Decimal, meta: Dict=None) -> Dict:
+async def generate_joint_wallet(transaction_source_address: str, deal_address: str, parties: List, creator: str, starting_xlm: Decimal, meta: Dict=None) -> Dict:
     """Making transaction for generate joint wallet with many parties"""
-    xdr, tx_hash = await build_joint_wallet(deal_address, parties, creator, starting_xlm, meta)
+    xdr, tx_hash = await build_joint_wallet(transaction_source_address, deal_address, parties, creator, starting_xlm, meta)
     parties_signer = [{'public_key': party['address'], 'weight': 1} for party in parties]
     signers = parties_signer + [{'public_key': creator, 'weight': 1}, {'public_key': deal_address, 'weight': 1}]
     result = {
@@ -42,7 +43,7 @@ async def generate_joint_wallet(deal_address: str, parties: List, creator: str, 
     return result
 
 
-async def build_joint_wallet(deal_address: str, parties: List, creator: str, starting_xlm: Decimal, meta:str=None):
+async def build_joint_wallet(transaction_source_address: str, deal_address: str, parties: List, creator: str, starting_xlm: Decimal, meta:str=None):
     """Build transaction for create joint wallet, trust HTKN and set option signer."""
 
     def _add_signer(builder: Builder, deal_address: str, party: str, amount: Decimal):
@@ -54,7 +55,7 @@ async def build_joint_wallet(deal_address: str, parties: List, creator: str, sta
             source=party, destination=deal_address, asset_type=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], amount=amount
         )
 
-    builder = Builder(address=creator, network=settings['STELLAR_NETWORK'])
+    builder = Builder(address=transaction_source_address, network=settings['STELLAR_NETWORK'])
     builder.append_create_account_op(source=creator, destination=deal_address, starting_balance=starting_xlm)
     builder.append_trust_op(source=deal_address, destination=settings['ISSUER'], code=settings['ASSET_CODE'])
     builder.append_set_options_op(

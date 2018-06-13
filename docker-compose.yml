@@ -13,6 +13,7 @@ services:
     environment:
       - ASSET_CODE=HTKN
       - ISSUER=GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ
+      - STELLAR_NETWORK=TESTNET
       - PYTHONPATH=/usr/src/token_platform
     networks:
       - hotnow-network
