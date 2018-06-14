@@ -23,9 +23,14 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
     async def test_get_change_trust_from_request_success(self, mock_get_unsigned_change_trust):
         mock_get_unsigned_change_trust.return_value = {}
         wallet_address = 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'
-        resp = await self.client.request('GET', reverse('change-trust', wallet_address=wallet_address))
+        transaction_source_address = 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'
+        transaction_url = reverse('change-trust', wallet_address=wallet_address)
+        params = 'transaction-source-address={}'.format(transaction_source_address)
+        url = f'{transaction_url}?{params}'
+
+        resp = await self.client.request('GET', url)
         assert resp.status == 200
-        mock_get_unsigned_change_trust.assert_called_once_with(wallet_address)
+        mock_get_unsigned_change_trust.assert_called_once_with(wallet_address, transaction_source_address)
 
 
     @unittest_run_loop
@@ -39,7 +44,7 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
         }]
 
         result = await get_unsigned_change_trust(
-            'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI')
+            'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI')
 
         expect_data = {
             "@id": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
@@ -67,4 +72,4 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
         instance.gen_xdr = Exception('cannot find sequence')
 
         with pytest.raises(web.HTTPNotFound):
-            build_unsigned_change_trust('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI')
+            build_unsigned_change_trust('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI')
