@@ -21,19 +21,18 @@ class TestGetWalletHistoryFromRequest(BaseTestClass):
     @patch('wallet.get_wallet_history.get_wallet_history')
     @patch('wallet.get_wallet_history.format_history')
     async def test_get_wallet_history_from_request_with_minimum_params_success(self, history, format_history):
-        format_history.return_value = history.return_value = {'status': 200}
+        format_history.return_value = history.return_value = {
+            'status': 200, '@id': 'test-id', 'next': 'test-next', 'previous': 'test-previous'}
         get_wallet_history_url = reverse('wallet-history', wallet_address=self.wallet_address)
         resp = await self.client.request("GET", get_wallet_history_url)
         assert resp.status == 200
-
-        body = await resp.json()
-        assert body['@id'] == get_wallet_history_url
 
     @unittest_run_loop
     @patch('wallet.get_wallet_history.get_wallet_history')
     @patch('wallet.get_wallet_history.format_history')
     async def test_get_wallet_history_from_request_with_all_params_success(self, history, format_history):
-        format_history.return_value = history.return_value = {'status': 200}
+        format_history.return_value = history.return_value = {
+            'status': 200, '@id': 'test-id', 'next': 'test-next', 'previous': 'test-previous'}
         params = {
             'limit': 20,
             'type': 'signer_created',
@@ -46,14 +45,12 @@ class TestGetWalletHistoryFromRequest(BaseTestClass):
         resp = await self.client.request("GET", get_wallet_history_url, params=params)
         assert resp.status == 200
 
-        body = await resp.json()
-        assert body['@id'] == get_wallet_history_url
-
     @unittest_run_loop
     @patch('wallet.get_wallet_history.get_wallet_history')
     @patch('wallet.get_wallet_history.format_history')
     async def test_get_wallet_history_from_request_fail_date_wrong_format(self, history, format_history):
-        format_history.return_value = history.return_value = {'status': 200}
+        format_history.return_value = history.return_value = {
+            'status': 200, '@id': 'test-id', 'next': 'test-next', 'previous': 'test-previous'}
         params = {
             'limit': 20,
             'type': 'signer_created',
@@ -70,7 +67,8 @@ class TestGetWalletHistoryFromRequest(BaseTestClass):
     @patch('wallet.get_wallet_history.get_wallet_history')
     @patch('wallet.get_wallet_history.format_history')
     async def test_get_wallet_history_from_request_fail_invalid_sort_value(self, history, format_history):
-        format_history.return_value = history.return_value = {'status': 200}
+        format_history.return_value = history.return_value = {
+            'status': 200, '@id': 'test-id', 'next': 'test-next', 'previous': 'test-previous'}
         params = {
             'limit': 20,
             'type': 'signer_created',
@@ -189,6 +187,7 @@ class TestGetWalletHistory(BaseTestClass):
 class TestFormatHistory(BaseTestClass):
 
     async def setUpAsync(self):
+        self.wallet_address = 'GAM47BTKU5RRA4NAVXO3WNWJ6YGGYIVJ4BK6YGOOY4URZ3VRDRX4N4O5'
         self.history = {
             "_links": {
                 "self": {
@@ -222,19 +221,83 @@ class TestFormatHistory(BaseTestClass):
                         "type_i": 0,
                         "created_at": "2018-05-03T13:31:45Z",
                         "starting_balance": "5.0002000"
+                    },
+                    {
+                        "_links": {
+                            "operation": {
+                                "href": "https://horizon-testnet.stellar.org/operations/37667833848532995"
+                            },
+                            "succeeds": {
+                                "href": "https://horizon-testnet.stellar.org/effects?order=desc&cursor=37667833848532995-1"
+                            },
+                            "precedes": {
+                                "href": "https://horizon-testnet.stellar.org/effects?order=asc&cursor=37667833848532995-1"
+                            }
+                        },
+                        "id": "0037667833848532995-0000000001",
+                        "paging_token": "37667833848532995-1",
+                        "account": "GAM47BTKU5RRA4NAVXO3WNWJ6YGGYIVJ4BK6YGOOY4URZ3VRDRX4N4O5",
+                        "type": "data_created",
+                        "type_i": 40,
+                        "created_at": "2018-05-03T13:31:45Z"
                     }
                 ]
             }
         }
+        self.limit = 10
 
     @unittest_run_loop
-    async def test_format_history(self):
-        expect = [{
-            "id": "0037667833848532993-0000000001",
-            "offset": "37667833848532993-1",
-            "address": "GAM47BTKU5RRA4NAVXO3WNWJ6YGGYIVJ4BK6YGOOY4URZ3VRDRX4N4O5",
-            "type": "account_created",
-            "created_at": "2018-05-03T13:31:45Z",
-            "starting_balance": "5.0002000"
-        }]
-        result = await format_history(self.history)
+    async def test_format_history_sort_asc_success(self):
+        url = reverse('wallet-history', wallet_address=self.wallet_address)
+        n_offset = self.history['_embedded']['records'][0]['paging_token']
+        p_offset = self.history['_embedded']['records'][-1]['paging_token']
+        expect = {
+            '@id': url,
+            'history': [{
+                "id": "0037667833848532993-0000000001",
+                "offset": "37667833848532993-1",
+                "address": "GAM47BTKU5RRA4NAVXO3WNWJ6YGGYIVJ4BK6YGOOY4URZ3VRDRX4N4O5",
+                "type": "account_created",
+                "created_at": "2018-05-03T13:31:45Z",
+                "starting_balance": "5.0002000"
+            },
+            {
+                "id": "0037667833848532995-0000000001",
+                "offset": "37667833848532995-1",
+                "address": "GAM47BTKU5RRA4NAVXO3WNWJ6YGGYIVJ4BK6YGOOY4URZ3VRDRX4N4O5",
+                "type": "data_created",
+                "created_at": "2018-05-03T13:31:45Z"
+            }],
+            'next':  f'{url}?offset={p_offset}&limit={self.limit}&sort=asc',
+            'previous': f'{url}?offset={n_offset}&limit={self.limit}&sort=desc'
+        }
+        actual = await format_history(history=self.history, wallet_address=self.wallet_address, limit=self.limit, sort='asc')
+        assert actual == expect
+
+    @unittest_run_loop
+    async def test_format_history_sort_desc_success(self):
+        url = reverse('wallet-history', wallet_address=self.wallet_address)
+        n_offset = self.history['_embedded']['records'][0]['paging_token']
+        p_offset = self.history['_embedded']['records'][-1]['paging_token']
+        expect = {
+            '@id': url,
+            'history': [{
+                "id": "0037667833848532993-0000000001",
+                "offset": "37667833848532993-1",
+                "address": "GAM47BTKU5RRA4NAVXO3WNWJ6YGGYIVJ4BK6YGOOY4URZ3VRDRX4N4O5",
+                "type": "account_created",
+                "created_at": "2018-05-03T13:31:45Z",
+                "starting_balance": "5.0002000"
+            },
+            {
+                "id": "0037667833848532995-0000000001",
+                "offset": "37667833848532995-1",
+                "address": "GAM47BTKU5RRA4NAVXO3WNWJ6YGGYIVJ4BK6YGOOY4URZ3VRDRX4N4O5",
+                "type": "data_created",
+                "created_at": "2018-05-03T13:31:45Z"
+            }],
+            'next':  f'{url}?offset={p_offset}&limit={self.limit}&sort=desc',
+            'previous': f'{url}?offset={n_offset}&limit={self.limit}&sort=asc'
+        }
+        actual = await format_history(history=self.history, wallet_address=self.wallet_address, limit=10, sort='desc')
+        assert actual == expect
