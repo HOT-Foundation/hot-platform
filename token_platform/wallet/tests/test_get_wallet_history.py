@@ -22,10 +22,12 @@ class TestGetWalletHistoryFromRequest(BaseTestClass):
     @patch('wallet.get_wallet_history.format_history')
     async def test_get_wallet_history_from_request_with_minimum_params_success(self, history, format_history):
         format_history.return_value = history.return_value = {'status': 200}
-        get_wallet_history_url = reverse(
-            'wallet-history', wallet_address=self.wallet_address)
+        get_wallet_history_url = reverse('wallet-history', wallet_address=self.wallet_address)
         resp = await self.client.request("GET", get_wallet_history_url)
         assert resp.status == 200
+
+        body = await resp.json()
+        assert body['@id'] == get_wallet_history_url
 
     @unittest_run_loop
     @patch('wallet.get_wallet_history.get_wallet_history')
@@ -35,15 +37,17 @@ class TestGetWalletHistoryFromRequest(BaseTestClass):
         params = {
             'limit': 20,
             'type': 'signer_created',
-            'sort': 'desc',
+            'sort': 'DESC',
             'offset': 'ABCSDSDLK',
             'start-date': '2018-06-12T02:38:34Z',
             'end-date': '2019-06-12T02:38:34Z'
         }
-        get_wallet_history_url = reverse(
-            'wallet-history', wallet_address=self.wallet_address)
+        get_wallet_history_url = reverse('wallet-history', wallet_address=self.wallet_address)
         resp = await self.client.request("GET", get_wallet_history_url, params=params)
         assert resp.status == 200
+
+        body = await resp.json()
+        assert body['@id'] == get_wallet_history_url
 
     @unittest_run_loop
     @patch('wallet.get_wallet_history.get_wallet_history')
@@ -58,8 +62,7 @@ class TestGetWalletHistoryFromRequest(BaseTestClass):
             'start-date': '2018-06-12',
             'end-date': '2019-06-12T02:38:34Z'
         }
-        get_wallet_history_url = reverse(
-            'wallet-history', wallet_address=self.wallet_address)
+        get_wallet_history_url = reverse('wallet-history', wallet_address=self.wallet_address)
         resp = await self.client.request("GET", get_wallet_history_url, params=params)
         assert resp.status == 400
 
@@ -76,8 +79,7 @@ class TestGetWalletHistoryFromRequest(BaseTestClass):
             'start-date': '2018-06-12T02:38:34Z',
             'end-date': '2019-06-12T02:38:34Z'
         }
-        get_wallet_history_url = reverse(
-            'wallet-history', wallet_address=self.wallet_address)
+        get_wallet_history_url = reverse('wallet-history', wallet_address=self.wallet_address)
         resp = await self.client.request("GET", get_wallet_history_url, params=params)
         assert resp.status == 400
 
