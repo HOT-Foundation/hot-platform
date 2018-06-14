@@ -49,7 +49,7 @@ def build_generate_trust_wallet_transaction(transaction_source_address: str, sou
         source=source_address, destination=destination_address, starting_balance=amount)
     try:
         builder.append_trust_op(
-            source=destination_address, destination=settings['ISSUER'], code=settings['ASSET_CODE'])
+            source=destination_address, destination=settings['ISSUER'], code=settings['ASSET_CODE'], limit=settings['LIMIT_ASSET'])
     except DecodeError:
         raise web.HTTPBadRequest(reason='Parameter values are not valid.')
     except Exception as e:

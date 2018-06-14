@@ -151,7 +151,7 @@ async def build_generate_escrow_wallet_transaction(
 
         * escrow_address: an address of new wallet
         * destination_address: an address of wallet which is target
-        * transaction_source_address an address from wallet pool 
+        * transaction_source_address an address from wallet pool
         * provider_address: an address which provides custom_asset to new wallet
         * creator_address: an address of source wallet which is owner of the transaction.
         * cost_per_transaction: cost for each promotion deals.
@@ -167,7 +167,7 @@ async def build_generate_escrow_wallet_transaction(
 
     try:
         builder.append_trust_op(
-            source=escrow_address, destination=settings['ISSUER'], code=settings['ASSET_CODE'])
+            source=escrow_address, destination=settings['ISSUER'], code=settings['ASSET_CODE'], limit=settings['LIMIT_ASSET'])
     except DecodeError:
         raise web.HTTPBadRequest(reason='Parameter escrow_address or issuer address are not valid.')
     except Exception as e:
