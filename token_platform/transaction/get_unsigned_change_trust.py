@@ -16,7 +16,7 @@ from router import reverse
 async def get_unsigned_change_trust_from_request(request: web.Request) -> web.Response:
     """AIOHttp Request unsigned transfer transaction"""
     source_account = request.match_info.get("wallet_address", "")
-    transaction_source_address = request.rel_url.query['transaction-source-address']
+    transaction_source_address = request.query['transaction-source-address']
 
     result = await get_unsigned_change_trust(source_account, transaction_source_address)
     return web.json_response(result)
