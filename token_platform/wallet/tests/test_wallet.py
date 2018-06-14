@@ -29,7 +29,7 @@ class TestBuildCreateTrustWalletTx(BaseTestClass):
         def append_create_account_op(self, source, destination, starting_balance):
             pass
 
-        def append_trust_op(self, source, destination, code):
+        def append_trust_op(self, source, destination, code, limit):
             if (source == 'decode-error' or destination == 'decode-error'):
                 raise DecodeError('decode parameter error')
             if (source == 'error' or destination == 'error'):

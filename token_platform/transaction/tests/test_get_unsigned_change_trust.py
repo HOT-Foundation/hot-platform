@@ -23,9 +23,14 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
     async def test_get_change_trust_from_request_success(self, mock_get_unsigned_change_trust):
         mock_get_unsigned_change_trust.return_value = {}
         wallet_address = 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'
-        resp = await self.client.request('GET', reverse('change-trust', wallet_address=wallet_address))
+        transaction_source_address = 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'
+        transaction_url = reverse('change-trust', wallet_address=wallet_address)
+        params = 'transaction-source-address={}'.format(transaction_source_address)
+        url = f'{transaction_url}?{params}'
+
+        resp = await self.client.request('GET', url)
         assert resp.status == 200
-        mock_get_unsigned_change_trust.assert_called_once_with(wallet_address)
+        mock_get_unsigned_change_trust.assert_called_once_with(wallet_address, transaction_source_address)
 
 
     @unittest_run_loop
@@ -39,12 +44,12 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
         }]
 
         result = await get_unsigned_change_trust(
-            'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI')
+            'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI')
 
         expect_data = {
             "@id": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
             "@url": f"{settings['HOST']}{reverse('change-trust', wallet_address='GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI')}",
-            "@transaction_url": f"{settings['HOST']}{reverse('transaction', transaction_hash='bbf17ffd2de5a1fafd1644b506ad601402426fe0633a168edec05522d30cf09c')}",
+            "@transaction_url": f"{settings['HOST']}{reverse('transaction', transaction_hash='ae7d705bf2655f0581d3f7f8bfbbc567f9fee5e9d4632bfb0adb2c74194fbed2')}",
             "min_signer": 1,
             "signers": [
                 {
@@ -52,8 +57,8 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
                 "weight": 1
                 }
             ],
-            "xdr": "AAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAZAB3A5sAAAAGAAAAAAAAAAAAAAABAAAAAQAAAADOf93UUiwNNmwwYj2/XOv/KuhgA2mooc0ID+GYa49siQAAAAYAAAABSFRLTgAAAADkHacjwpeFWz5txveZ4sJ3pEmTzpdS9fiBscDwpmoppn//////////AAAAAAAAAAA=",
-            "transaction_hash": "bbf17ffd2de5a1fafd1644b506ad601402426fe0633a168edec05522d30cf09c"
+            "xdr": "AAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAZAB3A5sAAAAGAAAAAAAAAAAAAAABAAAAAQAAAADOf93UUiwNNmwwYj2/XOv/KuhgA2mooc0ID+GYa49siQAAAAYAAAABSFRLTgAAAADkHacjwpeFWz5txveZ4sJ3pEmTzpdS9fiBscDwpmoppgFjRXhdigAAAAAAAAAAAAA=",
+            "transaction_hash": "ae7d705bf2655f0581d3f7f8bfbbc567f9fee5e9d4632bfb0adb2c74194fbed2"
         }
 
         assert result == expect_data
@@ -67,4 +72,4 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
         instance.gen_xdr = Exception('cannot find sequence')
 
         with pytest.raises(web.HTTPNotFound):
-            build_unsigned_change_trust('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI')
+            build_unsigned_change_trust('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI')
