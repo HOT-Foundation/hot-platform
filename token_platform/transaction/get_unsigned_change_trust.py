@@ -16,13 +16,15 @@ from router import reverse
 async def get_unsigned_change_trust_from_request(request: web.Request) -> web.Response:
     """AIOHttp Request unsigned transfer transaction"""
     source_account = request.match_info.get("wallet_address", "")
-    result = await get_unsigned_change_trust(source_account)
+    transaction_source_address = request.rel_url.query['transaction-source-address']
+
+    result = await get_unsigned_change_trust(source_account, transaction_source_address)
     return web.json_response(result)
 
 
-async def get_unsigned_change_trust(source_address: str) -> Dict:
+async def get_unsigned_change_trust(source_address: str, transaction_source_address: str) -> Dict:
     """Get unsigned transfer transaction and signers"""
-    unsigned_xdr, tx_hash = build_unsigned_change_trust(source_address)
+    unsigned_xdr, tx_hash = build_unsigned_change_trust(source_address, transaction_source_address)
     host: str = settings['HOST']
     result = {
         '@id': source_address,
@@ -36,13 +38,13 @@ async def get_unsigned_change_trust(source_address: str) -> Dict:
     return result
 
 
-def build_unsigned_change_trust(source_address: str) -> Tuple[str, str]:
+def build_unsigned_change_trust(source_address: str, transaction_source_address: str) -> Tuple[str, str]:
     """"Build unsigned transfer transaction return unsigned XDR and transaction hash.
 
         Args:
             source_address: address need to be trust HTKN
     """
-    builder = Builder(address=source_address, network=settings['STELLAR_NETWORK'])
+    builder = Builder(address=transaction_source_address, network=settings['STELLAR_NETWORK'])
     builder.append_trust_op(settings['ISSUER'], settings['ASSET_CODE'], source=source_address)
 
     try:
