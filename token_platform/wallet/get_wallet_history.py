@@ -87,14 +87,15 @@ async def format_history(history: dict, wallet_address: str, limit: int, sort: s
 
     url = reverse('wallet-history', wallet_address=wallet_address)
 
-    n_sort = 'asc'
-    p_sort = 'desc'
+    next_sort = 'asc'
+    previous_sort = 'desc'
 
     if sort and sort == 'desc':
-        n_sort, p_sort = p_sort, n_sort
+        #Swap value
+        next_sort, previous_sort = previous_sort, next_sort
 
-    next_history = f'{url}?offset={last_record_offset}&limit={limit}&sort={n_sort}'
-    previous_history = f'{url}?offset={first_record_offset}&limit={limit}&sort={p_sort}'
+    next_history = f'{url}?offset={last_record_offset}&limit={limit}&sort={next_sort}'
+    previous_history = f'{url}?offset={first_record_offset}&limit={limit}&sort={previous_sort}'
 
     result = {
         '@id': reverse('wallet-history', wallet_address=wallet_address),
