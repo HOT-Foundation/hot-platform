@@ -63,6 +63,27 @@ class TestGetUnsignedTransaction(BaseTestClass):
         mock_generate_payment.assert_not_called()
 
     @unittest_run_loop
+    @patch('transaction.generate_payment.get_wallet')
+    @patch('transaction.generate_payment.generate_payment')
+    async def test_get_transaction_from_request_with_invalid_memo_on(self, mock_generate_payment, mock_address):
+        mock_generate_payment.return_value = {}
+        balances = [
+            {
+                'balance': '9.9999200',
+                'asset_type': 'native'
+            }]
+        mock_address.return_value = StellarWallet(balances)
+        source_address = 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'
+        destination_address = 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6'
+        transaction_source_address = 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ'
+
+        data = {'target_address': 'invalid', 'transaction_source_address': transaction_source_address, 'amount_xlm': 10, 'amount_htkn': 5, 'memo_on': 'a'}
+        url = reverse('generate-payment', wallet_address=source_address)
+        resp = await self.client.request('POST', url, json=data)
+        assert resp.status == 400
+        mock_generate_payment.assert_not_called()
+
+    @unittest_run_loop
     @patch('transaction.generate_payment.get_transaction_by_memo')
     @patch('transaction.generate_payment.get_wallet')
     async def test_get_transaction_from_request_already_submitted(self, mock_address, mock_transaction_by_memo):
@@ -93,7 +114,6 @@ class TestGetUnsignedTransaction(BaseTestClass):
         assert text == mock_transaction_by_memo.return_value
         mock_transaction_by_memo.assert_called_once_with(source_address, memo)
 
-
     @unittest_run_loop
     @patch('transaction.generate_payment.generate_payment')
     async def test_get_transaction_from_request_invalid_parameter(self, mock_generate_payment):
@@ -108,7 +128,6 @@ class TestGetUnsignedTransaction(BaseTestClass):
         print(resp)
         assert resp.status == 400
         assert resp.reason == 'Bad Request'
-
 
     @unittest_run_loop
     @patch('transaction.generate_payment.get_wallet')
@@ -125,7 +144,6 @@ class TestGetUnsignedTransaction(BaseTestClass):
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 404
         assert resp.reason == 'Not Found'
-
 
     @unittest_run_loop
     @patch('transaction.generate_payment.build_unsigned_transfer')
