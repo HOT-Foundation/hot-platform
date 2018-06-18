@@ -27,7 +27,11 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
     amount_xlm = body.get('amount_xlm')
     sequence_number = body.get('sequence_number', None)
     memo = body.get('memo', None)
+    memo_on = body.get('memo_on', 'source')
     await get_wallet(source_account)
+
+    if memo_on not in ['destination', 'source']:
+        raise web.HTTPBadRequest(reason='memo_on should be only "source" or "destination"')
 
     try:
         decode_check('account', target_address)
@@ -35,7 +39,8 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
         raise web.HTTPBadRequest(reason='Invalid value : {}'.format(target_address))
 
     if memo:
-        url_get_transaction = await get_transaction_by_memo(source_account, memo)
+        focus_address = target_address if memo_on == 'destination' else source_account
+        url_get_transaction = await get_transaction_by_memo(focus_address, memo)
         if url_get_transaction:
             return web.json_response(url_get_transaction, status=400)
 
