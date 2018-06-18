@@ -94,6 +94,17 @@ class TestGetTransactionFromRequest(BaseTestClass):
             await get_transaction("4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9")
         assert str(context.value) == 'Not Found'
 
+
+    @unittest_run_loop
+    @patch('transaction.get_transaction.get_transaction_by_memo')
+    async def test_get_transaction_hash_by_memo_from_reqeust_can_get_tx(self, mock_get_transaction) -> None:
+        mock_get_transaction.return_value = {'test': 'test'}
+        resp = await self.client.request('GET', reverse('get-transaction-hash-memo', wallet_address='address', memo='hello'))
+        assert resp.status == 200
+        mock_get_transaction.assert_called_once_with('address', 'hello')
+        assert await resp.json() == {'test':'test'}
+
+
     @unittest_run_loop
     @patch('transaction.get_transaction.get_transaction_by_memo')
     async def test_get_transaction_hash_by_memo_from_reqeust(self, mock_get_transaction) -> None:
