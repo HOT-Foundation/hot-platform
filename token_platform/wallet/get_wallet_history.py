@@ -11,13 +11,16 @@ from router import reverse
 
 async def get_wallet_history_from_request(request: web.Request) -> web.Response:
     """Get wallet history"""
-    wallet_address = request.match_info.get('wallet_address', "")
+    wallet_address = request.match_info.get('wallet_address')
     limit = request.query.get('limit', 10)
     type = request.query.get('type')
     sort = request.query.get('sort', 'asc')
     offset = request.query.get('offset')
     start_date = request.query.get('start-date')
     end_date = request.query.get('end-date')
+
+    limit = int(limit)
+    sort = sort.lower()
 
     if not(sort == 'asc' or sort == 'desc'):
         raise web.HTTPBadRequest(reason=f'Invalid. Parameter sort.')
@@ -31,9 +34,9 @@ async def get_wallet_history_from_request(request: web.Request) -> web.Response:
         end_date = end_date.astimezone(tz=timezone.utc)
 
     history = await get_wallet_history(wallet_address, sort, limit, offset)
-    result = await format_history(history)
+    formatted_history = await format_history(history, wallet_address, limit, sort)
 
-    return web.json_response(result)
+    return web.json_response(formatted_history)
 
 def datetime_is_valid(value: str) -> datetime:
 
@@ -65,7 +68,7 @@ async def get_wallet_history(wallet_address: str, sort: str='asc', limit: int=10
     effects = address.effects(**params)
     return effects
 
-async def format_history(history: dict)-> list:
+async def format_history(history: dict, wallet_address: str, limit: int, sort: str)-> dict:
 
 
     def _format_record(record):
@@ -74,8 +77,31 @@ async def format_history(history: dict)-> list:
         result.pop('type_i', None)
         result['offset'] = result.pop('paging_token', None)
         result['address'] = result.pop('account', None)
+
         return result
 
-
     records = [_format_record(record) for record in history['_embedded']['records']]
-    return records
+
+    last_record_offset = records[-1]['offset']
+    first_record_offset = records[0]['offset']
+
+    url = reverse('wallet-history', wallet_address=wallet_address)
+
+    next_sort = 'asc'
+    previous_sort = 'desc'
+
+    if sort and sort == 'desc':
+        #Swap value
+        next_sort, previous_sort = previous_sort, next_sort
+
+    next_history = f'{url}?offset={last_record_offset}&limit={limit}&sort={next_sort}'
+    previous_history = f'{url}?offset={first_record_offset}&limit={limit}&sort={previous_sort}'
+
+    result = {
+        '@id': reverse('wallet-history', wallet_address=wallet_address),
+        'history': records,
+        'next': next_history,
+        'previous': previous_history
+    }
+
+    return result

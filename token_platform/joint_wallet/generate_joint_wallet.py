@@ -57,7 +57,7 @@ async def build_joint_wallet(transaction_source_address: str, deal_address: str,
 
     builder = Builder(address=transaction_source_address, network=settings['STELLAR_NETWORK'])
     builder.append_create_account_op(source=creator, destination=deal_address, starting_balance=starting_xlm)
-    builder.append_trust_op(source=deal_address, destination=settings['ISSUER'], code=settings['ASSET_CODE'])
+    builder.append_trust_op(source=deal_address, destination=settings['ISSUER'], code=settings['ASSET_CODE'], limit=settings['LIMIT_ASSET'])
     builder.append_set_options_op(
         source=deal_address, signer_address=creator, signer_type='ed25519PublicKey', signer_weight=1
     )

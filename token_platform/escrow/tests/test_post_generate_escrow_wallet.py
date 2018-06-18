@@ -421,7 +421,7 @@ class TestBuildCreateEscrowWalletTransaction(BaseTestClass):
     @patch('escrow.post_generate_escrow_wallet.Builder')
     async def test_build_generate_escrow_wallet_cannot_optain_trust_op(self, mock_builder):
 
-        def _raiseDecodeError(source, destination, code):
+        def _raiseDecodeError(source, destination, code, limit):
             raise DecodeError('Parameter is not valid.')
 
         def _raiseError(source, destination, code):
