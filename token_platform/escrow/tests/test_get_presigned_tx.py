@@ -107,15 +107,13 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
             "signers": [],
             "xdr": [
                 {
-                "@id": "/wallet/GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY/transaction/transfer",
-                "@transaction_url": reverse('transaction', transaction_hash='hash'),
+                "@id": reverse('transaction', transaction_hash='hash'),
                 "xdr": "xdr",
                 "sequence_number": 2,
                 "transaction_hash": "hash"
                 },
                 {
-                "@id": "/wallet/GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY/transaction/transfer",
-                "@transaction_url": reverse('transaction', transaction_hash='hash'),
+                "@id": reverse('transaction', transaction_hash='hash'),
                 "xdr": "xdr",
                 "sequence_number": 3,
                 "transaction_hash": "hash"
