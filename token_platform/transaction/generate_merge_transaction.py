@@ -18,7 +18,6 @@ async def generate_merge_transaction(transaction_source_address: str, wallet_add
         parties_walles : list of provider address and amount for payback
     return Dict type
         escrow_address : Address of escrow wallet
-        @url : Current POST url
         transaction_url : Url for GET transaction detail
         signers : Array of signers use for sign xdr
         xdr : Xdr for sign
@@ -45,7 +44,7 @@ async def build_generate_merge_transaction(transaction_source_address: str, wall
         parties_walles : list of provider address and amount for payback
     """
 
-    wallet_address = wallet_detail['@id']
+    wallet_address = wallet_detail['escrow_address']
     wallet_data = wallet_detail['data']
     creator_address = wallet_data['creator_address'] if wallet_data and 'creator_address' in wallet_data.keys() else await get_creator_address(wallet_address)
 

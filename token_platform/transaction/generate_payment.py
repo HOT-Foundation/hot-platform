@@ -57,8 +57,7 @@ async def generate_payment(transaction_source_address: str, source_address: str,
     unsigned_xdr, tx_hash = await build_unsigned_transfer(transaction_source_address, source_address, destination, amount_htkn, amount_xlm, sequence, memo)
     host: str = settings['HOST']
     result = {
-        '@id': source_address,
-        '@url': f"{host}{reverse('generate-payment', wallet_address=source_address)}",
+        '@id': f"{host}{reverse('generate-payment', wallet_address=source_address)}",
         '@transaction_url': f"{host}{reverse('transaction', transaction_hash=tx_hash)}",
         'min_signer': await get_threshold_weight(source_address, 'payment'),
         'signers': await get_signers(source_address),

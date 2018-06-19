@@ -57,8 +57,8 @@ async def get_wallet_detail(wallet_address: str) -> Dict:
     wallet = await get_wallet(wallet_address)
     url = reverse('wallet-address', wallet_address=wallet_address)
     result: Dict[str, Any] = {
-        '@id': wallet_address,
-        '@url': f"{settings['HOST']}{url}",
+        '@id': f"{settings['HOST']}{url}",
+        'wallet_address': wallet.address,
         'asset': _merge_balance(wallet.balances),
         'sequence': wallet.sequence,
         'data': _format_data(wallet.data),

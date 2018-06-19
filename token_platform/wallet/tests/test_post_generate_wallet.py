@@ -60,7 +60,7 @@ class TestCreateWallet(BaseTestClass):
             'xdr': expect_unsigned_xdr,
             'transaction_url': f"{self.host}{reverse('transaction', transaction_hash=expect_tx_hash)}",
             'transaction_hash': expect_tx_hash,
-            '@url': f'{self.host}{url}'
+            '@id': f'{self.host}{url}'
         }
 
         assert text == expect

@@ -27,8 +27,7 @@ async def get_unsigned_change_trust(source_address: str, transaction_source_addr
     unsigned_xdr, tx_hash = build_unsigned_change_trust(source_address, transaction_source_address)
     host: str = settings['HOST']
     result = {
-        '@id': source_address,
-        '@url': f"{host}{reverse('change-trust', wallet_address=source_address)}",
+        '@id': f"{host}{reverse('change-trust', wallet_address=source_address)}",
         '@transaction_url': f"{host}{reverse('transaction', transaction_hash=tx_hash)}",
         'min_signer': await get_threshold_weight(source_address, 'change-trust'),
         'signers': await get_signers(source_address),

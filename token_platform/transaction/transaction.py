@@ -63,8 +63,8 @@ async def get_transaction(tx_hash: str) -> Dict[str, Union[str, int, List[Dict[s
     def _format_transaction(tx_detail: Dict[str, str]) -> Dict[str, Union[str, int, List[Dict[str, str]]]]:
         """Format transaction detail in pattern dict"""
         return {
-            "@id": tx_detail.get("id", None),
-            "@url": f"{settings.get('HOST', None)}{reverse('transaction', transaction_hash=tx_detail.get('id'))}",
+            "@id": f"{settings.get('HOST', None)}{reverse('transaction', transaction_hash=tx_detail.get('id'))}",
+            "transaction_id": tx_detail.get("id", None),
             "paging_token": tx_detail.get("paging_token"),
             "ledger": tx_detail.get("ledger"),
             "created_at": tx_detail.get("created_at", None),
