@@ -71,8 +71,7 @@ async def get_presigned_tx_xdr(
         )
         host: str = settings['HOST']
         result = {
-            '@id': '{}/wallet/{}/transaction/transfer'.format(host, source_address),
-            '@transaction_url': f"{host}{reverse('transaction', transaction_hash=tx_hash)}",
+            '@transaction_url': reverse('transaction', transaction_hash=tx_hash),
             'xdr': unsigned_xdr,
             'sequence_number': sequence + 1,
             'transaction_hash': tx_hash
