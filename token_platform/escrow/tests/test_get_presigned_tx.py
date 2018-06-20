@@ -25,13 +25,12 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
         mock_get_transaction.return_value = {}
         host = settings.get('HOST', None)
         mock_get_wallet.return_value = {
-            '@id': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
-            '@url': f"{host}{reverse('escrow-address', escrow_address='')}",
+            '@id': reverse('escrow-address', escrow_address=''),
             'asset': {
                 'HTKN': '10.0000000',
                 'XLM': '9.9999200'
             },
-            'generate-wallet': f"{host}{reverse('escrow-generate-wallet', escrow_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')}",
+            'generate-wallet': reverse('escrow-generate-wallet', escrow_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'),
             'data': {
                 'destination_address': 'GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6',
                 'cost_per_transaction': '5'
@@ -67,13 +66,12 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
         mock_get_transaction.return_value = {}
 
         mock_get_wallet.return_value = {
-            '@id': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
-            '@url': f"{host}{reverse('escrow-address', escrow_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')}",
+            '@id': reverse('escrow-address', escrow_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'),
             'asset': {
                 'HTKN': '10.0000000',
                 'XLM': '9.9999200'
             },
-            'generate-wallet': f"{host}{reverse('escrow-generate-wallet', escrow_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')}",
+            'generate-wallet': reverse('escrow-generate-wallet', escrow_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'),
             'data': {
                 'source': 'GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6'
             }
@@ -109,17 +107,13 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
             "signers": [],
             "xdr": [
                 {
-                "@id": "GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY",
-                "@url": "/wallet/GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY/transaction/transfer",
-                "@transaction_url": reverse('transaction', transaction_hash='hash'),
+                "@id": reverse('transaction', transaction_hash='hash'),
                 "xdr": "xdr",
                 "sequence_number": 2,
                 "transaction_hash": "hash"
                 },
                 {
-                "@id": "GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY",
-                "@url": "/wallet/GAH6333FKTNQGSFSDLCANJIE52N7IGMS7DUIWR6JIMQZE7XKWEQLJQAY/transaction/transfer",
-                "@transaction_url": reverse('transaction', transaction_hash='hash'),
+                "@id": reverse('transaction', transaction_hash='hash'),
                 "xdr": "xdr",
                 "sequence_number": 3,
                 "transaction_hash": "hash"
@@ -137,13 +131,12 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
         mock_get_transaction.return_value = {}
         host = settings.get('HOST', None)
         mock_get_wallet.return_value = {
-            '@id': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
-            '@url': f"{host}{reverse('escrow-address', escrow_address='')}",
+            '@id': reverse('escrow-address', escrow_address=''),
             'asset': {
                 'HTKN': '10.0000000',
                 'XLM': '9.9999200'
             },
-            'generate-wallet': f"{host}{reverse('escrow-generate-wallet', escrow_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')}",
+            'generate-wallet': reverse('escrow-generate-wallet', escrow_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'),
             'data': {
                 'destination_address': 'GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6',
                 'cost_per_transaction': '5'

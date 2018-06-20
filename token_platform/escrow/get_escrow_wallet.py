@@ -47,8 +47,8 @@ async def get_escrow_wallet_detail(escrow_address: str) -> web.Response:
     wallet = await get_wallet(escrow_address)
 
     result: Dict[str, Any] = {
-        '@id': escrow_address,
-        '@url': f"{settings['HOST']}{reverse('escrow-address', escrow_address=escrow_address)}",
+        '@id': f"{settings['HOST']}{reverse('escrow-address', escrow_address=escrow_address)}",
+        'escrow_address': escrow_address,
         'asset': _merge_balance(wallet.balances),
         'generate-wallet': f"{settings['HOST']}{reverse('escrow-generate-wallet', escrow_address=escrow_address)}",
         'sequence': wallet.sequence,

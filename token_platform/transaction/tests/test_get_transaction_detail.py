@@ -34,8 +34,8 @@ class TestGetTransactionFromRequest(BaseTestClass):
         result = await get_transaction("4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9")
         host = settings.get('HOST', None)
         expect_data = {
-            '@id': '4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9',
-            '@url': f"{host}{reverse('transaction', transaction_hash='4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9')}",
+            'transaction_id': '4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9',
+            '@id': f"{host}{reverse('transaction', transaction_hash='4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9')}",
             'paging_token': '34980756279271424',
             'ledger': 8144592,
             'created_at': '2018-03-28T08:34:22Z',
