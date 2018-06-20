@@ -32,8 +32,7 @@ async def generate_joint_wallet(transaction_source_address: str, deal_address: s
     parties_signer = [{'public_key': party['address'], 'weight': 1} for party in parties]
     signers = parties_signer + [{'public_key': creator, 'weight': 1}, {'public_key': deal_address, 'weight': 1}]
     result = {
-        '@id': deal_address,
-        '@url': reverse('generate-joint-wallet', wallet_address=deal_address),
+        '@id': reverse('generate-joint-wallet', wallet_address=deal_address),
         '@transaction_url': reverse('transaction', transaction_hash=tx_hash),
         'signers': signers,
         'xdr': xdr,
