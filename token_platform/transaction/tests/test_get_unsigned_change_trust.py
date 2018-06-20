@@ -47,8 +47,7 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
             'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI')
 
         expect_data = {
-            "@id": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
-            "@url": f"{settings['HOST']}{reverse('change-trust', wallet_address='GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI')}",
+            "@id": f"{settings['HOST']}{reverse('change-trust', wallet_address='GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI')}",
             "@transaction_url": f"{settings['HOST']}{reverse('transaction', transaction_hash='ae7d705bf2655f0581d3f7f8bfbbc567f9fee5e9d4632bfb0adb2c74194fbed2')}",
             "min_signer": 1,
             "signers": [

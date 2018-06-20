@@ -69,6 +69,7 @@ def build_generate_wallet_transaction(transaction_source_address: str, source_ad
     """"Build transaction return unsigned XDR and transaction hash.
 
         Args:
+            transaction_source_address: Owner of the transactoin
             source_address: Owner of creator wallet
             destination_address: wallet id of new wallet
             amount: starting balance of new wallet

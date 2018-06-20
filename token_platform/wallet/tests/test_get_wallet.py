@@ -53,8 +53,8 @@ async def test_get_wallet_success_trusted_htkn(mock_address):
     host = settings.get('HOST', None)
     url = reverse('wallet-address', wallet_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')
     expect_data = {
-        '@id': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
-        '@url': f'{host}{url}',
+        'wallet_address': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+        '@id': f'{host}{url}',
         'asset': {
             'HTKN': '7.0000000',
             'XLM': '9.9999200'
@@ -84,8 +84,8 @@ async def test_get_wallet_success_not_trust_htkn(mock_address):
     host = host = settings.get('HOST', None)
     url = reverse('wallet-address', wallet_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')
     expect_data = {
-        '@id': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
-        '@url': f'{host}{url}',
+        'wallet_address': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+        '@id': f'{host}{url}',
         'trust': f"{settings['HOST']}{reverse('change-trust', wallet_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')}",
         'asset': {
             'XLM': '9.9999200'
@@ -112,7 +112,7 @@ async def test_get_wallet_success(mock_address):
 
     result = await get_wallet('GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')
     expect_result = {
-        "id": "GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD",
+        "address": "GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD",
         "balances": [
             {
             "balance": "9.9999200",

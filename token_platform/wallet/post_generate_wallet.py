@@ -48,7 +48,7 @@ async def post_generate_wallet_from_request(request: web.Request):
         'xdr': unsigned_xdr,
         'transaction_url': f"{host}{reverse('transaction', transaction_hash=tx_hash)}",
         'transaction_hash': tx_hash,
-        '@url': f'{host}{request.path}'
+        '@id': f'{host}{request.path}'
     }
 
     return web.json_response(result)

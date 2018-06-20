@@ -53,8 +53,7 @@ class TestGenerateJointWallet(BaseTestClass):
         result = await generate_joint_wallet(transaction_source_address, deal_address, parties, creator, 5)
 
         expect = {
-            "@id": "deal_address",
-            "@url": reverse('generate-joint-wallet', wallet_address='deal_address'),
+            "@id": reverse('generate-joint-wallet', wallet_address='deal_address'),
             "@transaction_url": reverse('transaction', transaction_hash='create_joint_wallet_tx_hash'),
             "signers": [{
                     "public_key": "address1",
@@ -98,8 +97,7 @@ class TestGenerateJointWallet(BaseTestClass):
         result = await generate_joint_wallet(transaction_source_address, deal_address, parties, creator, 5, meta)
 
         expect = {
-            "@id": "deal_address",
-            "@url": reverse('generate-joint-wallet', wallet_address='deal_address'),
+            "@id": reverse('generate-joint-wallet', wallet_address='deal_address'),
             "@transaction_url": reverse('transaction', transaction_hash='create_joint_wallet_tx_hash'),
             "signers": [{
                     "public_key": "address1",

@@ -49,7 +49,7 @@ async def post_generate_trust_wallet_from_request(request: web.Request):
         signers = [source_address, destination_address]
     else:
         signers = [source_address, destination_address, transaction_source_address]
-    
+
     host: str = settings['HOST']
 
     result = {
@@ -57,9 +57,9 @@ async def post_generate_trust_wallet_from_request(request: web.Request):
         'transaction_source_address': transaction_source_address,
         'signers': signers,
         'xdr': unsigned_xdr,
-        'transaction_url': f"{host}{reverse('transaction', transaction_hash=tx_hash)}",
+        'transaction_url': reverse('transaction', transaction_hash=tx_hash),
         'transaction_hash': tx_hash,
-        '@url': f'{host}{request.path}'
+        '@id': reverse('generate-trust-wallet', wallet_address=source_address)
     }
 
     return web.json_response(result)

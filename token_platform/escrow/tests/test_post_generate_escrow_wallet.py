@@ -42,20 +42,19 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         }
 
         expect = {
-            '@id': self.escrow_address,
-            'escrow_address': self.escrow_address,
-            '@url': f"{self.host}{reverse('escrow-generate-wallet', escrow_address=self.escrow_address)}",
+            '@id': reverse('escrow-generate-wallet', escrow_address=self.escrow_address),
             '@transaction_url': reverse('transaction', transaction_hash='tx_hash'),
             'signers': [self.escrow_address, self.creator_address, self.provider_address],
-            'xdr': 'xdr'
+            'xdr': 'xdr',
+            'transaction_hash': 'tx-hash'
         }
 
         mock_wallet.return_value = {
-            'escrow_address': self.escrow_address,
-            '@url': f"{self.host}{reverse('escrow-generate-wallet', escrow_address=self.escrow_address)}",
+            '@id': reverse('escrow-generate-wallet', escrow_address=self.escrow_address),
             '@transaction_url': reverse('transaction', transaction_hash='tx_hash'),
             'signers': [self.escrow_address, self.creator_address, self.provider_address],
-            'xdr': 'xdr'
+            'xdr': 'xdr',
+            'transaction_hash': 'tx-hash'
         }
 
         url = reverse('escrow-generate-wallet', escrow_address=self.escrow_address)
@@ -80,20 +79,19 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         }
 
         expect = {
-            '@id': self.escrow_address,
-            'escrow_address': self.escrow_address,
-            '@url': f"{self.host}{reverse('escrow-generate-wallet', escrow_address=self.escrow_address)}",
+            '@id': reverse('escrow-generate-wallet', escrow_address=self.escrow_address),
             '@transaction_url': reverse('transaction', transaction_hash='tx_hash'),
             'signers': [self.escrow_address, self.creator_address, self.provider_address],
-            'xdr': 'xdr'
+            'xdr': 'xdr',
+            'transaction_hash': 'tx-hash'
         }
 
         mock_wallet.return_value = {
-            'escrow_address': self.escrow_address,
-            '@url': f"{self.host}{reverse('escrow-generate-wallet', escrow_address=self.escrow_address)}",
+            '@id': reverse('escrow-generate-wallet', escrow_address=self.escrow_address),
             '@transaction_url': reverse('transaction', transaction_hash='tx_hash'),
             'signers': [self.escrow_address, self.creator_address, self.provider_address],
-            'xdr': 'xdr'
+            'xdr': 'xdr',
+            'transaction_hash': 'tx-hash'
         }
 
         url = reverse('escrow-generate-wallet', escrow_address=self.escrow_address)
@@ -351,8 +349,7 @@ class TestGetCreateWallet(BaseTestClass):
         mock_cal.return_value = 20
 
         expect = {
-            'escrow_address': self.escrow_address,
-            '@url': f"{self.host}{reverse('escrow-generate-wallet', escrow_address=self.escrow_address)}",
+            '@id': reverse('escrow-generate-wallet', escrow_address=self.escrow_address),
             '@transaction_url': reverse('transaction', transaction_hash='tx_hash'),
             'signers': [self.escrow_address, self.creator_address, self.provider_address],
             'xdr': 'xdr',

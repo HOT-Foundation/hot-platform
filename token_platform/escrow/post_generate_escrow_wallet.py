@@ -55,8 +55,6 @@ async def post_generate_escrow_wallet_from_request(request: web.Request) -> web.
                                 starting_balance,
                                 cost_per_transaction,
                                 expiration_date)
-
-    result['@id'] = escrow_address
     return web.json_response(result)
 
 
@@ -103,8 +101,7 @@ async def generate_escrow_wallet(escrow_address: str,
 
     host = settings['HOST']
     return {
-        'escrow_address': escrow_address,
-        '@url': f"{host}{reverse('escrow-generate-wallet', escrow_address=escrow_address)}",
+        '@id': reverse('escrow-generate-wallet', escrow_address=escrow_address),
         '@transaction_url': f"{host}{reverse('transaction', transaction_hash=tx_hash)}",
         'signers': [escrow_address, creator_address, provider_address],
         'xdr': xdr,
