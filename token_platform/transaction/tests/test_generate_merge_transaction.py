@@ -28,8 +28,7 @@ class TestGenerateMergeTransaction(BaseTestClass):
             {'address' : 'wallet2', 'amount' : '20'}
         ]
         self.wallet_detail = {
-            '@id': self.wallet_address,
-            '@url': reverse('escrow-address', escrow_address=self.wallet_address),
+            '@id': reverse('escrow-address', escrow_address=self.wallet_address),
             'asset': {
                 self.custom_asset : self.remain_custom_asset
             },
@@ -72,8 +71,8 @@ class TestBuildGenerateMergeTransaction(BaseTestClass):
             {'address' : 'wallet2', 'amount' : '20'}
         ]
         self.wallet_detail = {
-            '@id': self.wallet_address,
-            '@url': reverse('escrow-address', escrow_address=self.wallet_address),
+            'escrow_address': self.wallet_address,
+            '@id': reverse('escrow-address', escrow_address=self.wallet_address),
             'asset': {
                 settings['ASSET_CODE'] : '100.0000'
             },
@@ -177,8 +176,7 @@ class TestGeneratePartiesWallet(BaseTestClass):
         self.provider_address = 'provider_address'
         self.creator_address = 'creator_address'
         self.wallet_detail = {
-            '@id': self.wallet_address,
-            '@url': reverse('escrow-address', escrow_address=self.wallet_address),
+            '@id': reverse('escrow-address', escrow_address=self.wallet_address),
             'asset': {
                 settings['ASSET_CODE'] : '100.0000'
             },
