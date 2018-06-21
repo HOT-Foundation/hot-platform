@@ -226,11 +226,11 @@ class TestGetReasonTransaction(BaseTestClass):
         respons_data = {
             "extras": {
                 "result_codes": {
-                      "transaction": "tx_failed",
-                      "operations": [
+                    "transaction": "tx_failed",
+                    "operations": [
                         "op_no_destination",
                         "op_success"
-                      ]
+                    ]
                 }
             }
         }
@@ -242,7 +242,7 @@ class TestGetReasonTransaction(BaseTestClass):
         respons_data = {
             "extras": {
                 "result_codes": {
-                      "transaction": "tx_bad_seq"
+                    "transaction": "tx_bad_seq"
                 }
             }
         }
