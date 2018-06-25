@@ -48,7 +48,7 @@ async def build_generate_merge_transaction(transaction_source_address: str, wall
     wallet_data = wallet_detail['data']
     creator_address = wallet_data['creator_address'] if wallet_data and 'creator_address' in wallet_data.keys() else await get_creator_address(wallet_address)
 
-    builder = Builder(address=transaction_source_address, horizon=settings['LOCAL_HORIZON'], network=settings['LOCAL_PASSPHRASE'])
+    builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
 
     if not parties_wallet:
         parties_wallet = await generate_parties_wallet(wallet_detail)
@@ -77,7 +77,8 @@ async def get_creator_address(wallet_address: str) -> str:
 
     Args:
         wallet_address: address for search creator address  '''
-    horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
+    # horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
+    horizon = Horizon(settings['HORIZON_URL'])
     result = horizon.account_operations(wallet_address, params={'limit' : 1, 'order' : 'asc'}).get('_embedded').get('records')[0]
     return result['source_account']
 

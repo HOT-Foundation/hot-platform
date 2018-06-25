@@ -56,15 +56,10 @@ async def get_wallet_history(wallet_address: str, sort: str='asc', limit: int=10
     """
         Get wallet history from Stellar network.
     """
-
-    horizon = HORIZON_TEST
-    if settings['STELLAR_NETWORK'] == 'PUBLIC':
-        horizon = HORIZON_LIVE
-
     params = { 'order': sort, 'limit': limit}
     if offset:
         params['cursor'] = offset
-    address = Address(address=wallet_address, horizon=horizon)
+    address = Address(address=wallet_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
     effects = address.effects(**params)
     return effects
 

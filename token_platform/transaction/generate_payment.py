@@ -84,7 +84,7 @@ async def build_unsigned_transfer(transaction_source_address: str, source_addres
             memo: memo text [optional]
     """
 
-    builder = Builder(address=transaction_source_address, sequence=sequence, horizon=settings['LOCAL_HORIZON'], network=settings['LOCAL_PASSPHRASE'])
+    builder = Builder(address=transaction_source_address, sequence=sequence, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
 
     wallet = await get_wallet_detail(destination_address)
     if amount_xlm:

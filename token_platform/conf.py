@@ -7,6 +7,5 @@ settings['ASSET_CODE'] = os.environ['ASSET_CODE']
 settings['LIMIT_ASSET'] = '10000000000'
 settings['ISSUER'] = os.environ['ISSUER']
 settings['STELLAR_NETWORK'] = os.environ['STELLAR_NETWORK']
-settings['LOCAL_HORIZON'] = os.environ['LOCAL_HORIZON']
-settings['LOCAL_PASSPHRASE'] = os.environ['LOCAL_PASSPHRASE']
 settings['PASSPHRASE'] = os.environ['PASSPHRASE']
+settings['HORIZON_URL'] = os.environ['HORIZON_URL']

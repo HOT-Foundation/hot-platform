@@ -43,7 +43,7 @@ def build_unsigned_change_trust(source_address: str, transaction_source_address:
         Args:
             source_address: address need to be trust HTKN
     """
-    builder = Builder(address=transaction_source_address, network=settings['STELLAR_NETWORK'])
+    builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
     builder.append_trust_op(settings['ISSUER'], settings['ASSET_CODE'], source=source_address, limit=settings['LIMIT_ASSET'])
 
     try:
