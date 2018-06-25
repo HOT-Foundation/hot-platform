@@ -22,8 +22,8 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
     @patch('transaction.get_unsigned_change_trust.get_unsigned_change_trust')
     async def test_get_change_trust_from_request_success(self, mock_get_unsigned_change_trust):
         mock_get_unsigned_change_trust.return_value = {}
-        wallet_address = 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'
-        transaction_source_address = 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'
+        wallet_address = 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE'
+        transaction_source_address = 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE'
         transaction_url = reverse('change-trust', wallet_address=wallet_address)
         params = 'transaction-source-address={}'.format(transaction_source_address)
         url = f'{transaction_url}?{params}'
@@ -39,25 +39,25 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
     async def test_get_unsigned_change_trust_success(self, mock_get_threshold_weight, mock_get_signer):
         mock_get_threshold_weight.return_value = 1
         mock_get_signer.return_value = [{
-            "public_key": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
+            "public_key": "GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE",
             "weight": 1
         }]
 
         result = await get_unsigned_change_trust(
-            'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI')
+            'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE', 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE')
 
         expect_data = {
-            "@id": f"{settings['HOST']}{reverse('change-trust', wallet_address='GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI')}",
-            "@transaction_url": f"{settings['HOST']}{reverse('transaction', transaction_hash='ae7d705bf2655f0581d3f7f8bfbbc567f9fee5e9d4632bfb0adb2c74194fbed2')}",
+            "@id": f"{settings['HOST']}{reverse('change-trust', wallet_address='GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE')}",
+            "@transaction_url": f"{settings['HOST']}{reverse('transaction', transaction_hash='15472c9afb7422b09a5adc200ee219d3339133bb2fc68a76cae321cad8b772b0')}",
             "min_signer": 1,
             "signers": [
                 {
-                "public_key": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
+                "public_key": "GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE",
                 "weight": 1
                 }
             ],
-            "xdr": "AAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAZAB3A5sAAAAGAAAAAAAAAAAAAAABAAAAAQAAAADOf93UUiwNNmwwYj2/XOv/KuhgA2mooc0ID+GYa49siQAAAAYAAAABSFRLTgAAAADkHacjwpeFWz5txveZ4sJ3pEmTzpdS9fiBscDwpmoppgFjRXhdigAAAAAAAAAAAAA=",
-            "transaction_hash": "ae7d705bf2655f0581d3f7f8bfbbc567f9fee5e9d4632bfb0adb2c74194fbed2"
+            "xdr": "AAAAAM+RRrB+7bNSWWC2QR4m3asIZvUZ8dm6HQB6lUZSpTPrAAAAZAAAAAcAAAAPAAAAAAAAAAAAAAABAAAAAQAAAADPkUawfu2zUllgtkEeJt2rCGb1GfHZuh0AepVGUqUz6wAAAAYAAAABSFRLTgAAAADkHacjwpeFWz5txveZ4sJ3pEmTzpdS9fiBscDwpmoppgFjRXhdigAAAAAAAAAAAAA=",
+            "transaction_hash": "15472c9afb7422b09a5adc200ee219d3339133bb2fc68a76cae321cad8b772b0"
         }
 
         assert result == expect_data
@@ -71,4 +71,4 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
         instance.gen_xdr = Exception('cannot find sequence')
 
         with pytest.raises(web.HTTPNotFound):
-            build_unsigned_change_trust('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI')
+            build_unsigned_change_trust('GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE', 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE')

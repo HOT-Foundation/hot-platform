@@ -56,7 +56,7 @@ async def get_wallet_history(wallet_address: str, sort: str='asc', limit: int=10
     """
         Get wallet history from Stellar network.
     """
-    horizon = settings['HORIZON_URL']
+    # horizon = settings['HORIZON_URL']
     params = { 'order': sort, 'limit': limit}
     if offset:
         params['cursor'] = offset
@@ -65,7 +65,6 @@ async def get_wallet_history(wallet_address: str, sort: str='asc', limit: int=10
     return effects
 
 async def format_history(history: dict, wallet_address: str, limit: int, sort: str)-> dict:
-
 
     def _format_record(record):
         result = record

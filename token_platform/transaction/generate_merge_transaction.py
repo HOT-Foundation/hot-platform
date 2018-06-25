@@ -77,11 +77,7 @@ async def get_creator_address(wallet_address: str) -> str:
 
     Args:
         wallet_address: address for search creator address  '''
-<<<<<<< HEAD
-    # horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
-=======
->>>>>>> 932ba08a12409047da55491e896191bb7128b8f1
-    horizon = Horizon(settings['HORIZON_URL'])
+    horizon = Horizon(horizon=settings['HORIZON_URL'])
     result = horizon.account_operations(wallet_address, params={'limit' : 1, 'order' : 'asc'}).get('_embedded').get('records')[0]
     return result['source_account']
 

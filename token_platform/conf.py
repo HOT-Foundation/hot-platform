@@ -6,6 +6,5 @@ settings['HOST'] = os.getenv('HOST', '')
 settings['ASSET_CODE'] = os.environ['ASSET_CODE']
 settings['LIMIT_ASSET'] = '10000000000'
 settings['ISSUER'] = os.environ['ISSUER']
-settings['STELLAR_NETWORK'] = os.environ['STELLAR_NETWORK']
 settings['PASSPHRASE'] = os.environ['PASSPHRASE']
 settings['HORIZON_URL'] = os.environ['HORIZON_URL']

@@ -133,6 +133,10 @@ class TestGetWalletHistory(BaseTestClass):
             }
         }
 
+
+        import pdb; pdb.set_trace()
+
+
         assert history == expect
 
     @unittest_run_loop

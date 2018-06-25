@@ -14,7 +14,7 @@ JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 
 async def is_duplicate_transaction(transaction_hash: str) -> bool:
     """Check transaction is duplicate or not"""
-    horizon = Horizon(settings['HORIZON_URL'])
+    horizon = Horizon(horizon=settings['HORIZON_URL'])
     transaction = horizon.transaction(transaction_hash)
     id = transaction.get('id')
     return True if id else False
@@ -22,7 +22,7 @@ async def is_duplicate_transaction(transaction_hash: str) -> bool:
 
 async def submit_transaction(xdr: bytes) -> Dict[str, str]:
     """Submit transaction into Stellar network"""
-    horizon = Horizon(settings['HORIZON_URL'])
+    horizon = Horizon(horizon=settings['HORIZON_URL'])
 
     try:
         response = horizon.submit(xdr)
@@ -49,7 +49,7 @@ def get_reason_transaction(response: Dict) -> str:
 
 async def get_current_sequence_number(wallet_address:str) -> int:
     """Get current sequence number of the wallet"""
-    horizon = Horizon(settings['HORIZON_URL'])
+    horizon = Horizon(horizon=settings['HORIZON_URL'])
     sequence = horizon.account(wallet_address).get('sequence')
     return sequence
 
@@ -94,7 +94,7 @@ async def get_transaction(tx_hash: str) -> Dict[str, Union[str, int, List[Dict[s
             operation.pop("_links")
         return operations
 
-    horizon = Horizon(settings['HORIZON_URL'])
+    horizon = Horizon(horizon=settings['HORIZON_URL'])
     transaction = horizon.transaction(tx_hash)
 
     if transaction.get('status', None) == 404:
@@ -136,7 +136,7 @@ async def get_threshold_weight(wallet_address:str, operation_type:str) -> int:
 
 
 async def get_transaction_by_memo(source_account: str, memo: str, cursor: int = None) -> Dict:
-    horizon = Horizon(settings['HORIZON_URL'])
+    horizon = Horizon(horizon=settings['HORIZON_URL'])
 
     # Get transactions data within key 'records'
     transactions = horizon.account_transactions(source_account, params={'limit' : 200, 'order' : 'desc', 'cursor' : cursor}).get('_embedded').get('records')
