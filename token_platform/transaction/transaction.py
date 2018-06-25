@@ -32,8 +32,21 @@ async def submit_transaction(xdr: bytes) -> Dict[str, str]:
         raise web.HTTPInternalServerError
     if response.get('status') == 400:
         msg = response.get('extras', {}).get('result_codes', {}).get('transaction', None)
+        if msg:
+            reasons = get_reason_transaction(response)
+            if reasons: msg += f' {reasons}'
         raise web.HTTPBadRequest(reason=msg)
     return response
+
+
+def get_reason_transaction(response: Dict) -> str:
+    reasons = response.get('extras', {}).get('result_codes', {}).get('operations', None)
+    if not reasons: return None
+    result = reasons[0]
+    for i in range(1, len(reasons)):
+        result += f'/{reasons[i]}'
+    return result
+
 
 
 async def get_current_sequence_number(wallet_address:str) -> int:

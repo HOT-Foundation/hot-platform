@@ -10,7 +10,8 @@ from transaction.transaction import (get_current_sequence_number, get_signers,
                                      get_transaction_by_memo,
                                      get_transaction_hash,
                                      is_duplicate_transaction,
-                                     submit_transaction)
+                                     submit_transaction,
+                                     get_reason_transaction)
 from wallet.tests.factory.wallet import StellarWallet
 
 
@@ -54,6 +55,7 @@ class TestSubmitTransaction(BaseTestClass):
         with pytest.raises(HTTPInternalServerError):
             signed_xdr = 'Testtest'
             result = await submit_transaction(signed_xdr)
+
 
 class TestDuplicateTransaction(BaseTestClass):
 
@@ -196,3 +198,34 @@ class TestGetThreshold(BaseTestClass):
     async def test_get_transaction_by_memo_not_found(self):
         result = await get_transaction_by_memo('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'testmemo')
         assert not result
+
+
+class TestGetReasonTransaction(BaseTestClass):
+    @unittest_run_loop
+    async def test_get_reason_transacton_successfully(self):
+        respons_data = {
+            "extras": {
+                "result_codes": {
+                    "transaction": "tx_failed",
+                    "operations": [
+                        "op_no_destination",
+                        "op_success"
+                    ]
+                }
+            }
+        }
+        resp = get_reason_transaction(respons_data)
+        self.assertEqual(resp, 'op_no_destination/op_success')
+
+    @unittest_run_loop
+    async def test_get_reason_transacton_not_found_value(self):
+        respons_data = {
+            "extras": {
+                "result_codes": {
+                    "transaction": "tx_bad_seq"
+                }
+            }
+        }
+        resp = get_reason_transaction(respons_data)
+        self.assertEqual(resp, None)
+
