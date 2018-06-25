@@ -158,8 +158,7 @@ async def build_generate_escrow_wallet_transaction(
     '''
 
     builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
-    builder.append_create_account_op(
-        source=creator_address, destination=escrow_address, starting_balance=starting_native_asset)
+    builder.append_create_account_op(source=creator_address, destination=escrow_address, starting_balance=starting_native_asset)
 
     try:
         builder.append_trust_op(

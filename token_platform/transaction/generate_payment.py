@@ -4,7 +4,6 @@ from typing import Any, Dict, List, Mapping, NewType, Optional, Tuple, Union
 
 from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
-from stellar_base.horizon import horizon_livenet, horizon_testnet
 from stellar_base.utils import AccountNotExistError, DecodeError, decode_check
 
 from aiohttp import web
@@ -83,7 +82,6 @@ async def build_unsigned_transfer(transaction_source_address: str, source_addres
             sequence: sequence number for generate transaction [optional]
             memo: memo text [optional]
     """
-
     builder = Builder(address=transaction_source_address, sequence=sequence, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
 
     wallet = await get_wallet_detail(destination_address)

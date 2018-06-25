@@ -9,7 +9,7 @@ from aiohttp.test_utils import make_mocked_request, unittest_run_loop
 from asynctest import patch
 from transaction.get_transaction import get_transaction_from_request
 from transaction.tests.factory.horizon import HorizonData
-from transaction.transaction import get_transaction, horizon_testnet
+from transaction.transaction import get_transaction
 from conf import settings
 from router import reverse
 
@@ -26,7 +26,7 @@ class TestGetTransactionFromRequest(BaseTestClass):
 
 
     @unittest_run_loop
-    @patch('transaction.transaction.horizon_testnet')
+    @patch('transaction.transaction.Horizon')
     async def test_get_transaction_success(self, mock_horizon):
 
         mock_horizon.return_value = HorizonData()
@@ -78,7 +78,7 @@ class TestGetTransactionFromRequest(BaseTestClass):
 
 
     @unittest_run_loop
-    @patch('transaction.transaction.horizon_testnet')
+    @patch('transaction.transaction.Horizon')
     async def test_get_transaction_not_found(self, mock_transaction):
         class MockTransaction(object):
             def transaction(self, tx_hash):

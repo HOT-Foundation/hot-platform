@@ -156,15 +156,10 @@ class TestGetCreatorAddress(BaseTestClass):
                       ]}}
 
     @unittest_run_loop
-    @patch('transaction.generate_merge_transaction.horizon_livenet')
-    @patch('transaction.generate_merge_transaction.horizon_testnet')
-    async def test_get_creator_address_success(self, mock_testnet, mock_livenet):
-        instance = mock_testnet.return_value
+    @patch('transaction.generate_merge_transaction.Horizon')
+    async def test_get_creator_address_success(self, mock_horizon):
+        instance = mock_horizon.return_value
         instance.account_operations.return_value = self.result
-
-        instance = mock_livenet.return_value
-        instance.account_operations.return_value = self.result
-
         result = await get_creator_address(self.wallet_address)
 
         assert result == 'source_account'
@@ -223,7 +218,7 @@ class TestIsMatchBalance(BaseTestClass):
 
 class TestBuildPaymentOperation(BaseTestClass):
     async def setUpAsync(self):
-        self.builder = Builder(address='GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE')
+        self.builder = Builder(address='GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE', horizon=settings['HORIZON_URL'])
         self.source_address = 'GCEOD3ALYS3I7PVF5PZ3JJDNQF2AWKX5IOWWPC4RBHQVJFR6LXEFOMZ3'
         self.destination_address = 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE'
 
@@ -257,7 +252,7 @@ class TestBuildPaymentOperation(BaseTestClass):
 
 class TestBuildRemoveTrustlinesOperation(BaseTestClass):
     async def setUpAsync(self):
-        self.builder = Builder(address='GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE')
+        self.builder = Builder(address='GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE', horizon=settings['HORIZON_URL'])
         self.source_address = 'GCEOD3ALYS3I7PVF5PZ3JJDNQF2AWKX5IOWWPC4RBHQVJFR6LXEFOMZ3'
 
     @unittest_run_loop
@@ -270,7 +265,7 @@ class TestBuildRemoveTrustlinesOperation(BaseTestClass):
 
 class TestBuildRemoveManageDataOperation(BaseTestClass):
     async def setUpAsync(self):
-        self.builder = Builder(address='GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE')
+        self.builder = Builder(address='GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE', horizon=settings['HORIZON_URL'])
         self.source_address = 'GCEOD3ALYS3I7PVF5PZ3JJDNQF2AWKX5IOWWPC4RBHQVJFR6LXEFOMZ3'
         self.key_list = ['key1', 'key2', 'key3']
 
@@ -285,7 +280,7 @@ class TestBuildRemoveManageDataOperation(BaseTestClass):
 
 class TestBuildAccountMergeOperation(BaseTestClass):
     async def setUpAsync(self):
-        self.builder = Builder(address='GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE')
+        self.builder = Builder(address='GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE', horizon=settings['HORIZON_URL'])
         self.source_address = 'GCEOD3ALYS3I7PVF5PZ3JJDNQF2AWKX5IOWWPC4RBHQVJFR6LXEFOMZ3'
         self.destination_address = 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE'
 
