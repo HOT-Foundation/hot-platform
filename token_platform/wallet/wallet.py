@@ -43,8 +43,7 @@ def build_generate_trust_wallet_transaction(transaction_source_address: str, sou
             destination_address: wallet id of new wallet
             amount: starting balance of new wallet
     """
-    builder = Builder(address=transaction_source_address,
-                      network=settings['STELLAR_NETWORK'])
+    builder = Builder(address=transaction_source_address, horizon=settings['LOCAL_HORIZON'], network=settings['LOCAL_PASSPHRASE'])
     builder.append_create_account_op(
         source=source_address, destination=destination_address, starting_balance=amount)
     try:
@@ -74,8 +73,7 @@ def build_generate_wallet_transaction(transaction_source_address: str, source_ad
             destination_address: wallet id of new wallet
             amount: starting balance of new wallet
     """
-    builder = Builder(address=transaction_source_address,
-                      network=settings['STELLAR_NETWORK'])
+    builder = Builder(address=transaction_source_address, horizon=settings['LOCAL_HORIZON'], network=settings['LOCAL_PASSPHRASE'])
 
     try:
         builder.append_create_account_op(

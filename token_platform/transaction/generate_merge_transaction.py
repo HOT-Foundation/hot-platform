@@ -48,7 +48,7 @@ async def build_generate_merge_transaction(transaction_source_address: str, wall
     wallet_data = wallet_detail['data']
     creator_address = wallet_data['creator_address'] if wallet_data and 'creator_address' in wallet_data.keys() else await get_creator_address(wallet_address)
 
-    builder = Builder(address=transaction_source_address, network=settings['STELLAR_NETWORK'])
+    builder = Builder(address=transaction_source_address, horizon=settings['LOCAL_HORIZON'], network=settings['LOCAL_PASSPHRASE'])
 
     if not parties_wallet:
         parties_wallet = await generate_parties_wallet(wallet_detail)

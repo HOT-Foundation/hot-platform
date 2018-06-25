@@ -157,8 +157,7 @@ async def build_generate_escrow_wallet_transaction(
         * expiration_date: a date when escrow address is terminated.
     '''
 
-    builder = Builder(address=transaction_source_address,
-                      network=settings['STELLAR_NETWORK'])
+    builder = Builder(address=transaction_source_address, horizon=settings['LOCAL_HORIZON'], network=settings['LOCAL_PASSPHRASE'])
     builder.append_create_account_op(
         source=creator_address, destination=escrow_address, starting_balance=starting_native_asset)
 

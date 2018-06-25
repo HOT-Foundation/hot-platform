@@ -15,6 +15,9 @@ services:
       - ISSUER=GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ
       - STELLAR_NETWORK=TESTNET
       - PYTHONPATH=/usr/src/token_platform
+      - LOCAL_HORIZON=http://horizon-integrationnet:8000
+      - LOCAL_PASSPHRASE=Integration Test Network ; zulucrypto
+      - PASSPHRASE=Integration Test Network ; zulucrypto
     networks:
       - hotnow-network
 networks:
