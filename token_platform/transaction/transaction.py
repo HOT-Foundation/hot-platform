@@ -138,20 +138,8 @@ async def get_threshold_weight(wallet_address:str, operation_type:str) -> int:
 async def get_transaction_by_memo(source_account: str, memo: str, cursor: int = None) -> Dict:
     horizon = Horizon(horizon=settings['HORIZON_URL'])
 
-
-
-    print(f'finding transaction by hash in {source_account}')
-
-
-
     # Get transactions data within key 'records'
     transactions = horizon.account_transactions(source_account, params={'limit' : 200, 'order' : 'desc', 'cursor' : cursor}).get('_embedded').get('records')
-
-
-
-    print(transactions)
-
-
 
     # Filter result data on above by 'memo_type' == text
     transactions_filter = list([transaction for transaction in transactions if transaction['memo_type'] == 'text' ])

@@ -90,7 +90,7 @@ async def build_unsigned_transfer(transaction_source_address: str, source_addres
         builder.append_payment_op(destination_address, amount_xlm, source=source_address)
     if amount_htkn and wallet['asset'].get(settings['ASSET_CODE'], False):
         builder.append_payment_op(
-            destination_address, amount_htkn, asset_type=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], source=source_address
+            destination_address, amount_htkn, asset_code=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], source=source_address
         )
 
     if amount_htkn and not wallet['asset'].get(settings['ASSET_CODE'], False):
@@ -101,15 +101,4 @@ async def build_unsigned_transfer(transaction_source_address: str, source_addres
 
     unsigned_xdr = builder.gen_xdr()
     tx_hash = builder.te.hash_meta()
-
-
-
-    print('************************************************************************************')
-    print('Builder Network: ', builder.network)
-    print('Settings: ', settings['PASSPHRASE'])
-    print('************************************************************************************')
-
-
-
-
     return unsigned_xdr.decode('utf8'), binascii.hexlify(tx_hash).decode()
