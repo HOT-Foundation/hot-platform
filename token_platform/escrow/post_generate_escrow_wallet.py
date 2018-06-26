@@ -186,7 +186,7 @@ async def build_generate_escrow_wallet_transaction(
 
     builder.append_payment_op(source=provider_address,
                                 destination=escrow_address,
-                                asset_type=settings['ASSET_CODE'],
+                                asset_code=settings['ASSET_CODE'],
                                 asset_issuer=settings['ISSUER'],
                                 amount=starting_custom_asset)
 

@@ -51,7 +51,7 @@ async def build_joint_wallet(transaction_source_address: str, deal_address: str,
             source=deal_address, signer_address=party, signer_type='ed25519PublicKey', signer_weight=1
         )
         builder.append_payment_op(
-            source=party, destination=deal_address, asset_type=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], amount=amount
+            source=party, destination=deal_address, asset_code=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], amount=amount
         )
 
     builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])

@@ -116,7 +116,7 @@ async def build_payment_operation(builder: Builder, source: str, parties_wallet:
         destination = wallet['address']
         amount = Decimal(wallet['amount'])
         if amount > 0:
-            builder.append_payment_op(destination=destination, amount=amount, asset_type=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], source=source)
+            builder.append_payment_op(destination=destination, amount=amount, asset_code=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], source=source)
 
 
 async def build_remove_trustlines_operation(builder: Builder, source: str):
