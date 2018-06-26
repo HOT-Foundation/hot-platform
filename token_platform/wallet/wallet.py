@@ -11,7 +11,7 @@ from decimal import Decimal
 
 async def get_wallet(wallet_address: str) -> StellarAddress:
     """Get wallet from stellar address"""
-    wallet = StellarAddress(address=wallet_address, network=settings['STELLAR_NETWORK'])
+    wallet = StellarAddress(address=wallet_address, horizon=settings['HORIZON_URL'])
 
     try:
         wallet.get()
@@ -23,8 +23,7 @@ async def get_wallet(wallet_address: str) -> StellarAddress:
 
 def wallet_address_is_duplicate(destination_address: str) -> bool:
     """Check address ID is not duplicate"""
-    wallet = StellarAddress(address=destination_address,
-                            network=settings['STELLAR_NETWORK'])
+    wallet = StellarAddress(address=destination_address, horizon=settings['HORIZON_URL'])
 
     try:
         wallet.get()
@@ -43,8 +42,7 @@ def build_generate_trust_wallet_transaction(transaction_source_address: str, sou
             destination_address: wallet id of new wallet
             amount: starting balance of new wallet
     """
-    builder = Builder(address=transaction_source_address,
-                      network=settings['STELLAR_NETWORK'])
+    builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'])
     builder.append_create_account_op(
         source=source_address, destination=destination_address, starting_balance=amount)
     try:
@@ -74,8 +72,7 @@ def build_generate_wallet_transaction(transaction_source_address: str, source_ad
             destination_address: wallet id of new wallet
             amount: starting balance of new wallet
     """
-    builder = Builder(address=transaction_source_address,
-                      network=settings['STELLAR_NETWORK'])
+    builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'])
 
     try:
         builder.append_create_account_op(
