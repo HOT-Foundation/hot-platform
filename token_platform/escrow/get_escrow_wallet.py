@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Union
 
 import requests
 from stellar_base.builder import Builder
-from stellar_base.utils import AccountNotExistError
+from stellar_base.exceptions import AccountNotExistError
 
 from aiohttp import web
 from conf import settings
