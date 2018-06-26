@@ -95,10 +95,20 @@ async def build_unsigned_transfer(transaction_source_address: str, source_addres
     if amount_htkn and not wallet['asset'].get(settings['ASSET_CODE'], False):
         raise web.HTTPBadRequest(reason="{} is not trusted {}".format(destination_address, settings['ASSET_CODE']))
 
-
     if memo_text:
         builder.add_text_memo(memo_text)
 
     unsigned_xdr = builder.gen_xdr()
     tx_hash = builder.te.hash_meta()
+
+
+
+    print('************************************************************************************')
+    print('Builder Network: ', builder.network)
+    print('Settings: ', settings['PASSPHRASE'])
+    print('************************************************************************************')
+
+
+
+
     return unsigned_xdr.decode('utf8'), binascii.hexlify(tx_hash).decode()

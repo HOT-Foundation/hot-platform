@@ -2,7 +2,8 @@ import traceback
 from json import JSONDecodeError
 
 from aiohttp import web
-from stellar_base.utils import AccountNotExistError, DecodeError
+from stellar_base.utils import DecodeError
+from stellar_base.exceptions import AccountNotExistError
 
 
 @web.middleware

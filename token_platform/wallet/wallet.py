@@ -63,6 +63,7 @@ def build_generate_trust_wallet_transaction(transaction_source_address: str, sou
 
     return unsigned_xdr, tx_hash
 
+
 def build_generate_wallet_transaction(transaction_source_address: str, source_address: str, destination_address: str, amount: Decimal) -> Tuple[bytes, bytes]:
     """"Build transaction return unsigned XDR and transaction hash.
 
