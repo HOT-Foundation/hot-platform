@@ -5,7 +5,7 @@ import pytest
 from aiohttp import web
 from aiohttp.test_utils import make_mocked_request
 from asynctest import patch
-from stellar_base.utils import AccountNotExistError
+from stellar_base.exceptions import AccountNotExistError
 
 from conf import settings
 from escrow.get_escrow_wallet import (get_escrow_wallet_detail,

@@ -4,7 +4,8 @@ import pytest
 from aiohttp.test_utils import unittest_run_loop
 from asynctest import patch
 from stellar_base.keypair import Keypair
-from stellar_base.utils import AccountNotExistError, StellarMnemonic
+from stellar_base.utils import StellarMnemonic
+from stellar_base.exceptions import AccountNotExistError
 from tests.test_utils import BaseTestClass
 from aiohttp import web
 
