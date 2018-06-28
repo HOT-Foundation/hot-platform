@@ -206,8 +206,6 @@ class TestGetThreshold(BaseTestClass):
         builder.sign()
         resp = builder.submit()
 
-        # time.sleep(3)
-
         result = await get_transaction_by_memo(address, memo)
         assert 'error' in result.keys()
         assert 'url' in result.keys()
