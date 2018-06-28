@@ -18,7 +18,7 @@ async def handle_error(request, handler):
     except TypeError as ex:
         message = "Invalid type of {}, please check your parameter.".format(str(ex))
         return web.json_response(format_error(ex), status=400)
-    except (ValueError, AccountNotExistError, HTTPBadRequest, DecodeError) as ex:
+    except (ValueError, AccountNotExistError, web.HTTPBadRequest, DecodeError) as ex:
         return web.json_response(format_error(ex), status=400)
     except web.HTTPNotFound as ex:
         return web.json_response(format_error(ex), status=404)

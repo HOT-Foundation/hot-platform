@@ -3,7 +3,6 @@ aiohttp==3.2.0
 stellar-base==0.1.8.1
 python-dateutil==2.7.2
 idna==2.6
-pytz==2018.4
 # Development Only
 pytest==3.5.0
 pytest-aiohttp==0.3.0

@@ -5,8 +5,6 @@ from datetime import datetime
 
 from aiohttp import web
 
-import pytz
-from log_conf import timezone
 
 @web.middleware
 async def handle_log(request, handler):
@@ -25,7 +23,6 @@ async def handle_log(request, handler):
 
 
 def write_access_log(request, response, time):
-    start_time_format = pytz.utc.localize(time).astimezone(timezone)
     now = datetime.utcnow()
     diff_time = now - time
     diff_time_seconds = diff_time.total_seconds()

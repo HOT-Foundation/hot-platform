@@ -1,8 +1,5 @@
 import os
 import logging
-import pytz
-
-timezone = pytz.timezone(os.getenv('TIMEZONE', 'Asia/Bangkok'))
 
 log_setting = {
     'version': 1,
