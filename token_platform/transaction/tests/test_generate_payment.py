@@ -214,10 +214,10 @@ class TestGetUnsignedTransaction(BaseTestClass):
             result = await build_unsigned_transfer('GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 10, 1, 'memo')
 
     @unittest_run_loop
-    @patch('transaction.generate_payment.StellarAddress')
-    async def test_build_unsigned_transfer_with_target_not_created(self, mock_stellar):
+    # @patch('transaction.generate_payment.StellarAddress')
+    async def test_build_unsigned_transfer_with_target_not_created(self):
 
-        mock_stellar.side_effect = web.HTTPNotFound()
+        # mock_stellar.side_effect = web.HTTPNotFound()
 
         with pytest.raises(web.HTTPNotFound):
             result = await build_unsigned_transfer('GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 0, 10, 1, 'memo')
