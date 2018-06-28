@@ -32,7 +32,8 @@ log_setting = {
     },
     'formatters': {
        'default': {
-            'format': '%(asctime)s - %(levelname)s - %(message)s'
-       }
+            'format': '%(asctime)s %(message)s',
+            'datefmt': '[%d/%m/%Y %H:%M:%S %z]'
+        }
     }
 }
