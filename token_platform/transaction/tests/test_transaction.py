@@ -1,7 +1,6 @@
 from tests.test_utils import BaseTestClass
 
 import pytest
-import time
 from aiohttp.test_utils import unittest_run_loop
 from aiohttp.web_exceptions import HTTPBadRequest, HTTPInternalServerError
 from asynctest import patch
@@ -115,8 +114,8 @@ class TestGetTransactionHash(BaseTestClass):
 class TestGetcurrentSequenceNumber(BaseTestClass):
 
     class Account():
-            def get(self, str):
-                return '1234566789'
+        def get(self, str):
+            return '1234566789'
 
     @unittest_run_loop
     @patch('transaction.transaction.Horizon')
@@ -128,6 +127,7 @@ class TestGetcurrentSequenceNumber(BaseTestClass):
         result = await get_current_sequence_number(wallet_address)
         assert isinstance(result, str)
         assert result == '1234566789'
+
 
 class TestGetSigner(BaseTestClass):
     @unittest_run_loop
@@ -150,6 +150,7 @@ class TestGetSigner(BaseTestClass):
             }]
         assert result == expect_result
 
+
 class TestGetThreshold(BaseTestClass):
     @unittest_run_loop
     @patch('transaction.transaction.get_wallet')
@@ -164,7 +165,6 @@ class TestGetThreshold(BaseTestClass):
         result = await get_threshold_weight('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'allow_trust')
         assert result == 1
 
-
     @unittest_run_loop
     @patch('transaction.transaction.get_wallet')
     async def test_get_threshold_weight_med_threshold(self, mock_address):
@@ -177,7 +177,6 @@ class TestGetThreshold(BaseTestClass):
 
         result = await get_threshold_weight('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'payment')
         assert result == 2
-
 
     @unittest_run_loop
     @patch('transaction.transaction.get_wallet')
@@ -244,4 +243,3 @@ class TestGetReasonTransaction(BaseTestClass):
         }
         resp = get_reason_transaction(respons_data)
         self.assertEqual(resp, None)
-

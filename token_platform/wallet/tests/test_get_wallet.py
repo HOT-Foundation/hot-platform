@@ -1,5 +1,4 @@
 import asyncio
-import json
 
 import pytest
 from aiohttp import web
@@ -23,7 +22,6 @@ async def test_get_wallet_from_request(mock_get_wallet):
                               match_info={'wallet_address': wallet_address})
     await get_wallet_from_request(req)
     assert mock_get_wallet.call_count == 1
-
 
 
 @asyncio.coroutine

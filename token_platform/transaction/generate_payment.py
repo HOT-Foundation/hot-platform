@@ -2,10 +2,8 @@ import binascii
 from decimal import Decimal
 from typing import Any, Dict, List, Mapping, NewType, Optional, Tuple, Union
 
-from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
 from stellar_base.utils import DecodeError, decode_check
-from stellar_base.exceptions import AccountNotExistError
 
 from aiohttp import web
 from conf import settings

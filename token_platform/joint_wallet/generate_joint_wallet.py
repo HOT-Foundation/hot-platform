@@ -38,7 +38,6 @@ async def generate_joint_wallet(transaction_source_address: str, deal_address: s
         'xdr': xdr,
         'transaction_hash': tx_hash
     }
-
     return result
 
 

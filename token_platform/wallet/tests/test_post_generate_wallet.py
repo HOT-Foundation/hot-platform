@@ -14,6 +14,7 @@ from wallet.wallet import (build_generate_wallet_transaction,
                            wallet_address_is_duplicate)
 from router import reverse
 
+
 class TestCreateWallet(BaseTestClass):
     """Test cases for building unsigned transaction for creating wallet."""
     async def setUpAsync(self):
@@ -63,7 +64,6 @@ class TestCreateWallet(BaseTestClass):
             'transaction_hash': expect_tx_hash,
             '@id': url
         }
-
         assert text == expect
 
     @unittest_run_loop
@@ -96,7 +96,6 @@ class TestCreateWallet(BaseTestClass):
         text = await resp.json()
         assert 'Balance must have more than 0.' in text['error']
 
-
         resp = await self.client.request("POST", url, json={
                                          'target_address' : 'test',
                                          'transaction_source_address': 'test',
@@ -119,7 +118,6 @@ class TestCreateWallet(BaseTestClass):
         assert result.status == 400
         text = await result.json()
         assert 'Target address is already used.' in text['error']
-
 
     @patch('wallet.wallet.StellarAddress.get', **{'side_effect': ValueError})
     def test_wallet_address_is_duplicate_with_value_error(self, mock):

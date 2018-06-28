@@ -16,7 +16,6 @@ from router import reverse
 
 
 class MockBuilder():
-
     def __init__(self):
         self.te = 'hash'
 
@@ -64,7 +63,6 @@ class TestCreateTrustWallet(BaseTestClass):
             'transaction_hash': expect_tx_hash,
             '@id': f'{self.host}{url}'
         }
-
         assert text == expect
 
     @unittest_run_loop
@@ -119,7 +117,6 @@ class TestCreateTrustWallet(BaseTestClass):
         assert result.status == 400
         text = await result.json()
         assert 'Target address is already used.' in text['error']
-
 
     @patch('wallet.wallet.StellarAddress.get', **{'side_effect': ValueError})
     def test_wallet_address_is_duplicate_with_value_error(self, mock):

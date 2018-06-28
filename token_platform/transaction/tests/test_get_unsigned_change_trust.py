@@ -1,13 +1,9 @@
-import asyncio
-import json
-
 from tests.test_utils import BaseTestClass
 
 import pytest
 from aiohttp import web
 from aiohttp.test_utils import unittest_run_loop
 from asynctest import patch
-from conf import settings
 from transaction.get_unsigned_change_trust import (get_signers,
                                                    get_threshold_weight,
                                                    get_unsigned_change_trust,
@@ -31,7 +27,6 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
         resp = await self.client.request('GET', url)
         assert resp.status == 200
         mock_get_unsigned_change_trust.assert_called_once_with(wallet_address, transaction_source_address)
-
 
     @unittest_run_loop
     @patch('transaction.get_unsigned_change_trust.get_signers')

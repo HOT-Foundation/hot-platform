@@ -1,18 +1,13 @@
-import asyncio
-import json
-
 import pytest
 from aiohttp import web
-from aiohttp.test_utils import make_mocked_request, unittest_run_loop
+from aiohttp.test_utils import unittest_run_loop
 from asynctest import patch
-from stellar_base.exceptions import AccountNotExistError
 from tests.test_utils import BaseTestClass
 
 from conf import settings
 from transaction.generate_payment import (get_signers,
                                                get_threshold_weight,
                                                generate_payment,
-                                               generate_payment_from_request,
                                                build_unsigned_transfer)
 from transaction.transaction import get_transaction_by_memo
 from wallet.tests.factory.wallet import StellarWallet

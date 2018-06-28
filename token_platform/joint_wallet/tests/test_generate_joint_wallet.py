@@ -72,7 +72,6 @@ class TestGenerateJointWallet(BaseTestClass):
             "xdr": "create_joint_wallet_xdr",
             "transaction_hash": "create_joint_wallet_tx_hash"
         }
-
         assert result == expect
 
     @unittest_run_loop
@@ -116,7 +115,6 @@ class TestGenerateJointWallet(BaseTestClass):
             "xdr": "create_joint_wallet_xdr",
             "transaction_hash": "create_joint_wallet_tx_hash"
         }
-
         assert result == expect
 
     @unittest_run_loop

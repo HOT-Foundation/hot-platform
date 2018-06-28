@@ -1,19 +1,12 @@
-
-from datetime import datetime, timezone, timedelta
-
-import pytest
-from aiohttp import web
 from aiohttp.test_utils import unittest_run_loop
 from asynctest import patch
 from tests.test_utils import BaseTestClass
 
-from conf import settings
 from router import reverse
 from wallet.get_wallet_history import get_wallet_history, format_history
 
 
 class TestGetWalletHistoryFromRequest(BaseTestClass):
-
     async def setUpAsync(self):
         self.wallet_address = 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE'
 
@@ -83,7 +76,6 @@ class TestGetWalletHistoryFromRequest(BaseTestClass):
 
 
 class TestGetWalletHistory(BaseTestClass):
-
     async def setUpAsync(self):
         self.wallet_address = 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE'
         self.limit = '1'
@@ -109,7 +101,6 @@ class TestGetWalletHistory(BaseTestClass):
 
 
 class TestFormatHistory(BaseTestClass):
-
     async def setUpAsync(self):
         self.wallet_address = 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE'
         self.history = {
