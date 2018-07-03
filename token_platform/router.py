@@ -73,6 +73,7 @@ ROUTER =  {
     }
 }
 
+
 def generate_routes() -> list:
     routes = []
     for key, value in ROUTER.items():

@@ -23,6 +23,12 @@ log_setting = {
             'class': 'logging.FileHandler',
             'level': 'INFO',
             'filename': '/opt/error.log'
+        },
+        'audit-file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '/opt/audit_log.log',
+            'maxBytes': 10485760, # 10MB
+            'formatter': 'audit'
         }
     },
     'loggers': {
@@ -37,12 +43,19 @@ log_setting = {
         'aiohttp.server': {
             'level': 'ERROR',
             'handlers': ['console-error', 'file-error'],
+        },
+        'audit': {
+            'level': 'INFO',
+            'handlers': ['audit-file']
         }
     },
     'formatters': {
         'default': {
             'format': '%(asctime)s %(message)s',
             'datefmt': '[%d/%m/%Y %H:%M:%S %z]'
+        },
+        'audit': {
+            'format': '%(asctime)s %(levelname)s %(message)s'
         }
     }
 }
