@@ -119,7 +119,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', url, data=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Request payload must be json format.'
+        assert body['message'] == 'Request payload must be json format.'
 
     @unittest_run_loop
     async def test_post_generate_escrow_wallet_from_request_missing_parameter(self):
@@ -137,7 +137,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter \'provider_address\' not found. Please ensure parameters is valid.'
+        assert body['message'] == 'Parameter \'provider_address\' not found. Please ensure parameters is valid.'
 
         data = {
             'provider_address': self.provider_address,
@@ -150,7 +150,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter \'destination_address\' not found. Please ensure parameters is valid.'
+        assert body['message'] == 'Parameter \'destination_address\' not found. Please ensure parameters is valid.'
 
         data = {
             'provider_address': self.provider_address,
@@ -163,7 +163,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter \'creator_address\' not found. Please ensure parameters is valid.'
+        assert body['message'] == 'Parameter \'creator_address\' not found. Please ensure parameters is valid.'
 
         data = {
             'provider_address': self.provider_address,
@@ -176,7 +176,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter \'starting_balance\' not found. Please ensure parameters is valid.'
+        assert body['message'] == 'Parameter \'starting_balance\' not found. Please ensure parameters is valid.'
 
         data = {
             'provider_address': self.provider_address,
@@ -189,7 +189,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter \'cost_per_transaction\' not found. Please ensure parameters is valid.'
+        assert body['message'] == 'Parameter \'cost_per_transaction\' not found. Please ensure parameters is valid.'
 
         data = {
             'provider_address': self.provider_address,
@@ -202,7 +202,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter \'transaction_source_address\' not found. Please ensure parameters is valid.'
+        assert body['message'] == 'Parameter \'transaction_source_address\' not found. Please ensure parameters is valid.'
 
     @unittest_run_loop
     async def test_post_generate_escrow_wallet_from_request_wrong_cost_per_transaction(self):
@@ -221,7 +221,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == "Can not convert to destination_address or cost_per_transaction to Decimal"
+        assert body['message'] == "Can not convert to destination_address or cost_per_transaction to Decimal"
 
         data = {
             'provider_address': self.provider_address,
@@ -236,7 +236,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter cost_per_transaction is not valid.'
+        assert body['message'] == 'Parameter cost_per_transaction is not valid.'
 
         data = {
             'provider_address': self.provider_address,
@@ -251,7 +251,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter cost_per_transaction is not valid.'
+        assert body['message'] == 'Parameter cost_per_transaction is not valid.'
 
 
     @unittest_run_loop
@@ -272,7 +272,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == "invalid literal for int() with base 10: b'make'"
+        assert body['message'] == "invalid literal for int() with base 10: b'make'"
 
         data = {
             'provider_address': self.provider_address,
@@ -287,7 +287,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter expiration date is not valid.'
+        assert body['message'] == 'Parameter expiration date is not valid.'
 
 
     @unittest_run_loop
@@ -307,7 +307,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == "Can not convert to destination_address or cost_per_transaction to Decimal"
+        assert body['message'] == "Can not convert to destination_address or cost_per_transaction to Decimal"
 
         data = {
             'provider_address': self.provider_address,
@@ -322,7 +322,7 @@ class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 400
         body = await resp.json()
-        assert body['error'] == 'Parameter starting_balance is not match with cost_per_transaction.'
+        assert body['message'] == 'Parameter starting_balance is not match with cost_per_transaction.'
 
 
 class TestGetCreateWallet(BaseTestClass):

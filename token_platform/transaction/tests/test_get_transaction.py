@@ -36,5 +36,5 @@ class TestGetTransactionHashFromRequest(BaseTestClass):
         response = await self.client.get(self.transaction_url)
         assert response.status == 400
         resp = await response.json()
-        assert 'error' in resp.keys()
+        assert 'message' in resp.keys()
 

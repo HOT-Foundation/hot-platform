@@ -72,5 +72,5 @@ class TestPostCloseJointWalletFromRequest(BaseTestClass):
 
         assert resp.status == 400
         text = await resp.json()
-        assert text['error'] == 'Parameter \'transaction_source_address\' not found. Please ensure parameters is valid.'
+        assert text['message'] == 'Parameter \'transaction_source_address\' not found. Please ensure parameters is valid.'
 
