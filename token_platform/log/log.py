@@ -2,6 +2,7 @@ import json
 import logging
 import traceback
 from datetime import datetime
+
 from aiohttp import web
 
 
@@ -14,7 +15,8 @@ async def handle_log(request, handler):
     if response.status != 200 and response.text:
         body = json.loads(response.text)
         error_message = body.get('message') or body.get('error')
-        traceback = '\n'.join(body.get('traceback')) if body.get('traceback') else None
+        traceback = '\n'.join(body.get('traceback')) if body.get(
+            'traceback') else None
         if error_message and traceback:
             write_error_log(error_message, traceback)
     return response
@@ -27,7 +29,6 @@ def write_access_log(request, response, time):
 
     user_agent = request.headers.get('User-Agent', '-')
     referer = request.headers.get('Referer', '-')
-    logger = logging.getLogger('aiohttp.access.custom')
     logger = logging.getLogger('aiohttp.access.custom')
     logger.info(f'{request.remote} "{request.method} {request.path_qs} HTTP/{request.version.major}.{request.version.minor}" "{referer}" "{user_agent}" "{response.status}" {diff_time_seconds} seconds')
 

@@ -1,6 +1,5 @@
 import logging
 
-
 log_setting = {
     'version': 1,
     'handlers': {
