@@ -9,6 +9,5 @@ settings['ISSUER'] = os.environ['ISSUER']
 settings['HORIZON_URL'] = os.environ['HORIZON_URL']
 
 settings['LOG_OPS'] = {
-	'SUBMIT': "[SUBMIT]",
-	'RESULT': "[RESULT]"
+	'SUBMIT': "[SUBMIT]"
 }
