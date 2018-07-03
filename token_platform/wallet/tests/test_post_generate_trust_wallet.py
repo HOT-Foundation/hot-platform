@@ -72,7 +72,7 @@ class TestCreateTrustWallet(BaseTestClass):
         resp = await self.client.request("POST", url)
         assert resp.status == 400
         text = await resp.json()
-        assert 'Bad request, JSON data missing.' in text['error']
+        assert 'Bad request, JSON data missing.' in text['message']
 
     @unittest_run_loop
     async def test_post_generate_trust_wallet_from_request_missing_param(self):
@@ -80,7 +80,7 @@ class TestCreateTrustWallet(BaseTestClass):
         resp = await self.client.request("POST", url, json={'target_address':'test', 'starting_balance':'10'})
         assert resp.status == 400
         text = await resp.json()
-        assert text['error'] == 'Parameter \'transaction_source_address\' not found. Please ensure parameters is valid.'
+        assert text['message'] == 'Parameter \'transaction_source_address\' not found. Please ensure parameters is valid.'
 
     @unittest_run_loop
     async def test_post_generate_trust_wallet_from_request_use_wrong_parameter(self):
@@ -88,13 +88,13 @@ class TestCreateTrustWallet(BaseTestClass):
         resp = await self.client.request("POST", url, json={'target':'test', 'transaction_source_address': 'test'})
         assert resp.status == 400
         text = await resp.json()
-        assert "Parameter 'target_address' not found. Please ensure parameters is valid." in text['error']
+        assert "Parameter 'target_address' not found. Please ensure parameters is valid." in text['message']
 
         resp = await self.client.request("POST", url, json={
                                          'target_address' : 'test', 'transaction_source_address': 'test'})
         assert resp.status == 400
         text = await resp.json()
-        assert 'Balance must have more than 0.' in text['error']
+        assert 'Balance must have more than 0.' in text['message']
 
         resp = await self.client.request("POST", url, json={
                                          'target_address' : 'test',
@@ -102,7 +102,7 @@ class TestCreateTrustWallet(BaseTestClass):
                                          'starting_balance' : 'not_Decimal'})
         assert resp.status == 400
         text = await resp.json()
-        assert "not_Decimal is not decimal" in text['error']
+        assert "not_Decimal is not decimal" in text['message']
 
     @unittest_run_loop
     @patch('wallet.post_generate_trust_wallet.wallet_address_is_duplicate', **{'return_value' : True})
@@ -117,7 +117,7 @@ class TestCreateTrustWallet(BaseTestClass):
         result = await self.client.request("POST", url, json=json_request)
         assert result.status == 400
         text = await result.json()
-        assert 'Target address is already used.' in text['error']
+        assert 'Target address is already used.' in text['message']
 
 
     @patch('wallet.wallet.StellarAddress.get', **{'side_effect': ValueError})

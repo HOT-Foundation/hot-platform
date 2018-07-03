@@ -80,7 +80,7 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
         resp = await self.client.request("POST", reverse('generate-presigned-transactions', escrow_address=escrow_address), json={'transaction_source_address': transaction_source_address})
 
         error_message = await resp.json()
-        error_message = error_message['error']
+        error_message = error_message['message']
         assert error_message == "Parameter 'destination_address' not found. Please ensure parameters is valid."
 
 

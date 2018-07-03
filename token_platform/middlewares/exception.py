@@ -11,13 +11,13 @@ async def handle_error(request, handler):
         response = await handler(request)
     except JSONDecodeError:
         message = 'Request payload must be json format.'
-        return web.json_response(format_error(ex), status=400)
-    except KeyError as e:
-        message = "Parameter {} not found. Please ensure parameters is valid.".format(str(e))
-        return web.json_response(format_error(ex), status=400)
+        return web.json_response(format_error(message), status=400)
+    except KeyError as ex:
+        message = "Parameter {} not found. Please ensure parameters is valid.".format(str(ex))
+        return web.json_response(format_error(message), status=400)
     except TypeError as ex:
         message = "Invalid type of {}, please check your parameter.".format(str(ex))
-        return web.json_response(format_error(ex), status=400)
+        return web.json_response(format_error(message), status=400)
     except (ValueError, AccountNotExistError, web.HTTPBadRequest, DecodeError) as ex:
         return web.json_response(format_error(ex), status=400)
     except web.HTTPNotFound as ex:
