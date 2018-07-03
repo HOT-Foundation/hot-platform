@@ -1,4 +1,3 @@
-import os
 import logging
 
 log_setting = {
@@ -14,12 +13,22 @@ log_setting = {
             'class': 'logging.StreamHandler',
             'level': 'ERROR',
             'stream': 'ext://sys.stderr'
+        },
+        'file-info': {
+            'class': 'logging.FileHandler',
+            'level': 'INFO',
+            'filename': '/opt/access.log'
+        },
+        'file-error': {
+            'class': 'logging.FileHandler',
+            'level': 'INFO',
+            'filename': '/opt/error.log'
         }
     },
     'loggers': {
         'aiohttp.access.custom': {
             'level': 'INFO',
-            'handlers': ['console-info']
+            'handlers': ['console-info', 'file-info']
         },
         'aiohttp.client': {
             'level': 'INFO',
@@ -27,11 +36,11 @@ log_setting = {
         },
         'aiohttp.server': {
             'level': 'ERROR',
-            'handlers': ['console-error'],
+            'handlers': ['console-error', 'file-error'],
         }
     },
     'formatters': {
-       'default': {
+        'default': {
             'format': '%(asctime)s %(message)s',
             'datefmt': '[%d/%m/%Y %H:%M:%S %z]'
         }
