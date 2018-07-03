@@ -2,8 +2,7 @@ from transaction.transaction import is_duplicate_transaction, submit_transaction
 from aiohttp import web
 from log import log_conf
 from conf import settings
-
-import logging
+from log.log import write_audit_log
 
 
 async def put_transaction_from_request(request: web.Request) -> web.Response:
@@ -20,9 +19,8 @@ async def put_transaction_from_request(request: web.Request) -> web.Response:
     response = await submit_transaction(signed_xdr)
 
     # audit log
-    logger = logging.getLogger('audit')
     operation = settings['LOG_OPS']['SUBMIT']
-    log_message = f'{operation} {request.remote} {request.method} {request.path_qs} {signed_xdr}'
-    logger.info(log_message)
+    message = f'xdr={signed_xdr}'
+    write_audit_log(request, response, operation, message)
 
     return web.json_response(response, status=202)

@@ -4,9 +4,6 @@ import traceback
 from datetime import datetime
 from aiohttp import web
 
-from conf import settings
-from log import log_conf
-
 
 @web.middleware
 async def handle_log(request, handler):
@@ -46,3 +43,12 @@ def format_error(e):
         'message': str(e),
         'traceback': traceback.format_exc(chain=False).split('\n')
     }
+
+
+def write_audit_log(request, response, operation, message):
+    user_agent = request.headers.get('User-Agent', '-')
+    referer = request.headers.get('Referer', '-')
+
+    logger = logging.getLogger('audit')
+    log_message = f'{operation} {request.remote} {request.method} {request.path_qs} {referer} {user_agent} : {message}'
+    logger.info(log_message)

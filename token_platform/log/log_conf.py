@@ -28,7 +28,7 @@ log_setting = {
         'audit-file': {
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': '/opt/audit_log.log',
-            'maxBytes': 1024,
+            'maxBytes': 10485760, # 10MB
             'formatter': 'audit'
         }
     },
