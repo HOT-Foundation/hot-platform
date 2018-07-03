@@ -28,11 +28,8 @@ class TestSubmitTransactionFromRequest(BaseTestClass):
         resp = await self.client.request("PUT", url)
         assert resp.status == 400
         text = await resp.json()
-        expect = {
-            'error': 'transaction fail, please check your parameter.'
-        }
-
-        assert text == expect
+        assert 'message' in text
+        assert 'traceback' in text
 
     @unittest_run_loop
     @patch('transaction.put_transaction.is_duplicate_transaction')
@@ -44,8 +41,5 @@ class TestSubmitTransactionFromRequest(BaseTestClass):
         resp = await self.client.request("PUT", url, data=b'test data')
         assert resp.status == 400
         text = await resp.json()
-        expect = {
-            'error': 'Duplicate transaction.'
-        }
-
-        assert text == expect
+        assert 'message' in text
+        assert 'traceback' in text
