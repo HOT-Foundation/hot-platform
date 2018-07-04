@@ -6,7 +6,8 @@ from aiohttp import ClientSession, web
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 from controller import handle
-from middlewares import exception, log, log_conf
+from middlewares import exception
+from log import log, log_conf
 from router import generate_routes
 
 
