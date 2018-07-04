@@ -193,25 +193,13 @@ class TestGetThreshold(BaseTestClass):
 
     @unittest_run_loop
     async def test_get_transaction_by_memo_success(self):
-        ''' submit transaction '''
-        address = 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE'
-        seed = 'SB2ROKLGFM4UZ4GIFL7PL4SWUWZ3LY7ZVUVRWR77IPJVY2CZUEBP6R7I'
-        kp = Keypair.random()
-        destination_address, destination_seed = kp.address().decode("utf-8"), kp.seed().decode("utf-8")
-        memo = 'testmemo'
-        builder = Builder(secret=seed, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
-        builder.append_create_account_op(source=address, destination=destination_address, starting_balance=2)
-        builder.add_text_memo(memo)
-        builder.sign()
-        resp = builder.submit()
-
-        result = await get_transaction_by_memo(address, memo)
+        result = await get_transaction_by_memo('GD3PPDLKXRDM57UV7QDFIHLLRCLM4KGVIA43GEM7ZOT7EHK5TR3Z5G6I', 'testmemo')
         assert 'error' in result.keys()
         assert 'url' in result.keys()
 
     @unittest_run_loop
     async def test_get_transaction_by_memo_not_found(self):
-        result = await get_transaction_by_memo('GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE', 'notfoundmemo')
+        result = await get_transaction_by_memo('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'testmemo')
         assert not result
 
 

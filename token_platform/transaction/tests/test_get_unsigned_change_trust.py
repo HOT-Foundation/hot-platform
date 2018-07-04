@@ -4,6 +4,7 @@ import pytest
 from aiohttp import web
 from aiohttp.test_utils import unittest_run_loop
 from asynctest import patch
+from conf import settings
 from transaction.get_unsigned_change_trust import (get_signers,
                                                    get_threshold_weight,
                                                    get_unsigned_change_trust,
@@ -41,9 +42,22 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
         result = await get_unsigned_change_trust(
             'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE', 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE')
 
-        assert '@id' in result
-        assert 'xdr' in result
-        assert 'transaction_hash' in result
+        expect_data = {
+            "@id": f"{settings['HOST']}{reverse('change-trust', wallet_address='GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE')}",
+            "@transaction_url": f"{settings['HOST']}{reverse('transaction', transaction_hash='720ba24a8cbd8a8da3247b02c64c43c672550cfbe0f43834e55be91b52b9308f')}",
+            "min_signer": 1,
+            "signers": [
+                {
+                "public_key": "GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE",
+                "weight": 1
+                }
+            ],
+            "xdr": "AAAAAM+RRrB+7bNSWWC2QR4m3asIZvUZ8dm6HQB6lUZSpTPrAAAAZACAMRUAAB8QAAAAAAAAAAAAAAABAAAAAQAAAADPkUawfu2zUllgtkEeJt2rCGb1GfHZuh0AepVGUqUz6wAAAAYAAAABSFRLTgAAAADkHacjwpeFWz5txveZ4sJ3pEmTzpdS9fiBscDwpmoppgFjRXhdigAAAAAAAAAAAAA=",
+            "transaction_hash": "720ba24a8cbd8a8da3247b02c64c43c672550cfbe0f43834e55be91b52b9308f"
+        }
+
+        assert result == expect_data
+
 
     @unittest_run_loop
     @patch('transaction.get_unsigned_change_trust.Builder')
