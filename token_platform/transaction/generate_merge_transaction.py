@@ -48,7 +48,7 @@ async def build_generate_merge_transaction(transaction_source_address: str, wall
     wallet_data = wallet_detail['data']
     creator_address = wallet_data['creator_address'] if wallet_data and 'creator_address' in wallet_data.keys() else await get_creator_address(wallet_address)
 
-    builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'])
+    builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
 
     if not parties_wallet:
         parties_wallet = await generate_parties_wallet(wallet_detail)
@@ -77,7 +77,7 @@ async def get_creator_address(wallet_address: str) -> str:
 
     Args:
         wallet_address: address for search creator address  '''
-    horizon = Horizon(settings['HORIZON_URL'])
+    horizon = Horizon(horizon=settings['HORIZON_URL'])
     result = horizon.account_operations(wallet_address, params={'limit' : 1, 'order' : 'asc'}).get('_embedded').get('records')[0]
     return result['source_account']
 
@@ -116,7 +116,7 @@ async def build_payment_operation(builder: Builder, source: str, parties_wallet:
         destination = wallet['address']
         amount = Decimal(wallet['amount'])
         if amount > 0:
-            builder.append_payment_op(destination=destination, amount=amount, asset_type=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], source=source)
+            builder.append_payment_op(destination=destination, amount=amount, asset_code=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], source=source)
 
 
 async def build_remove_trustlines_operation(builder: Builder, source: str):

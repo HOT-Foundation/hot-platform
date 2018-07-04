@@ -222,7 +222,6 @@ class TestBuildPaymentOperation(BaseTestClass):
         self.source_address = 'GCEOD3ALYS3I7PVF5PZ3JJDNQF2AWKX5IOWWPC4RBHQVJFR6LXEFOMZ3'
         self.destination_address = 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE'
 
-
     @unittest_run_loop
     async def test_build_payment_operation_success(self):
         parties_wallet = [
@@ -235,7 +234,6 @@ class TestBuildPaymentOperation(BaseTestClass):
 
         assert len(self.builder.ops) == len(parties_wallet)
         assert operation.type == const.PAYMENT
-
 
     @unittest_run_loop
     async def test_build_payment_operation_fail(self):

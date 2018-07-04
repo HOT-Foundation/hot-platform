@@ -3,7 +3,6 @@ from datetime import datetime, timezone
 from aiohttp import web
 from dateutil import parser
 from stellar_base.address import Address
-from stellar_base.horizon import HORIZON_LIVE, HORIZON_TEST
 
 from conf import settings
 from router import reverse
@@ -38,8 +37,8 @@ async def get_wallet_history_from_request(request: web.Request) -> web.Response:
 
     return web.json_response(formatted_history)
 
-def datetime_is_valid(value: str) -> datetime:
 
+def datetime_is_valid(value: str) -> datetime:
     date_time = None
     try:
         date_time = parser.isoparse(value) # type: ignore
@@ -52,21 +51,20 @@ def datetime_is_valid(value: str) -> datetime:
 
     return date_time
 
+
 async def get_wallet_history(wallet_address: str, sort: str='asc', limit: int=10, offset: str=None) -> dict:
     """
         Get wallet history from Stellar network.
     """
-
-    horizon = settings['HORIZON_URL']
     params = { 'order': sort, 'limit': limit}
     if offset:
         params['cursor'] = offset
-    address = Address(address=wallet_address, horizon=horizon)
+    address = Address(address=wallet_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
     effects = address.effects(**params)
     return effects
 
-async def format_history(history: dict, wallet_address: str, limit: int, sort: str)-> dict:
 
+async def format_history(history: dict, wallet_address: str, limit: int, sort: str)-> dict:
 
     def _format_record(record):
         result = record

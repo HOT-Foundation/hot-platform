@@ -1,18 +1,13 @@
-import asyncio
-import json
-
 import pytest
 from aiohttp import web
-from aiohttp.test_utils import make_mocked_request, unittest_run_loop
+from aiohttp.test_utils import unittest_run_loop
 from asynctest import patch
-from stellar_base.utils import AccountNotExistError
 from tests.test_utils import BaseTestClass
 
 from conf import settings
 from transaction.generate_payment import (get_signers,
                                                get_threshold_weight,
                                                generate_payment,
-                                               generate_payment_from_request,
                                                build_unsigned_transfer)
 from transaction.transaction import get_transaction_by_memo
 from wallet.tests.factory.wallet import StellarWallet
@@ -183,9 +178,10 @@ class TestGetUnsignedTransaction(BaseTestClass):
     async def test_build_unsigned_transfer_with_memo(self, mock_wallet):
         mock_wallet.return_value = {'asset': {settings['ASSET_CODE']: 10}}
         result = await build_unsigned_transfer('GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 0, 1, 'memo')
+
         assert result == (
-            'AAAAAOQdpyPCl4VbPm3G95niwnekSZPOl1L1+IGxwPCmaimmAAAAZAAAAAAAAAACAAAAAAAAAAEAAAAEbWVtbwAAAAEAAAABAAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAAQAAAADZmUaevDbFEdvFYNAKhFBHPxv9Rr4phQFV2Vx/gRzlsQAAAAFIVEtOAAAAAOQdpyPCl4VbPm3G95niwnekSZPOl1L1+IGxwPCmaimmAAAAAAX14QAAAAAAAAAAAA==',
-            '5da3b355f7f54a1db0c9b5e5576de488dcbdbb8b6b80067f93c32d2a20226724'
+            'AAAAAOQdpyPCl4VbPm3G95niwnekSZPOl1L1+IGxwPCmaimmAAAAZAAAAAAAAAACAAAAAAAAAAEAAAAEbWVtbwAAAAEAAAABAAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAAQAAAADZmUaevDbFEdvFYNAKhFBHPxv9Rr4phQFV2Vx/gRzlsQAAAAFIVEtOAAAAAOQdpyPCl4VbPm3G95niwnekSZPOl1L1+IGxwPCmaimmAAAAAAX14QAAAAAAAAAAAA==', 
+            'b8722f7aab5b3dd1ef7718231b7e0a136881d008b90224fd1027823201d3be20'
         )
 
     @unittest_run_loop
@@ -193,9 +189,10 @@ class TestGetUnsignedTransaction(BaseTestClass):
     async def test_build_unsigned_transfer_with_xlm_amount(self, mock_wallet):
         mock_wallet.return_value = {'asset': {}}
         result = await build_unsigned_transfer('GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 0, 10, 1, 'memo')
+
         assert result == (
-            'AAAAAOQdpyPCl4VbPm3G95niwnekSZPOl1L1+IGxwPCmaimmAAAAZAAAAAAAAAACAAAAAAAAAAEAAAAEbWVtbwAAAAEAAAABAAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAAQAAAADZmUaevDbFEdvFYNAKhFBHPxv9Rr4phQFV2Vx/gRzlsQAAAAAAAAAABfXhAAAAAAAAAAAA',
-            '7cb70707e6532899c033068d07f9479a5d6e9fda37e47bafdcc70ddd9fc88dcc'
+            'AAAAAOQdpyPCl4VbPm3G95niwnekSZPOl1L1+IGxwPCmaimmAAAAZAAAAAAAAAACAAAAAAAAAAEAAAAEbWVtbwAAAAEAAAABAAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAAQAAAADZmUaevDbFEdvFYNAKhFBHPxv9Rr4phQFV2Vx/gRzlsQAAAAAAAAAABfXhAAAAAAAAAAAA', 
+            '9ede4ea6342ee85dd338e438c04c7539a0a8b3bc05b4bc6e3e474843e0c351d9'
         )
 
     @unittest_run_loop
@@ -203,10 +200,10 @@ class TestGetUnsignedTransaction(BaseTestClass):
     async def test_build_unsigned_transfer_with_xlm_and_htkn_amount_with_trust(self, mock_wallet):
         mock_wallet.return_value = {'asset': {settings['ASSET_CODE']: 10}}
         result = await build_unsigned_transfer('GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 10, 1, 'memo')
-        print(result)
+        
         assert result == (
-            'AAAAAOQdpyPCl4VbPm3G95niwnekSZPOl1L1+IGxwPCmaimmAAAAyAAAAAAAAAACAAAAAAAAAAEAAAAEbWVtbwAAAAIAAAABAAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAAQAAAADZmUaevDbFEdvFYNAKhFBHPxv9Rr4phQFV2Vx/gRzlsQAAAAAAAAAABfXhAAAAAAEAAAAAzn/d1FIsDTZsMGI9v1zr/yroYANpqKHNCA/hmGuPbIkAAAABAAAAANmZRp68NsUR28Vg0AqEUEc/G/1GvimFAVXZXH+BHOWxAAAAAUhUS04AAAAA5B2nI8KXhVs+bcb3meLCd6RJk86XUvX4gbHA8KZqKaYAAAAABfXhAAAAAAAAAAAA',
-            'b1079fd6b4835bb9a2213433c9ddf9a01ad5f230aa92ab76b58f205fc683a42a'
+            'AAAAAOQdpyPCl4VbPm3G95niwnekSZPOl1L1+IGxwPCmaimmAAAAyAAAAAAAAAACAAAAAAAAAAEAAAAEbWVtbwAAAAIAAAABAAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAAQAAAADZmUaevDbFEdvFYNAKhFBHPxv9Rr4phQFV2Vx/gRzlsQAAAAAAAAAABfXhAAAAAAEAAAAAzn/d1FIsDTZsMGI9v1zr/yroYANpqKHNCA/hmGuPbIkAAAABAAAAANmZRp68NsUR28Vg0AqEUEc/G/1GvimFAVXZXH+BHOWxAAAAAUhUS04AAAAA5B2nI8KXhVs+bcb3meLCd6RJk86XUvX4gbHA8KZqKaYAAAAABfXhAAAAAAAAAAAA', 
+            '79a187dda755f48669b6b5a924d6e7c287aa491ab917d177c63937b18a2b3afd'
         )
 
     @unittest_run_loop
@@ -217,10 +214,6 @@ class TestGetUnsignedTransaction(BaseTestClass):
             result = await build_unsigned_transfer('GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 10, 1, 'memo')
 
     @unittest_run_loop
-    @patch('transaction.generate_payment.StellarAddress')
-    async def test_build_unsigned_transfer_with_target_not_created(self, mock_stellar):
-
-        mock_stellar.side_effect = web.HTTPNotFound()
-
+    async def test_build_unsigned_transfer_with_target_not_created(self):
         with pytest.raises(web.HTTPNotFound):
-            result = await build_unsigned_transfer('GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 0, 10, 1, 'memo')
+            result = await build_unsigned_transfer('GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 0, 10, 1, 'NotFound')

@@ -2,10 +2,6 @@ from base64 import b64decode
 from functools import reduce
 from typing import Any, Dict, List, Union
 
-import requests
-from stellar_base.builder import Builder
-from stellar_base.utils import AccountNotExistError
-
 from aiohttp import web
 from conf import settings
 from router import reverse
@@ -62,5 +58,4 @@ async def get_escrow_wallet_detail(escrow_address: str) -> web.Response:
             signers.append(value)
 
     result['signers'] = signers
-
     return result

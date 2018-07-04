@@ -1,13 +1,10 @@
 import binascii
 from typing import Any, Dict, List, Mapping, NewType, Optional, Tuple, Union
 
-from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
 
 from aiohttp import web
 from conf import settings
-from wallet.wallet import (build_generate_trust_wallet_transaction,
-                           wallet_address_is_duplicate)
 
 from transaction.transaction import get_threshold_weight, get_signers
 from router import reverse
@@ -43,7 +40,7 @@ def build_unsigned_change_trust(source_address: str, transaction_source_address:
         Args:
             source_address: address need to be trust HTKN
     """
-    builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'])
+    builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
     builder.append_trust_op(settings['ISSUER'], settings['ASSET_CODE'], source=source_address, limit=settings['LIMIT_ASSET'])
 
     try:
