@@ -2,7 +2,8 @@ import traceback
 from json import JSONDecodeError
 
 from aiohttp import web
-from stellar_base.utils import AccountNotExistError, DecodeError
+from stellar_base.utils import DecodeError
+from stellar_base.exceptions import AccountNotExistError, HorizonError
 from typing import Dict
 
 @web.middleware
@@ -18,7 +19,7 @@ async def handle_error(request, handler):
     except TypeError as ex:
         message = "Invalid type of {}, please check your parameter.".format(str(ex))
         return web.json_response(format_error(message), status=400)
-    except (ValueError, AccountNotExistError, web.HTTPBadRequest, DecodeError) as ex:
+    except (ValueError, HorizonError, AccountNotExistError, web.HTTPBadRequest, DecodeError) as ex:
         return web.json_response(format_error(ex), status=400)
     except web.HTTPNotFound as ex:
         return web.json_response(format_error(ex), status=404)

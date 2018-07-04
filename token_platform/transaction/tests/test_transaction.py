@@ -4,6 +4,9 @@ import pytest
 from aiohttp.test_utils import unittest_run_loop
 from aiohttp.web_exceptions import HTTPBadRequest, HTTPInternalServerError
 from asynctest import patch
+from conf import settings
+from stellar_base.builder import Builder
+from stellar_base.keypair import Keypair
 from transaction.tests.factory.horizon import HorizonData
 from transaction.transaction import (get_current_sequence_number, get_signers,
                                      get_threshold_weight,
@@ -52,7 +55,7 @@ class TestSubmitTransaction(BaseTestClass):
     @patch('transaction.transaction.Horizon')
     async def test_submit_transaction_fail_with_wrong_response_format(self, mock_horizon) -> None:
         mock_horizon.return_value = self.WrongResponse()
-        with pytest.raises(HTTPInternalServerError):
+        with pytest.raises(HTTPBadRequest):
             signed_xdr = 'Testtest'
             result = await submit_transaction(signed_xdr)
 
@@ -111,8 +114,8 @@ class TestGetTransactionHash(BaseTestClass):
 class TestGetcurrentSequenceNumber(BaseTestClass):
 
     class Account():
-            def get(self, str):
-                return '1234566789'
+        def get(self, str):
+            return '1234566789'
 
     @unittest_run_loop
     @patch('transaction.transaction.Horizon')
@@ -124,6 +127,7 @@ class TestGetcurrentSequenceNumber(BaseTestClass):
         result = await get_current_sequence_number(wallet_address)
         assert isinstance(result, str)
         assert result == '1234566789'
+
 
 class TestGetSigner(BaseTestClass):
     @unittest_run_loop
@@ -146,6 +150,7 @@ class TestGetSigner(BaseTestClass):
             }]
         assert result == expect_result
 
+
 class TestGetThreshold(BaseTestClass):
     @unittest_run_loop
     @patch('transaction.transaction.get_wallet')
@@ -160,7 +165,6 @@ class TestGetThreshold(BaseTestClass):
         result = await get_threshold_weight('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'allow_trust')
         assert result == 1
 
-
     @unittest_run_loop
     @patch('transaction.transaction.get_wallet')
     async def test_get_threshold_weight_med_threshold(self, mock_address):
@@ -173,7 +177,6 @@ class TestGetThreshold(BaseTestClass):
 
         result = await get_threshold_weight('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'payment')
         assert result == 2
-
 
     @unittest_run_loop
     @patch('transaction.transaction.get_wallet')
@@ -228,4 +231,3 @@ class TestGetReasonTransaction(BaseTestClass):
         }
         resp = get_reason_transaction(respons_data)
         self.assertEqual(resp, None)
-

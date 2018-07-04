@@ -2,9 +2,8 @@ import binascii
 from decimal import Decimal
 from typing import Any, Dict, List, Mapping, NewType, Optional, Tuple, Union
 
-from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
-from stellar_base.utils import AccountNotExistError, DecodeError, decode_check
+from stellar_base.utils import DecodeError, decode_check
 
 from aiohttp import web
 from conf import settings
@@ -82,20 +81,18 @@ async def build_unsigned_transfer(transaction_source_address: str, source_addres
             sequence: sequence number for generate transaction [optional]
             memo: memo text [optional]
     """
-
-    builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'], sequence=sequence)
+    builder = Builder(address=transaction_source_address, sequence=sequence, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
 
     wallet = await get_wallet_detail(destination_address)
     if amount_xlm:
         builder.append_payment_op(destination_address, amount_xlm, source=source_address)
     if amount_htkn and wallet['asset'].get(settings['ASSET_CODE'], False):
         builder.append_payment_op(
-            destination_address, amount_htkn, asset_type=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], source=source_address
+            destination_address, amount_htkn, asset_code=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], source=source_address
         )
 
     if amount_htkn and not wallet['asset'].get(settings['ASSET_CODE'], False):
         raise web.HTTPBadRequest(reason="{} is not trusted {}".format(destination_address, settings['ASSET_CODE']))
-
 
     if memo_text:
         builder.add_text_memo(memo_text)

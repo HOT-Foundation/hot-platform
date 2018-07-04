@@ -38,7 +38,6 @@ async def generate_joint_wallet(transaction_source_address: str, deal_address: s
         'xdr': xdr,
         'transaction_hash': tx_hash
     }
-
     return result
 
 
@@ -51,10 +50,10 @@ async def build_joint_wallet(transaction_source_address: str, deal_address: str,
             source=deal_address, signer_address=party, signer_type='ed25519PublicKey', signer_weight=1
         )
         builder.append_payment_op(
-            source=party, destination=deal_address, asset_type=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], amount=amount
+            source=party, destination=deal_address, asset_code=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], amount=amount
         )
 
-    builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'])
+    builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
     builder.append_create_account_op(source=creator, destination=deal_address, starting_balance=starting_xlm)
     builder.append_trust_op(source=deal_address, destination=settings['ISSUER'], code=settings['ASSET_CODE'], limit=settings['LIMIT_ASSET'])
     builder.append_set_options_op(

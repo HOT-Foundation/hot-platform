@@ -3,8 +3,9 @@ import binascii
 import pytest
 from aiohttp.test_utils import unittest_run_loop
 from asynctest import patch
+from stellar_base.exceptions import AccountNotExistError, HorizonError
 from stellar_base.keypair import Keypair
-from stellar_base.utils import AccountNotExistError, StellarMnemonic
+from stellar_base.utils import StellarMnemonic
 from tests.test_utils import BaseTestClass
 from aiohttp import web
 
@@ -15,7 +16,6 @@ from router import reverse
 
 
 class MockBuilder():
-
     def __init__(self):
         self.te = 'hash'
 
@@ -63,7 +63,6 @@ class TestCreateTrustWallet(BaseTestClass):
             'transaction_hash': expect_tx_hash,
             '@id': f'{self.host}{url}'
         }
-
         assert text == expect
 
     @unittest_run_loop
@@ -119,13 +118,12 @@ class TestCreateTrustWallet(BaseTestClass):
         text = await result.json()
         assert 'Target address is already used.' in text['message']
 
-
     @patch('wallet.wallet.StellarAddress.get', **{'side_effect': ValueError})
     def test_wallet_address_is_duplicate_with_value_error(self, mock):
         result = wallet_address_is_duplicate(self.target_address)
         assert result == True
 
-    @patch('wallet.wallet.StellarAddress.get', **{'side_effect': AccountNotExistError('test error')})
+    @patch('wallet.wallet.StellarAddress.get', **{'side_effect': HorizonError('test error')})
     def test_wallet_address_is_duplicate_with_account_not_existing_errir(self, mock):
         result = wallet_address_is_duplicate(self.target_address)
         assert result == False
