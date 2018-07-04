@@ -5,7 +5,7 @@ from aiohttp.test_utils import unittest_run_loop
 from asynctest import patch
 from stellar_base.keypair import Keypair
 from stellar_base.utils import StellarMnemonic
-from stellar_base.exceptions import AccountNotExistError
+from stellar_base.exceptions import AccountNotExistError, HorizonError
 from tests.test_utils import BaseTestClass
 from aiohttp import web
 
@@ -72,7 +72,7 @@ class TestCreateWallet(BaseTestClass):
         resp = await self.client.request("POST", url)
         assert resp.status == 400
         text = await resp.json()
-        assert 'Bad request, JSON data missing.' in text['error']
+        assert 'Bad request, JSON data missing.' in text['message']
 
     @unittest_run_loop
     async def test_post_generate_wallet_from_request_missing_param(self):
@@ -80,7 +80,7 @@ class TestCreateWallet(BaseTestClass):
         resp = await self.client.request("POST", url, json={'target_address':'test', 'amount_xlm':'10'})
         assert resp.status == 400
         text = await resp.json()
-        assert text['error'] == 'Parameter \'transaction_source_address\' not found. Please ensure parameters is valid.'
+        assert text['message'] == 'Parameter \'transaction_source_address\' not found. Please ensure parameters is valid.'
 
     @unittest_run_loop
     async def test_post_generate_wallet_from_request_use_wrong_parameter(self):
@@ -88,13 +88,13 @@ class TestCreateWallet(BaseTestClass):
         resp = await self.client.request("POST", url, json={'target':'test', 'transaction_source_address': 'test'})
         assert resp.status == 400
         text = await resp.json()
-        assert "Parameter 'target_address' not found. Please ensure parameters is valid." in text['error']
+        assert "Parameter 'target_address' not found. Please ensure parameters is valid." in text['message']
 
         resp = await self.client.request("POST", url, json={
                                          'target_address' : 'test', 'transaction_source_address': 'test',})
         assert resp.status == 400
         text = await resp.json()
-        assert 'Balance must have more than 0.' in text['error']
+        assert 'Balance must have more than 0.' in text['message']
 
         resp = await self.client.request("POST", url, json={
                                          'target_address' : 'test',
@@ -102,7 +102,7 @@ class TestCreateWallet(BaseTestClass):
                                          'amount_xlm' : 'not_Decimal'})
         assert resp.status == 400
         text = await resp.json()
-        assert "not_Decimal is not decimal" in text['error']
+        assert "not_Decimal is not decimal" in text['message']
 
     @unittest_run_loop
     @patch('wallet.post_generate_wallet.wallet_address_is_duplicate', **{'return_value' : True})
@@ -117,14 +117,14 @@ class TestCreateWallet(BaseTestClass):
         result = await self.client.request("POST", url, json=json_request)
         assert result.status == 400
         text = await result.json()
-        assert 'Target address is already used.' in text['error']
+        assert 'Target address is already used.' in text['message']
 
     @patch('wallet.wallet.StellarAddress.get', **{'side_effect': ValueError})
     def test_wallet_address_is_duplicate_with_value_error(self, mock):
         result = wallet_address_is_duplicate(self.target_address)
         assert result == True
 
-    @patch('wallet.wallet.StellarAddress.get', **{'side_effect': AccountNotExistError('test error')})
+    @patch('wallet.wallet.StellarAddress.get', **{'side_effect': HorizonError('test error')})
     def test_wallet_address_is_duplicate_with_account_not_existing_errir(self, mock):
         result = wallet_address_is_duplicate(self.target_address)
         assert result == False

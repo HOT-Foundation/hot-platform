@@ -3,7 +3,7 @@ from typing import Tuple
 from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
 from stellar_base.utils import DecodeError
-from stellar_base.exceptions import AccountNotExistError
+from stellar_base.exceptions import AccountNotExistError, HorizonError
 
 from aiohttp import web
 from conf import settings
@@ -16,7 +16,7 @@ async def get_wallet(wallet_address: str) -> StellarAddress:
 
     try:
         wallet.get()
-    except AccountNotExistError as ex:
+    except (AccountNotExistError, HorizonError) as ex:
         msg = "{}: {}".format(str(ex), wallet_address)
         raise web.HTTPNotFound(reason=msg)
     return wallet
@@ -29,7 +29,7 @@ def wallet_address_is_duplicate(destination_address: str) -> bool:
     try:
         wallet.get()
         return True
-    except (AccountNotExistError):
+    except (AccountNotExistError, HorizonError):
         return False
     except (ValueError):
         return True

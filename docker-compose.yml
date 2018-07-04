@@ -14,9 +14,10 @@ services:
       - ASSET_CODE=HTKN
       - ISSUER=GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ
       - PYTHONPATH=/usr/src/token_platform
-      - PASSPHRASE=Integration Test Network ; zulucrypto
-      - HORIZON_URL=http://horizon-integrationnet:8000
-      # - HORIZON_URL=https://horizon-testnet.stellar.org
+      # - PASSPHRASE=Integration Test Network ; zulucrypto
+      - PASSPHRASE=TESTNET
+      # - HORIZON_URL=http://horizon-integrationnet:8000
+      - HORIZON_URL=https://horizon-testnet.stellar.org
     networks:
       - hotnow-network
 networks:

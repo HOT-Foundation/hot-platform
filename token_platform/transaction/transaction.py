@@ -14,7 +14,10 @@ JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 async def is_duplicate_transaction(transaction_hash: str) -> bool:
     """Check transaction is duplicate or not"""
     horizon = Horizon(horizon=settings['HORIZON_URL'])
-    transaction = horizon.transaction(transaction_hash)
+    try:
+        transaction = horizon.transaction(transaction_hash)
+    except Exception:
+        return False
     id = transaction.get('id')
     return True if id else False
 

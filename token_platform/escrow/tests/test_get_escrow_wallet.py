@@ -4,7 +4,7 @@ import pytest
 from aiohttp import web
 from aiohttp.test_utils import make_mocked_request
 from asynctest import patch
-from stellar_base.exceptions import AccountNotExistError
+from stellar_base.exceptions import AccountNotExistError, HorizonError
 
 from conf import settings
 from escrow.get_escrow_wallet import (get_escrow_wallet_detail,
@@ -80,7 +80,7 @@ async def test_get_escrow_wallet_success_trusted_htkn(mock_address):
 async def test_get_escrow_wallet_not_found(mock_address):
     class MockAddress(object):
         def get(self):
-            raise AccountNotExistError('Resource Missing')
+            raise HorizonError('Resource Missing')
 
     mock_address.return_value = MockAddress()
 
