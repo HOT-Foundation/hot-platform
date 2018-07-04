@@ -193,7 +193,7 @@ class TestGetThreshold(BaseTestClass):
 
     @unittest_run_loop
     async def test_get_transaction_by_memo_success(self):
-        # submit transaction
+        ''' submit transaction '''
         address = 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE'
         seed = 'SB2ROKLGFM4UZ4GIFL7PL4SWUWZ3LY7ZVUVRWR77IPJVY2CZUEBP6R7I'
         kp = Keypair.random()
