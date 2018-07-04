@@ -3,7 +3,8 @@ aiohttp==3.2.0
 python-dateutil==2.7.2
 idna==2.6
 # stellar-base==0.1.8.1
-git+https://github.com/StellarCN/py-stellar-base.git@v0.2
+# git+https://github.com/StellarCN/py-stellar-base.git@v0.2
+git+https://github.com/StellarCN/py-stellar-base.git@64a9de63d56fb31ed8f3820df78e108fcede7f39
 
 # Development Only
 pytest==3.5.0
