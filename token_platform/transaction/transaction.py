@@ -30,7 +30,7 @@ async def submit_transaction(xdr: bytes) -> Dict[str, str]:
         response = horizon.submit(xdr)
     except Exception as e:
         msg = str(e)
-        raise web.HTTPInternalServerError
+        raise web.HTTPBadRequest(reason=msg)
     if response.get('status') == 400:
         msg = response.get('extras', {}).get('result_codes', {}).get('transaction', None)
         if msg:

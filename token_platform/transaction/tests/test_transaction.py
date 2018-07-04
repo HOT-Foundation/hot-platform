@@ -55,7 +55,7 @@ class TestSubmitTransaction(BaseTestClass):
     @patch('transaction.transaction.Horizon')
     async def test_submit_transaction_fail_with_wrong_response_format(self, mock_horizon) -> None:
         mock_horizon.return_value = self.WrongResponse()
-        with pytest.raises(HTTPInternalServerError):
+        with pytest.raises(HTTPBadRequest):
             signed_xdr = 'Testtest'
             result = await submit_transaction(signed_xdr)
 

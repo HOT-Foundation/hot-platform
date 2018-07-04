@@ -35,25 +35,25 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
     async def test_get_unsigned_change_trust_success(self, mock_get_threshold_weight, mock_get_signer):
         mock_get_threshold_weight.return_value = 1
         mock_get_signer.return_value = [{
-            "public_key": "GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE",
+            "public_key": "GAGNG7WP6JJH726KJ3RPMHB3TNOVNABRBHULYVN3APK6CHXRJNRSSHBA",
             "weight": 1
         }]
 
         result = await get_unsigned_change_trust(
-            'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE', 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE')
+            'GAGNG7WP6JJH726KJ3RPMHB3TNOVNABRBHULYVN3APK6CHXRJNRSSHBA', 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE')
 
         expect_data = {
-            "@id": f"{settings['HOST']}{reverse('change-trust', wallet_address='GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE')}",
-            "@transaction_url": f"{settings['HOST']}{reverse('transaction', transaction_hash='720ba24a8cbd8a8da3247b02c64c43c672550cfbe0f43834e55be91b52b9308f')}",
+            "@id": f"{settings['HOST']}{reverse('change-trust', wallet_address='GAGNG7WP6JJH726KJ3RPMHB3TNOVNABRBHULYVN3APK6CHXRJNRSSHBA')}",
+            "@transaction_url": f"{settings['HOST']}{reverse('transaction', transaction_hash='1b0d046ac1a458597b4350677123d1f85a9eb9dafd02f08bec704146acf3139f')}",
             "min_signer": 1,
             "signers": [
                 {
-                "public_key": "GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE",
+                "public_key": "GAGNG7WP6JJH726KJ3RPMHB3TNOVNABRBHULYVN3APK6CHXRJNRSSHBA",
                 "weight": 1
                 }
             ],
-            "xdr": "AAAAAM+RRrB+7bNSWWC2QR4m3asIZvUZ8dm6HQB6lUZSpTPrAAAAZACAMRUAAB8QAAAAAAAAAAAAAAABAAAAAQAAAADPkUawfu2zUllgtkEeJt2rCGb1GfHZuh0AepVGUqUz6wAAAAYAAAABSFRLTgAAAADkHacjwpeFWz5txveZ4sJ3pEmTzpdS9fiBscDwpmoppgFjRXhdigAAAAAAAAAAAAA=",
-            "transaction_hash": "720ba24a8cbd8a8da3247b02c64c43c672550cfbe0f43834e55be91b52b9308f"
+            "xdr": "AAAAAM+RRrB+7bNSWWC2QR4m3asIZvUZ8dm6HQB6lUZSpTPrAAAAZACAMRUAAB8iAAAAAAAAAAAAAAABAAAAAQAAAAAM037P8lJ/68pO4vYcO5tdVoAxCei8VbsD1eEe8UtjKQAAAAYAAAABSFRLTgAAAADkHacjwpeFWz5txveZ4sJ3pEmTzpdS9fiBscDwpmoppgFjRXhdigAAAAAAAAAAAAA=",
+            "transaction_hash": "1b0d046ac1a458597b4350677123d1f85a9eb9dafd02f08bec704146acf3139f"
         }
 
         assert result == expect_data
