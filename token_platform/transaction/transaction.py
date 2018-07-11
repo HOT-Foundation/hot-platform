@@ -40,7 +40,7 @@ async def submit_transaction(xdr: bytes) -> Dict[str, str]:
     return response
 
 
-def get_reason_transaction(response: Dict) -> str:
+def get_reason_transaction(response: Dict) -> Union[str, None]:
     reasons = response.get('extras', {}).get('result_codes', {}).get('operations', None)
     if not reasons: return None
     result = reasons[0]
@@ -73,7 +73,7 @@ async def get_transaction(tx_hash: str) -> Dict[str, Union[str, int, List[Dict[s
         tx_hash: hash of transaction we are interested in.
     """
 
-    def _format_transaction(tx_detail: Dict[str, str]) -> Dict[str, Union[str, int, List[Dict[str, str]]]]:
+    def _format_transaction(tx_detail: Dict[str, str]) -> Dict[str, Any]:
         """Format transaction detail in pattern dict"""
         return {
             "@id": reverse('transaction', transaction_hash=tx_detail.get('id')),

@@ -1,14 +1,13 @@
 # Production Dependencies
-aiohttp==3.2.0
-python-dateutil==2.7.2
-idna==2.6
+aiohttp==3.3.2
+python-dateutil==2.7.3
 git+https://github.com/StellarCN/py-stellar-base.git@191845bae47bb20158ebba25c9f79e1e0f367cfa
 
 # Development Only
-pytest==3.5.0
+pytest==3.6.3
 pytest-aiohttp==0.3.0
 pytest-cov==2.5.1
-asynctest==0.12.0
-mypy==0.580
+asynctest==0.12.2
+mypy==0.610
 # pytest-mypy==0.3.0
 

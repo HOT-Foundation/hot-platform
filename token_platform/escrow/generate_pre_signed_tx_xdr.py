@@ -55,7 +55,7 @@ async def get_presigned_tx_xdr(
         transaction_source_address,
         destination: str,
         amount: Decimal,
-        sequence:int = None
+        sequence:int
     ) -> Dict:
         """Get unsigned transfer transaction and signers
 
