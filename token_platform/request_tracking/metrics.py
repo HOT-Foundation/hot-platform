@@ -3,6 +3,7 @@ from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram
 
 from aiohttp import web
 
+
 metric = dict()
 
 metric['GET_WALLET_ADDRESS'] = Gauge(
@@ -65,8 +66,15 @@ async def get_metrics(request: web.Request) -> web.Response:
 
 @web.middleware
 async def metrics_mapping(request, handler):
-    print(request.method)
-    print(request.remote)
-    print(request.path_qs)
+
+    print(request.match_info)
+    print(vars(request.match_info))
+    print(request.match_info.__dict__)
+
+    
     response = await handler(request)
+
     return response
+
+
+

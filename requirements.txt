@@ -13,4 +13,4 @@ pytest-cov==2.5.1
 asynctest==0.12.0
 mypy==0.580
 # pytest-mypy==0.3.0
-
+prometheus_client==0.2.0
