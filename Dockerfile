@@ -1,8 +1,4 @@
-FROM registry-hotnow.proteus-tech.com/base-hotnow-htkn-platform:1.2
-
-RUN apt-get update && \
-    apt-get install -y git
-
+FROM registry-hotnow.proteus-tech.com/base-hotnow-htkn-platform:1.2.0
 
 COPY requirements.txt /
 
