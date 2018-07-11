@@ -57,6 +57,9 @@ metric['POST_CLOSE_ESCROW_WALLET'] = Gauge(
 metric['POST_CLOSE_JOINT_WALLET'] = Gauge(
     'post_close_joint_wallet_htkn_platform_api', 'tracking post close joint wallet api')
 
+metric['GET_METRICS'] = Gauge(
+    'get_metrics_request_from_prom_htkn_platform_api', 'tracking get request from prom api')
+
 
 async def get_metrics(request: web.Request) -> web.Response:
     response = web.Response(body=prometheus_client.generate_latest())
@@ -74,11 +77,11 @@ async def metrics_mapping(request, handler):
     # print(request.match_info._route._resource._name)
     # print(request.match_info.route.resource.name)
 
-    # router_key = request.match_info.route.resource.name
-    # router_key = str(router_key).upper()
-    # router_key = router_key.replace('-', '_')
-    # print(router_key)
-    # metric[router_key].inc()
+    router_key = request.match_info.route.resource.name
+    router_key = str(router_key).upper()
+    router_key = router_key.replace('-', '_')
+    print(router_key)
+    metric[router_key].inc()
     
     response = await handler(request)
 
