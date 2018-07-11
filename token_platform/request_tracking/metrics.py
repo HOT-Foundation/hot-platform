@@ -67,10 +67,18 @@ async def get_metrics(request: web.Request) -> web.Response:
 @web.middleware
 async def metrics_mapping(request, handler):
 
-    print(request.match_info)
-    print(vars(request.match_info))
-    print(request.match_info.__dict__)
+    # print(request.match_info)
+    # print(request.match_info.__dict__)
+    # print(request.match_info._route.__dict__)
+    # print(request.match_info._route._resource.__dict__)
+    # print(request.match_info._route._resource._name)
+    # print(request.match_info.route.resource.name)
 
+    # router_key = request.match_info.route.resource.name
+    # router_key = str(router_key).upper()
+    # router_key = router_key.replace('-', '_')
+    # print(router_key)
+    # metric[router_key].inc()
     
     response = await handler(request)
 
