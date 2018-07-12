@@ -3,7 +3,6 @@ from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram
 
 from aiohttp import web
 
-
 metric = dict()
 
 metric['GET_WALLET_ADDRESS'] = Gauge(
@@ -13,7 +12,7 @@ metric['GET_WALLET_HISTORY'] = Gauge(
     'get_wallet_history_htkn_platform_api', 'tracking get wallet history api')
 
 metric['POST_GENERATE_WALLET'] = Gauge(
-    'post_generate_wallet_htkn_platform_api', 'tracking post generate wallet api') 
+    'post_generate_wallet_htkn_platform_api', 'tracking post generate wallet api')
 
 metric['POST_GENERATE_TRUST_WALLET'] = Gauge(
     'post_generate_trust_wallet_htkn_platform_api', 'tracking post generate trust wallet api')
@@ -57,9 +56,6 @@ metric['POST_CLOSE_ESCROW_WALLET'] = Gauge(
 metric['POST_CLOSE_JOINT_WALLET'] = Gauge(
     'post_close_joint_wallet_htkn_platform_api', 'tracking post close joint wallet api')
 
-metric['GET_METRICS'] = Gauge(
-    'get_metrics_request_from_prom_htkn_platform_api', 'tracking get request from prom api')
-
 
 async def get_metrics(request: web.Request) -> web.Response:
     response = web.Response(body=prometheus_client.generate_latest())
@@ -68,24 +64,15 @@ async def get_metrics(request: web.Request) -> web.Response:
 
 
 @web.middleware
-async def metrics_mapping(request, handler):
+async def metrics_increase(request, handler):
 
-    # print(request.match_info)
-    # print(request.match_info.__dict__)
-    # print(request.match_info._route.__dict__)
-    # print(request.match_info._route._resource.__dict__)
-    # print(request.match_info._route._resource._name)
-    # print(request.match_info.route.resource.name)
+    resource_name = request.match_info.route.resource.name
+    resource_name = str(resource_name).upper()
+    resource_name = resource_name.replace('-', '_')
 
-    router_key = request.match_info.route.resource.name
-    router_key = str(router_key).upper()
-    router_key = router_key.replace('-', '_')
-    print(router_key)
-    metric[router_key].inc()
-    
+    if resource_name != 'GET_METRICS':
+        metric[resource_name].inc()
+        print(resource_name)
+
     response = await handler(request)
-
     return response
-
-
-
