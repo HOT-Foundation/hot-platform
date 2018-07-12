@@ -7,13 +7,14 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 from controller import handle
 from middlewares import exception
+from request_tracking import metrics
 from log import log, log_conf
 from router import generate_routes
 
 
 async def init_app():
     """Initialize the application server."""
-    app = web.Application(middlewares=[log.handle_log, exception.handle_error])
+    app = web.Application(middlewares=[log.handle_log, exception.handle_error, metrics.metrics_increasing])
     app.add_routes(generate_routes())
     return app
 

@@ -70,7 +70,11 @@ ROUTER =  {
     "close-joint-wallet" : {
         "url" : "/wallet/{wallet_address}/generate-close-joint-wallet",
         "POST" : "joint_wallet.post_close_joint_wallet.post_close_joint_wallet_from_request"
-    }
+    },
+    "metrics": {
+        "url" : "/metrics",
+        "GET" : "request_tracking.metrics.get_metrics"
+    },
 }
 
 
