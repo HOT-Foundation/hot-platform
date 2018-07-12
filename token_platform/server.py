@@ -14,7 +14,7 @@ from router import generate_routes
 
 async def init_app():
     """Initialize the application server."""
-    app = web.Application(middlewares=[log.handle_log, exception.handle_error, metrics.metrics_increase])
+    app = web.Application(middlewares=[log.handle_log, exception.handle_error, metrics.metrics_increasing])
     app.add_routes(generate_routes())
     return app
 
