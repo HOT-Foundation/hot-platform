@@ -29,7 +29,7 @@ class TestCreateTrustWallet(BaseTestClass):
         self.wallet_address = 'GB6PGEFJSXPRUNYAJXH4OZNIZNCEXC6B2JMV5RUGWJECWVWNCJTMGJB4'
         self.transaction_source_address = 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ'
         self.target_address = kp.address().decode()
-        self.starting_balance = 600
+        self.xlm_amount = 600
         self.host = settings['HOST']
 
     @unittest_run_loop
@@ -45,7 +45,7 @@ class TestCreateTrustWallet(BaseTestClass):
         json_request = {
             'target_address' : self.target_address,
             'transaction_source_address': self.transaction_source_address,
-            'starting_balance' : self.starting_balance
+            'xlm_amount' : self.xlm_amount
         }
 
         resp = await self.client.request("POST", url, json=json_request)
@@ -76,7 +76,7 @@ class TestCreateTrustWallet(BaseTestClass):
     @unittest_run_loop
     async def test_post_generate_trust_wallet_from_request_missing_param(self):
         url = reverse('generate-trust-wallet', wallet_address=self.wallet_address)
-        resp = await self.client.request("POST", url, json={'target_address':'test', 'starting_balance':'10'})
+        resp = await self.client.request("POST", url, json={'target_address':'test', 'xlm_amount':'10'})
         assert resp.status == 400
         text = await resp.json()
         assert text['message'] == 'Parameter \'transaction_source_address\' not found. Please ensure parameters is valid.'
@@ -93,15 +93,25 @@ class TestCreateTrustWallet(BaseTestClass):
                                          'target_address' : 'test', 'transaction_source_address': 'test'})
         assert resp.status == 400
         text = await resp.json()
-        assert 'Balance must have more than 0.' in text['message']
+        assert 'XLM balance must have more than 0.' in text['message']
 
         resp = await self.client.request("POST", url, json={
                                          'target_address' : 'test',
                                          'transaction_source_address': 'test',
-                                         'starting_balance' : 'not_Decimal'})
+                                         'xlm_amount' : 'not_Decimal'})
         assert resp.status == 400
         text = await resp.json()
         assert "not_Decimal is not decimal" in text['message']
+
+        resp = await self.client.request("POST", url, json={
+                                         'target_address' : 'test',
+                                         'transaction_source_address': 'test',
+                                         'xlm_amount' : '5',
+                                         'htkn_amount' : 'not_Decimal'})
+        assert resp.status == 400
+        text = await resp.json()
+        assert "not_Decimal is not decimal" in text['message']
+
 
     @unittest_run_loop
     @patch('wallet.post_generate_trust_wallet.wallet_address_is_duplicate', **{'return_value' : True})
@@ -110,7 +120,7 @@ class TestCreateTrustWallet(BaseTestClass):
         json_request = {
             'target_address' : self.target_address,
             'transaction_source_address': self.transaction_source_address,
-            'starting_balance' : self.starting_balance
+            'xlm_amount' : self.xlm_amount
         }
 
         result = await self.client.request("POST", url, json=json_request)
