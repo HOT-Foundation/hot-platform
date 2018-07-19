@@ -84,7 +84,7 @@ async def test_get_wallet_success_not_trust_htkn(mock_address):
     expect_data = {
         'wallet_address': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
         '@id': f'{host}{url}',
-        'trust': f"{settings['HOST']}{reverse('change-trust', wallet_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')}",
+        'trust': f"{settings['HOST']}{reverse('change-trust-add-token', wallet_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')}",
         'asset': {
             'XLM': '9.9999200'
         },

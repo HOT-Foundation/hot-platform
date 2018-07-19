@@ -47,7 +47,7 @@ async def get_wallet_detail(wallet_address: str) -> Dict:
     def _trusted_htkn(balances: STELLAR_BALANCES) -> Union[Dict, Dict[str, str]]:
         """Return URL for making trust HTKN"""
         if len(list(filter(lambda b: b.get('asset_code', None) == settings['ASSET_CODE'] and b.get('asset_issuer', None) == settings['ISSUER'], balances))) == 0:
-            return {'trust': f"{settings['HOST']}{reverse('change-trust', wallet_address=wallet_address)}"}
+            return {'trust': f"{settings['HOST']}{reverse('change-trust-add-token', wallet_address=wallet_address)}"}
         return {}
 
     def _format_data(data: Dict[str, str]) -> Dict:

@@ -38,6 +38,10 @@ ROUTER =  {
         "url" : "/wallet/{wallet_address}/transaction/change-trust",
         "GET" : "transaction.get_unsigned_change_trust.get_unsigned_change_trust_from_request"
     },
+    "change-trust-add-token" : {
+        "url" : "/wallet/{wallet_address}/transaction/change-trust-add-token",
+        "GET" : "transaction.get_unsigned_change_trust.get_unsigned_add_trust_and_htkn_from_request"
+    },
     "get-transaction-hash" : {
         "url" : "/wallet/{wallet_address}/get-transaction-hash",
         "GET" : "transaction.get_transaction.get_transaction_hash_from_request"
