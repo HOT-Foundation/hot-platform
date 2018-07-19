@@ -3,12 +3,13 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, Dict, List, Mapping, NewType, Optional, Tuple, Union
 
 from aiohttp import web
+from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
 
 from conf import settings
 from router import reverse
 from transaction.transaction import get_signers, get_threshold_weight
-
+from stellar_base.exceptions import AccountNotExistError, HorizonError
 
 async def get_unsigned_add_trust_and_htkn_from_request(request: web.Request) -> web.Response:
     """AIOHttp Request unsigned transfer transaction"""
@@ -20,8 +21,24 @@ async def get_unsigned_add_trust_and_htkn_from_request(request: web.Request) -> 
     except InvalidOperation:
         raise web.HTTPBadRequest(reason='htkn_amount cannot convert to decimal.')
 
+    trust = await does_wallet_have_trust(source_account)
+    if trust:
+        raise web.HTTPBadRequest(reason='Wallet already has trust.')
+
     result = await get_unsigned_add_trust_and_htkn(source_account, transaction_source_address, htkn_amount)
     return web.json_response(result)
+
+async def does_wallet_have_trust(wallet_address: str) -> bool:
+    """Check address ID is not duplicate"""
+    wallet = StellarAddress(address=wallet_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
+
+    try:
+        wallet.get()
+        if len(list(filter(lambda b: b.get('asset_code', None) == settings['ASSET_CODE'] and b.get('asset_issuer', None) == settings['ISSUER'], wallet.balances))) == 0:
+            return False
+        return True
+    except (AccountNotExistError, HorizonError, ValueError):
+        return False
 
 async def get_unsigned_add_trust_and_htkn(source_address: str, transaction_source_address: str, htkn_amount: Decimal) -> Dict:
     """Get unsigned transfer transaction and signers"""
