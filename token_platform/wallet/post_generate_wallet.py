@@ -1,11 +1,10 @@
 import binascii
-
+from decimal import Decimal, InvalidOperation
 from json import JSONDecodeError
-from aiohttp import web
 
+from aiohttp import web
 from conf import settings
 from router import reverse
-from decimal import Decimal, InvalidOperation
 from transaction.transaction import get_signers
 from wallet.wallet import (build_generate_wallet_transaction,
                            wallet_address_is_duplicate)
@@ -21,6 +20,8 @@ async def post_generate_wallet_from_request(request: web.Request):
     source_address: str = request.match_info.get('wallet_address')
 
     destination_address: str = json_response['target_address']
+
+    transaction_source_address: str = json_response['transaction_source_address']
     try:
         balance: Decimal = Decimal(json_response.get('amount_xlm', 0))
     except InvalidOperation:
@@ -33,7 +34,7 @@ async def post_generate_wallet_from_request(request: web.Request):
     if duplicate:
         raise web.HTTPBadRequest(reason = 'Target address is already used.')
 
-    unsigned_xdr_byte, tx_hash_byte = build_generate_wallet_transaction(source_address, destination_address, balance)
+    unsigned_xdr_byte, tx_hash_byte = build_generate_wallet_transaction(transaction_source_address, source_address, destination_address, balance)
 
     unsigned_xdr: str = unsigned_xdr_byte.decode()
     tx_hash: str = binascii.hexlify(tx_hash_byte).decode()
@@ -47,7 +48,7 @@ async def post_generate_wallet_from_request(request: web.Request):
         'xdr': unsigned_xdr,
         'transaction_url': f"{host}{reverse('transaction', transaction_hash=tx_hash)}",
         'transaction_hash': tx_hash,
-        '@url': f'{host}{request.path}'
+        '@id': f'{host}{request.path}'
     }
 
     return web.json_response(result)

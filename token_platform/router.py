@@ -10,6 +10,10 @@ ROUTER =  {
         "url" : "/wallet/{wallet_address}",
         "GET" : "wallet.get_wallet.get_wallet_from_request"
     },
+    "wallet-history" : {
+        "url" : "/wallet/{wallet_address}/history",
+        "GET" : "wallet.get_wallet_history.get_wallet_history_from_request"
+    },
     "generate-wallet" : {
         "url" : "/wallet/{wallet_address}/generate-wallet",
         "POST" : "wallet.post_generate_wallet.post_generate_wallet_from_request"
@@ -33,6 +37,10 @@ ROUTER =  {
     "change-trust" : {
         "url" : "/wallet/{wallet_address}/transaction/change-trust",
         "GET" : "transaction.get_unsigned_change_trust.get_unsigned_change_trust_from_request"
+    },
+    "change-trust-add-token" : {
+        "url" : "/wallet/{wallet_address}/transaction/change-trust-add-token",
+        "GET" : "transaction.get_unsigned_change_trust.get_unsigned_add_trust_and_htkn_from_request"
     },
     "get-transaction-hash" : {
         "url" : "/wallet/{wallet_address}/get-transaction-hash",
@@ -66,8 +74,13 @@ ROUTER =  {
     "close-joint-wallet" : {
         "url" : "/wallet/{wallet_address}/generate-close-joint-wallet",
         "POST" : "joint_wallet.post_close_joint_wallet.post_close_joint_wallet_from_request"
-    }
+    },
+    "metrics": {
+        "url" : "/metrics",
+        "GET" : "request_tracking.metrics.get_metrics"
+    },
 }
+
 
 def generate_routes() -> list:
     routes = []

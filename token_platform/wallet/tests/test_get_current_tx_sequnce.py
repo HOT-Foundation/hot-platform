@@ -35,6 +35,6 @@ class TestGetcurrentTransactionNumber(BaseTestClass):
 
         message = await resp.json()
         expect = f"Not found current sequence of wallet address \'{wallet_address}\', Please ensure wallet address is valid."
-        assert message['error'] == expect
+        assert message['message'] == expect
 
         mock_seq_no.assert_called_once_with('test')

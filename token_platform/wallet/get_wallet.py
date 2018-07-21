@@ -20,7 +20,7 @@ THRESHOLDS = Dict[str, int]
 
 
 async def get_wallet_from_request(request: web.Request) -> web.Response:
-    """AIOHttp Request wallet address to get wallet"""
+    """Get wallet detail"""
     wallet_address = request.match_info.get('wallet_address', "")
     result = await get_wallet_detail(wallet_address)
     return web.json_response(result)
@@ -47,7 +47,7 @@ async def get_wallet_detail(wallet_address: str) -> Dict:
     def _trusted_htkn(balances: STELLAR_BALANCES) -> Union[Dict, Dict[str, str]]:
         """Return URL for making trust HTKN"""
         if len(list(filter(lambda b: b.get('asset_code', None) == settings['ASSET_CODE'] and b.get('asset_issuer', None) == settings['ISSUER'], balances))) == 0:
-            return {'trust': f"{settings['HOST']}{reverse('change-trust', wallet_address=wallet_address)}"}
+            return {'trust': f"{settings['HOST']}{reverse('change-trust-add-token', wallet_address=wallet_address)}"}
         return {}
 
     def _format_data(data: Dict[str, str]) -> Dict:
@@ -55,10 +55,9 @@ async def get_wallet_detail(wallet_address: str) -> Dict:
         return {k: b64decode(v).decode('utf-8') for k, v in data.items()}
 
     wallet = await get_wallet(wallet_address)
-    url = reverse('wallet-address', wallet_address=wallet_address)
     result: Dict[str, Any] = {
-        '@id': wallet_address,
-        '@url': f"{settings['HOST']}{url}",
+        '@id': reverse('wallet-address', wallet_address=wallet_address),
+        'wallet_address': wallet.address,
         'asset': _merge_balance(wallet.balances),
         'sequence': wallet.sequence,
         'data': _format_data(wallet.data),

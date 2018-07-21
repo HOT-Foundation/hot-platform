@@ -9,7 +9,7 @@ from aiohttp.test_utils import make_mocked_request, unittest_run_loop
 from asynctest import patch
 from transaction.get_transaction import get_transaction_from_request
 from transaction.tests.factory.horizon import HorizonData
-from transaction.transaction import get_transaction, horizon_testnet
+from transaction.transaction import get_transaction
 from conf import settings
 from router import reverse
 
@@ -26,7 +26,7 @@ class TestGetTransactionFromRequest(BaseTestClass):
 
 
     @unittest_run_loop
-    @patch('transaction.transaction.horizon_testnet')
+    @patch('transaction.transaction.Horizon')
     async def test_get_transaction_success(self, mock_horizon):
 
         mock_horizon.return_value = HorizonData()
@@ -34,8 +34,8 @@ class TestGetTransactionFromRequest(BaseTestClass):
         result = await get_transaction("4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9")
         host = settings.get('HOST', None)
         expect_data = {
-            '@id': '4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9',
-            '@url': f"{host}{reverse('transaction', transaction_hash='4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9')}",
+            'transaction_id': '4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9',
+            '@id': f"{host}{reverse('transaction', transaction_hash='4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9')}",
             'paging_token': '34980756279271424',
             'ledger': 8144592,
             'created_at': '2018-03-28T08:34:22Z',
@@ -78,7 +78,7 @@ class TestGetTransactionFromRequest(BaseTestClass):
 
 
     @unittest_run_loop
-    @patch('transaction.transaction.horizon_testnet')
+    @patch('transaction.transaction.Horizon')
     async def test_get_transaction_not_found(self, mock_transaction):
         class MockTransaction(object):
             def transaction(self, tx_hash):
@@ -93,6 +93,17 @@ class TestGetTransactionFromRequest(BaseTestClass):
         with pytest.raises(web.HTTPNotFound) as context:
             await get_transaction("4c239561b64f2353819452073f2ec7f62a5ad66f533868f89f7af862584cdee9")
         assert str(context.value) == 'Not Found'
+
+
+    @unittest_run_loop
+    @patch('transaction.get_transaction.get_transaction_by_memo')
+    async def test_get_transaction_hash_by_memo_from_reqeust_can_get_tx(self, mock_get_transaction) -> None:
+        mock_get_transaction.return_value = {'test': 'test'}
+        resp = await self.client.request('GET', reverse('get-transaction-hash-memo', wallet_address='address', memo='hello'))
+        assert resp.status == 200
+        mock_get_transaction.assert_called_once_with('address', 'hello')
+        assert await resp.json() == {'test':'test'}
+
 
     @unittest_run_loop
     @patch('transaction.get_transaction.get_transaction_by_memo')

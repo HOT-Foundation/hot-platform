@@ -1,11 +1,10 @@
 import asyncio
-import json
 
 import pytest
 from aiohttp import web
 from aiohttp.test_utils import make_mocked_request
 from asynctest import patch
-from stellar_base.utils import AccountNotExistError
+from stellar_base.exceptions import AccountNotExistError, HorizonError
 
 from conf import settings
 from escrow.get_escrow_wallet import (get_escrow_wallet_detail,
@@ -56,8 +55,8 @@ async def test_get_escrow_wallet_success_trusted_htkn(mock_address):
     actual_data = await get_escrow_wallet_detail('GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')
     host = settings.get('HOST', None)
     expect_data = {
-        '@id': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
-        '@url': f"{host}{reverse('escrow-address', escrow_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')}",
+        '@id': reverse('escrow-address', escrow_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'),
+        'escrow_address': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
         'asset': {
             'HTKN': '7.0000000',
             'XLM': '9.9999200'
@@ -81,7 +80,7 @@ async def test_get_escrow_wallet_success_trusted_htkn(mock_address):
 async def test_get_escrow_wallet_not_found(mock_address):
     class MockAddress(object):
         def get(self):
-            raise AccountNotExistError('Resource Missing')
+            raise HorizonError('Resource Missing')
 
     mock_address.return_value = MockAddress()
 

@@ -7,3 +7,4 @@ htmlcov
 .directory
 .mypy_cache
 .vscode/
+*.log

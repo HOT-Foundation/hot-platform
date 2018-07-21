@@ -3,8 +3,9 @@ import binascii
 import pytest
 from aiohttp.test_utils import unittest_run_loop
 from asynctest import patch
+from stellar_base.exceptions import AccountNotExistError, HorizonError
 from stellar_base.keypair import Keypair
-from stellar_base.utils import AccountNotExistError, StellarMnemonic
+from stellar_base.utils import StellarMnemonic
 from tests.test_utils import BaseTestClass
 from aiohttp import web
 
@@ -15,7 +16,6 @@ from router import reverse
 
 
 class MockBuilder():
-
     def __init__(self):
         self.te = 'hash'
 
@@ -27,8 +27,9 @@ class TestCreateTrustWallet(BaseTestClass):
         secret_phrase = sm.generate()
         kp = Keypair.deterministic(secret_phrase, lang='english')
         self.wallet_address = 'GB6PGEFJSXPRUNYAJXH4OZNIZNCEXC6B2JMV5RUGWJECWVWNCJTMGJB4'
+        self.transaction_source_address = 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ'
         self.target_address = kp.address().decode()
-        self.starting_balance = 600
+        self.xlm_amount = 600
         self.host = settings['HOST']
 
     @unittest_run_loop
@@ -43,7 +44,8 @@ class TestCreateTrustWallet(BaseTestClass):
         url = reverse('generate-trust-wallet', wallet_address=self.wallet_address)
         json_request = {
             'target_address' : self.target_address,
-            'starting_balance' : self.starting_balance
+            'transaction_source_address': self.transaction_source_address,
+            'xlm_amount' : self.xlm_amount
         }
 
         resp = await self.client.request("POST", url, json=json_request)
@@ -54,13 +56,13 @@ class TestCreateTrustWallet(BaseTestClass):
         expect_unsigned_xdr = mock_xdr.return_value[0].decode()
         expect = {
             'source_address': self.wallet_address,
-            'signers': [self.wallet_address, self.target_address],
+            'transaction_source_address': self.transaction_source_address,
+            'signers': [self.wallet_address, self.target_address, self.transaction_source_address],
             'xdr': expect_unsigned_xdr,
             'transaction_url': f"{self.host}{reverse('transaction', transaction_hash=expect_tx_hash)}",
             'transaction_hash': expect_tx_hash,
-            '@url': f'{self.host}{url}'
+            '@id': f'{self.host}{url}'
         }
-
         assert text == expect
 
     @unittest_run_loop
@@ -69,28 +71,47 @@ class TestCreateTrustWallet(BaseTestClass):
         resp = await self.client.request("POST", url)
         assert resp.status == 400
         text = await resp.json()
-        assert 'Bad request, JSON data missing.' in text['error']
+        assert 'Bad request, JSON data missing.' in text['message']
+
+    @unittest_run_loop
+    async def test_post_generate_trust_wallet_from_request_missing_param(self):
+        url = reverse('generate-trust-wallet', wallet_address=self.wallet_address)
+        resp = await self.client.request("POST", url, json={'target_address':'test', 'xlm_amount':'10'})
+        assert resp.status == 400
+        text = await resp.json()
+        assert text['message'] == 'Parameter \'transaction_source_address\' not found. Please ensure parameters is valid.'
 
     @unittest_run_loop
     async def test_post_generate_trust_wallet_from_request_use_wrong_parameter(self):
         url = reverse('generate-trust-wallet', wallet_address=self.wallet_address)
-        resp = await self.client.request("POST", url, json={'target':'test'})
+        resp = await self.client.request("POST", url, json={'target':'test', 'transaction_source_address': 'test'})
         assert resp.status == 400
         text = await resp.json()
-        assert "Parameter 'target_address' not found. Please ensure parameters is valid." in text['error']
+        assert "Parameter 'target_address' not found. Please ensure parameters is valid." in text['message']
 
         resp = await self.client.request("POST", url, json={
-                                         'target_address' : 'test'})
+                                         'target_address' : 'test', 'transaction_source_address': 'test'})
         assert resp.status == 400
         text = await resp.json()
-        assert 'Balance must have more than 0.' in text['error']
+        assert 'XLM balance must have more than 0.' in text['message']
 
         resp = await self.client.request("POST", url, json={
                                          'target_address' : 'test',
-                                         'starting_balance' : 'not_Decimal'})
+                                         'transaction_source_address': 'test',
+                                         'xlm_amount' : 'not_Decimal'})
         assert resp.status == 400
         text = await resp.json()
-        assert "not_Decimal is not decimal" in text['error']
+        assert "not_Decimal is not decimal" in text['message']
+
+        resp = await self.client.request("POST", url, json={
+                                         'target_address' : 'test',
+                                         'transaction_source_address': 'test',
+                                         'xlm_amount' : '5',
+                                         'htkn_amount' : 'not_Decimal'})
+        assert resp.status == 400
+        text = await resp.json()
+        assert "not_Decimal is not decimal" in text['message']
+
 
     @unittest_run_loop
     @patch('wallet.post_generate_trust_wallet.wallet_address_is_duplicate', **{'return_value' : True})
@@ -98,21 +119,21 @@ class TestCreateTrustWallet(BaseTestClass):
         url = reverse('generate-trust-wallet', wallet_address=self.wallet_address)
         json_request = {
             'target_address' : self.target_address,
-            'starting_balance' : self.starting_balance
+            'transaction_source_address': self.transaction_source_address,
+            'xlm_amount' : self.xlm_amount
         }
 
         result = await self.client.request("POST", url, json=json_request)
         assert result.status == 400
         text = await result.json()
-        assert 'Target address is already used.' in text['error']
-
+        assert 'Target address is already used.' in text['message']
 
     @patch('wallet.wallet.StellarAddress.get', **{'side_effect': ValueError})
     def test_wallet_address_is_duplicate_with_value_error(self, mock):
         result = wallet_address_is_duplicate(self.target_address)
         assert result == True
 
-    @patch('wallet.wallet.StellarAddress.get', **{'side_effect': AccountNotExistError('test error')})
+    @patch('wallet.wallet.StellarAddress.get', **{'side_effect': HorizonError('test error')})
     def test_wallet_address_is_duplicate_with_account_not_existing_errir(self, mock):
         result = wallet_address_is_duplicate(self.target_address)
         assert result == False

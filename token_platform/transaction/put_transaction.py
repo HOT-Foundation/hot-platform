@@ -1,5 +1,9 @@
 from transaction.transaction import is_duplicate_transaction, submit_transaction, get_transaction
 from aiohttp import web
+from log import log_conf
+from conf import settings
+from log.log import write_audit_log
+
 
 async def put_transaction_from_request(request: web.Request) -> web.Response:
     """Submit the transaction into Stellar network"""
@@ -13,5 +17,10 @@ async def put_transaction_from_request(request: web.Request) -> web.Response:
         raise web.HTTPBadRequest(reason='Duplicate transaction.')
 
     response = await submit_transaction(signed_xdr)
-    return web.json_response(response, status=202)
 
+    # audit log
+    operation = settings['LOG_OPS']['SUBMIT']
+    message = f'xdr={signed_xdr}'
+    write_audit_log(request, response, operation, message)
+
+    return web.json_response(response, status=202)

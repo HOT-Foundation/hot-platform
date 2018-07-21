@@ -2,7 +2,8 @@ from typing import Tuple
 
 from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
-from stellar_base.utils import AccountNotExistError, DecodeError
+from stellar_base.utils import DecodeError
+from stellar_base.exceptions import AccountNotExistError, HorizonError
 
 from aiohttp import web
 from conf import settings
@@ -11,11 +12,11 @@ from decimal import Decimal
 
 async def get_wallet(wallet_address: str) -> StellarAddress:
     """Get wallet from stellar address"""
-    wallet = StellarAddress(address=wallet_address, network=settings['STELLAR_NETWORK'])
+    wallet = StellarAddress(address=wallet_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
 
     try:
         wallet.get()
-    except AccountNotExistError as ex:
+    except (AccountNotExistError, HorizonError) as ex:
         msg = "{}: {}".format(str(ex), wallet_address)
         raise web.HTTPNotFound(reason=msg)
     return wallet
@@ -23,38 +24,45 @@ async def get_wallet(wallet_address: str) -> StellarAddress:
 
 def wallet_address_is_duplicate(destination_address: str) -> bool:
     """Check address ID is not duplicate"""
-    wallet = StellarAddress(address=destination_address,
-                            network=settings['STELLAR_NETWORK'])
+    wallet = StellarAddress(address=destination_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
 
     try:
         wallet.get()
         return True
-    except (AccountNotExistError):
+    except (AccountNotExistError, HorizonError):
         return False
     except (ValueError):
         return True
 
 
-def build_generate_trust_wallet_transaction(source_address: str, destination_address: str, amount: Decimal) -> Tuple[bytes, bytes]:
+def build_generate_trust_wallet_transaction(transaction_source_address: str, source_address: str, destination_address: str, xlm_amount: Decimal, htkn_amount: Decimal = Decimal(0)) -> Tuple[bytes, bytes]:
     """"Build transaction return unsigned XDR and transaction hash.
 
         Args:
-            source_address: Owner of creator address
-            destination_address: wallet id of new wallet
-            amount: starting balance of new wallet
+            transaction_source_address: Owner of a transaction.
+            source_address: Owner of creator address and payment operations.
+            destination_address: wallet id of new wallet.
+            xlm_amount: starting xlm_balance of new wallet.
+            htkn_amount: starting htkn_balance of new wallet.
     """
-    builder = Builder(address=source_address,
-                      network=settings['STELLAR_NETWORK'])
+    builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
     builder.append_create_account_op(
-        source=source_address, destination=destination_address, starting_balance=amount)
+        source=source_address, destination=destination_address, starting_balance=xlm_amount)
     try:
         builder.append_trust_op(
-            source=destination_address, destination=settings['ISSUER'], code=settings['ASSET_CODE'])
+            source=destination_address, destination=settings['ISSUER'], code=settings['ASSET_CODE'], limit=settings['LIMIT_ASSET'])
     except DecodeError:
         raise web.HTTPBadRequest(reason='Parameter values are not valid.')
     except Exception as e:
         msg = str(e)
         raise web.HTTPInternalServerError(reason=msg)
+
+    if(htkn_amount > 0):
+        builder.append_payment_op(source=source_address,
+                                destination=destination_address,
+                                asset_code=settings['ASSET_CODE'],
+                                asset_issuer=settings['ISSUER'],
+                                amount=htkn_amount)
 
     try:
         unsigned_xdr = builder.gen_xdr()
@@ -65,16 +73,17 @@ def build_generate_trust_wallet_transaction(source_address: str, destination_add
 
     return unsigned_xdr, tx_hash
 
-def build_generate_wallet_transaction(source_address: str, destination_address: str, amount: Decimal) -> Tuple[bytes, bytes]:
+
+def build_generate_wallet_transaction(transaction_source_address: str, source_address: str, destination_address: str, amount: Decimal) -> Tuple[bytes, bytes]:
     """"Build transaction return unsigned XDR and transaction hash.
 
         Args:
+            transaction_source_address: Owner of the transactoin
             source_address: Owner of creator wallet
             destination_address: wallet id of new wallet
             amount: starting balance of new wallet
     """
-    builder = Builder(address=source_address,
-                      network=settings['STELLAR_NETWORK'])
+    builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
 
     try:
         builder.append_create_account_op(

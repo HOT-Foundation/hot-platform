@@ -2,15 +2,10 @@ from base64 import b64decode
 from functools import reduce
 from typing import Any, Dict, List, Union
 
-import requests
 from aiohttp import web
-from stellar_base.builder import Builder
-from stellar_base.utils import AccountNotExistError
-
 from conf import settings
-from wallet.wallet import get_wallet
-from base64 import b64decode
 from router import reverse
+from wallet.wallet import get_wallet
 
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 STELLAR_BALANCE = Dict[str, str]
@@ -48,8 +43,8 @@ async def get_escrow_wallet_detail(escrow_address: str) -> web.Response:
     wallet = await get_wallet(escrow_address)
 
     result: Dict[str, Any] = {
-        '@id': escrow_address,
-        '@url': f"{settings['HOST']}{reverse('escrow-address', escrow_address=escrow_address)}",
+        '@id': f"{settings['HOST']}{reverse('escrow-address', escrow_address=escrow_address)}",
+        'escrow_address': escrow_address,
         'asset': _merge_balance(wallet.balances),
         'generate-wallet': f"{settings['HOST']}{reverse('escrow-generate-wallet', escrow_address=escrow_address)}",
         'sequence': wallet.sequence,
@@ -63,5 +58,4 @@ async def get_escrow_wallet_detail(escrow_address: str) -> web.Response:
             signers.append(value)
 
     result['signers'] = signers
-
     return result

@@ -5,12 +5,12 @@ from router import reverse
 from decimal import Decimal
 from conf import settings
 from aiohttp import web
-from stellar_base.horizon import horizon_testnet, horizon_livenet
+from stellar_base.horizon import Horizon
 
 import binascii
 
 
-async def generate_merge_transaction(wallet_address: str, parties_wallet: List=None) -> Dict:
+async def generate_merge_transaction(transaction_source_address: str, wallet_address: str, parties_wallet: List=None) -> Dict:
     """ Generate close escrow wallet function by escrow address then get escrow wallet detail by that address then build generate for return xdr and transaction hash
 
     Args;
@@ -18,7 +18,6 @@ async def generate_merge_transaction(wallet_address: str, parties_wallet: List=N
         parties_walles : list of provider address and amount for payback
     return Dict type
         escrow_address : Address of escrow wallet
-        @url : Current POST url
         transaction_url : Url for GET transaction detail
         signers : Array of signers use for sign xdr
         xdr : Xdr for sign
@@ -26,7 +25,7 @@ async def generate_merge_transaction(wallet_address: str, parties_wallet: List=N
     """
     wallet_detail = await get_escrow_wallet_detail(wallet_address)
 
-    unsigned_xdr, tx_hash = await build_generate_merge_transaction(wallet_detail, parties_wallet)
+    unsigned_xdr, tx_hash = await build_generate_merge_transaction(transaction_source_address, wallet_detail, parties_wallet)
 
     return {
         'wallet_address' : wallet_address,
@@ -37,7 +36,7 @@ async def generate_merge_transaction(wallet_address: str, parties_wallet: List=N
     }
 
 
-async def build_generate_merge_transaction(wallet_detail: Dict, parties_wallet: List=None) -> Tuple[Any, str]:
+async def build_generate_merge_transaction(transaction_source_address: str, wallet_detail: Dict, parties_wallet: List=None) -> Tuple[Any, str]:
     """ Builder transaction close escrow wallet by payment remaining HTKN from escrow_wallet to provider_wallet and merge account from escrow_wallet to creator_wallet, Finally, return xdr and transaction_hash
 
     Args:
@@ -45,11 +44,11 @@ async def build_generate_merge_transaction(wallet_detail: Dict, parties_wallet: 
         parties_walles : list of provider address and amount for payback
     """
 
-    wallet_address = wallet_detail['@id']
+    wallet_address = wallet_detail['escrow_address']
     wallet_data = wallet_detail['data']
     creator_address = wallet_data['creator_address'] if wallet_data and 'creator_address' in wallet_data.keys() else await get_creator_address(wallet_address)
 
-    builder = Builder(address=creator_address, network=settings['STELLAR_NETWORK'])
+    builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
 
     if not parties_wallet:
         parties_wallet = await generate_parties_wallet(wallet_detail)
@@ -78,7 +77,7 @@ async def get_creator_address(wallet_address: str) -> str:
 
     Args:
         wallet_address: address for search creator address  '''
-    horizon = horizon_livenet() if settings['STELLAR_NETWORK'] == 'PUBLIC' else horizon_testnet()
+    horizon = Horizon(horizon=settings['HORIZON_URL'])
     result = horizon.account_operations(wallet_address, params={'limit' : 1, 'order' : 'asc'}).get('_embedded').get('records')[0]
     return result['source_account']
 
@@ -117,7 +116,7 @@ async def build_payment_operation(builder: Builder, source: str, parties_wallet:
         destination = wallet['address']
         amount = Decimal(wallet['amount'])
         if amount > 0:
-            builder.append_payment_op(destination=destination, amount=amount, asset_type=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], source=source)
+            builder.append_payment_op(destination=destination, amount=amount, asset_code=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], source=source)
 
 
 async def build_remove_trustlines_operation(builder: Builder, source: str):

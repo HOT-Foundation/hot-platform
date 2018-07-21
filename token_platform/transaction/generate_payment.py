@@ -2,10 +2,8 @@ import binascii
 from decimal import Decimal
 from typing import Any, Dict, List, Mapping, NewType, Optional, Tuple, Union
 
-from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
-from stellar_base.horizon import horizon_livenet, horizon_testnet
-from stellar_base.utils import AccountNotExistError, DecodeError, decode_check
+from stellar_base.utils import DecodeError, decode_check
 
 from aiohttp import web
 from conf import settings
@@ -21,12 +19,17 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
 
     body = await request.json()
     source_account = request.match_info.get("wallet_address", "")
+    transaction_source_address = body['transaction_source_address']
     target_address = body['target_address']
     amount_htkn = body.get('amount_htkn')
     amount_xlm = body.get('amount_xlm')
     sequence_number = body.get('sequence_number', None)
     memo = body.get('memo', None)
+    memo_on = body.get('memo_on', 'source')
     await get_wallet(source_account)
+
+    if memo_on not in ['destination', 'source']:
+        raise web.HTTPBadRequest(reason='memo_on should be only "source" or "destination"')
 
     try:
         decode_check('account', target_address)
@@ -34,15 +37,16 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
         raise web.HTTPBadRequest(reason='Invalid value : {}'.format(target_address))
 
     if memo:
-        url_get_transaction = await get_transaction_by_memo(source_account, memo)
+        focus_address = target_address if memo_on == 'destination' else source_account
+        url_get_transaction = await get_transaction_by_memo(focus_address, memo)
         if url_get_transaction:
             return web.json_response(url_get_transaction, status=400)
 
-    result = await generate_payment(source_account, target_address, amount_htkn, amount_xlm, sequence_number, memo)
+    result = await generate_payment(transaction_source_address, source_account, target_address, amount_htkn, amount_xlm, sequence_number, memo)
     return web.json_response(result)
 
 
-async def generate_payment(source_address: str, destination: str, amount_htkn: Decimal, amount_xlm:Decimal, sequence:int = None, memo:str = None) -> Dict:
+async def generate_payment(transaction_source_address: str, source_address: str, destination: str, amount_htkn: Decimal, amount_xlm:Decimal, sequence:int = None, memo:str = None) -> Dict:
     """Get unsigned transfer transaction and signers
 
         Args:
@@ -53,12 +57,11 @@ async def generate_payment(source_address: str, destination: str, amount_htkn: D
             sequence: sequence number for generate transaction [optional]
             memo: memo text [optional]
     """
-    unsigned_xdr, tx_hash = await build_unsigned_transfer(source_address, destination, amount_htkn, amount_xlm, sequence, memo)
+    unsigned_xdr, tx_hash = await build_unsigned_transfer(transaction_source_address, source_address, destination, amount_htkn, amount_xlm, sequence, memo)
     host: str = settings['HOST']
     result = {
-        '@id': source_address,
-        '@url': f"{host}{reverse('generate-payment', wallet_address=source_address)}",
-        '@transaction_url': f"{host}{reverse('transaction', transaction_hash=tx_hash)}",
+        '@id': reverse('generate-payment', wallet_address=source_address),
+        '@transaction_url': reverse('transaction', transaction_hash=tx_hash),
         'min_signer': await get_threshold_weight(source_address, 'payment'),
         'signers': await get_signers(source_address),
         'xdr': unsigned_xdr,
@@ -67,7 +70,7 @@ async def generate_payment(source_address: str, destination: str, amount_htkn: D
     return result
 
 
-async def build_unsigned_transfer(source_address: str, destination_address: str, amount_htkn: Decimal, amount_xlm: Decimal, sequence:int=None, memo_text:str=None) -> Tuple[str, str]:
+async def build_unsigned_transfer(transaction_source_address: str, source_address: str, destination_address: str, amount_htkn: Decimal, amount_xlm: Decimal, sequence:int=None, memo_text:str=None) -> Tuple[str, str]:
     """"Build unsigned transfer transaction return unsigned XDR and transaction hash.
 
         Args:
@@ -78,20 +81,18 @@ async def build_unsigned_transfer(source_address: str, destination_address: str,
             sequence: sequence number for generate transaction [optional]
             memo: memo text [optional]
     """
-
-    builder = Builder(address=source_address, network=settings['STELLAR_NETWORK'], sequence=sequence)
+    builder = Builder(address=transaction_source_address, sequence=sequence, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
 
     wallet = await get_wallet_detail(destination_address)
     if amount_xlm:
         builder.append_payment_op(destination_address, amount_xlm, source=source_address)
     if amount_htkn and wallet['asset'].get(settings['ASSET_CODE'], False):
         builder.append_payment_op(
-            destination_address, amount_htkn, asset_type=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], source=source_address
+            destination_address, amount_htkn, asset_code=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], source=source_address
         )
 
     if amount_htkn and not wallet['asset'].get(settings['ASSET_CODE'], False):
         raise web.HTTPBadRequest(reason="{} is not trusted {}".format(destination_address, settings['ASSET_CODE']))
-
 
     if memo_text:
         builder.add_text_memo(memo_text)
