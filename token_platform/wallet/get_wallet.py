@@ -34,7 +34,7 @@ async def get_wallet_detail(wallet_address: str) -> Dict:
         if balance['asset_type'] == 'native':
             return {'XLM': balance['balance']}
         elif balance['asset_code'] == settings['ASSET_CODE'] and balance['asset_issuer'] == settings['ISSUER']:
-            return {'HTKN': balance['balance']}
+            return {'HTKN': balance['balance'], settings['ASSET_CODE']: balance['balance']}
         return {}
 
     def _merge_balance(balances: STELLAR_BALANCES) -> Dict[str, str]:
