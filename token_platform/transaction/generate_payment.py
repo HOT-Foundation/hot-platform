@@ -40,8 +40,7 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
         focus_address = target_address if memo_on == 'destination' else source_account
         url_get_transaction = await get_transaction_by_memo(focus_address, memo)
         if url_get_transaction:
-            return web.json_response(url_get_transaction, status=400)
-
+            raise web.HTTPBadRequest(reason="Transaction is already submitted")
     result = await generate_payment(transaction_source_address, source_account, target_address, amount_htkn, amount_xlm, sequence_number, memo)
     return web.json_response(result)
 
