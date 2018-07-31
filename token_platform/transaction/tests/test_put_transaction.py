@@ -29,7 +29,6 @@ class TestSubmitTransactionFromRequest(BaseTestClass):
         assert resp.status == 400
         text = await resp.json()
         assert 'message' in text
-        assert 'traceback' in text
 
     @unittest_run_loop
     @patch('transaction.put_transaction.is_duplicate_transaction')
@@ -42,4 +41,3 @@ class TestSubmitTransactionFromRequest(BaseTestClass):
         assert resp.status == 400
         text = await resp.json()
         assert 'message' in text
-        assert 'traceback' in text
