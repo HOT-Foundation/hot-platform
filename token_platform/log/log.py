@@ -23,6 +23,10 @@ async def handle_log(request, handler):
 
 
 def write_access_log(request, response, time):
+    request_name = request.path_qs
+    if request_name == '/metrics':
+        return None
+
     now = datetime.utcnow()
     diff_time = now - time
     diff_time_seconds = diff_time.total_seconds()
