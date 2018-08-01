@@ -24,15 +24,17 @@ async def handle_log(request, handler):
 
 def write_access_log(request, response, time):
     request_name = request.path_qs
-    if request_name != '/metrics':
-        now = datetime.utcnow()
-        diff_time = now - time
-        diff_time_seconds = diff_time.total_seconds()
+    if request_name == '/metrics':
+        return None
 
-        user_agent = request.headers.get('User-Agent', '-')
-        referer = request.headers.get('Referer', '-')
-        logger = logging.getLogger('aiohttp.access.custom')
-        logger.info(f'{request.remote} "{request.method} {request.path_qs} HTTP/{request.version.major}.{request.version.minor}" "{referer}" "{user_agent}" "{response.status}" {diff_time_seconds} seconds')
+    now = datetime.utcnow()
+    diff_time = now - time
+    diff_time_seconds = diff_time.total_seconds()
+
+    user_agent = request.headers.get('User-Agent', '-')
+    referer = request.headers.get('Referer', '-')
+    logger = logging.getLogger('aiohttp.access.custom')
+    logger.info(f'{request.remote} "{request.method} {request.path_qs} HTTP/{request.version.major}.{request.version.minor}" "{referer}" "{user_agent}" "{response.status}" {diff_time_seconds} seconds')
 
 
 def write_error_log(error_message, traceback_stack):
