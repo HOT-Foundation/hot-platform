@@ -14,3 +14,5 @@ settings['HORIZON_URL'] = os.environ['HORIZON_URL']
 settings['LOG_OPS'] = {
     'SUBMIT': '[SUBMIT]'
 }
+
+settings['SENTRY_ENDPOINT'] = os.getenv('SENTRY_ENDPOINT', False)

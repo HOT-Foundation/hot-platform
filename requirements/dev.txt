@@ -11,3 +11,4 @@ asynctest==0.12.2
 mypy==0.610
 # pytest-mypy==0.3.0
 prometheus_client==0.2.0
+raven==6.9.0

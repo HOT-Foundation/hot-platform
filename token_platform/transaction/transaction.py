@@ -56,11 +56,11 @@ async def get_current_sequence_number(wallet_address:str) -> int:
     return sequence
 
 
-async def get_transaction_hash(address: str, memo: str) -> str:
+async def get_transaction_hash(address: str, memo: str) -> Union[str, None]:
     """Retrieve transaction detail from wallet address and memo."""
     transaction = await get_transaction_by_memo(address, memo)
 
-    if isinstance(transaction, Dict):
+    if isinstance(transaction, Dict) and 'transaction_hash' in transaction:
         return transaction['transaction_hash']
     else:
         return None

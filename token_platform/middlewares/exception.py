@@ -5,6 +5,7 @@ from aiohttp import web
 from stellar_base.utils import DecodeError
 from stellar_base.exceptions import AccountNotExistError, HorizonError
 from typing import Dict
+from sentry import capture_exception
 
 @web.middleware
 async def handle_error(request, handler):
@@ -24,7 +25,8 @@ async def handle_error(request, handler):
     except web.HTTPNotFound as ex:
         return web.json_response(format_error(ex), status=404)
     except web.HTTPInternalServerError as ex:
-        return web.json_response(format_error(ex), status=500)
+        capture_exception()
+        return web.json_response(format_error_5xx(ex), status=500)
     except web.HTTPConflict as ex:
         return web.json_response(format_error(ex), status=409)
     except Exception as ex:
@@ -33,6 +35,18 @@ async def handle_error(request, handler):
 
 
 def format_error(e):
+    try:
+        body = e.reason
+        if isinstance(body, Dict):
+            e = body['message']
+    except:
+        pass
+
+    return {
+        'message': str(e)
+    }
+
+def format_error_5xx(e):
     try:
         body = e.reason
         if isinstance(body, Dict):
