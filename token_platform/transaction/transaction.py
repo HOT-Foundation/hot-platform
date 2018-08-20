@@ -18,9 +18,7 @@ async def is_duplicate_transaction(transaction_hash: str) -> bool:
         async with session.get(url) as resp:
             response = await resp.json()
             id = response.get('id')
-            if response.get('status') == 404 or id:
-                return True
-            return False
+            return True if id else False
 
 
 async def submit_transaction(xdr: bytes) -> Dict[str, str]:
