@@ -1,20 +1,20 @@
-from tests.test_utils import BaseTestClass
-
 import pytest
 from aiohttp.test_utils import unittest_run_loop
 from aiohttp.web_exceptions import HTTPBadRequest, HTTPInternalServerError
 from asynctest import patch
-from conf import settings
 from stellar_base.builder import Builder
 from stellar_base.keypair import Keypair
+from tests.test_utils import BaseTestClass
+
+from conf import settings
 from transaction.tests.factory.horizon import HorizonData
-from transaction.transaction import (get_current_sequence_number, get_signers,
+from transaction.transaction import (get_current_sequence_number,
+                                     get_reason_transaction, get_signers,
                                      get_threshold_weight,
                                      get_transaction_by_memo,
                                      get_transaction_hash,
                                      is_duplicate_transaction,
-                                     submit_transaction,
-                                     get_reason_transaction)
+                                     submit_transaction)
 from wallet.tests.factory.wallet import StellarWallet
 
 
@@ -24,20 +24,22 @@ class TestSubmitTransaction(BaseTestClass):
         def submit(self, tx_hash):
             raise ValueError('response is not json format.')
 
-    class SuccessTransaction():
-        def submit(self, tx_hash):
-            return {
-                'status': 200,
-                'msg' : 'success'
-            }
+    class SuccessResponse():
+        def __init__(self):
+            self.status = 200
+
+        async def json(self):
+            return { 'status': 200 }
 
     @unittest_run_loop
-    @patch('transaction.transaction.Horizon')
-    async def test_submit_transaction_success(self, mock_horizon) -> None:
-        mock_horizon.return_value = self.SuccessTransaction()
+    @patch('aiohttp.ClientSession.post')
+    async def test_submit_transaction_success(self, mock_client) -> None:
+        session = mock_client.return_value
+        session.__aenter__.return_value = self.SuccessResponse()
         signed_xdr = 'Testtest'
         result = await submit_transaction(signed_xdr)
-        assert result == mock_horizon.return_value.submit('test')
+        expect = self.SuccessResponse()
+        assert result == await expect.json()
 
     @unittest_run_loop
     async def test_submit_transaction_fail_with_duplicate_xdr(self) -> None:

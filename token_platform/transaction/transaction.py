@@ -1,7 +1,7 @@
 import copy
 from typing import Any, Dict, List, Mapping, NewType, Optional, Union
 
-from aiohttp import web
+import aiohttp
 from conf import settings
 from router import reverse
 from stellar_base.horizon import Horizon
@@ -9,35 +9,33 @@ from stellar_base.transaction import Transaction
 from wallet.wallet import get_wallet
 
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
-
+HORIZON_URL = settings['HORIZON_URL']
 
 async def is_duplicate_transaction(transaction_hash: str) -> bool:
     """Check transaction is duplicate or not"""
-    horizon = Horizon(horizon=settings['HORIZON_URL'])
-    try:
-        transaction = horizon.transaction(transaction_hash)
-    except Exception:
-        return False
-    id = transaction.get('id')
-    return True if id else False
+    url = f'{HORIZON_URL}/transactions/{transaction_hash}'
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            response = await resp.json()
+            id = response.get('id')
+            return True if id else False
 
 
 async def submit_transaction(xdr: bytes) -> Dict[str, str]:
     """Submit transaction into Stellar network"""
     horizon = Horizon(horizon=settings['HORIZON_URL'])
-
-    try:
-        response = horizon.submit(xdr)
-    except Exception as e:
-        msg = str(e)
-        raise web.HTTPBadRequest(reason=msg)
-    if response.get('status') == 400:
-        msg = response.get('extras', {}).get('result_codes', {}).get('transaction', None)
-        if msg:
-            reasons = get_reason_transaction(response)
-            if reasons: msg += f' {reasons}'
-        raise web.HTTPBadRequest(reason=msg)
-    return response
+    url = f'{HORIZON_URL}/transactions'
+    async with aiohttp.ClientSession() as session:
+        data = { 'tx': xdr }
+        async with session.post(url, data=data) as resp:
+            response = await resp.json()
+            if resp.status == 400:
+                msg = response.get('extras', {}).get('result_codes', {}).get('transaction', None)
+                if msg:
+                    reasons = get_reason_transaction(response)
+                    if reasons: msg += f' {reasons}'
+                raise aiohttp.web.HTTPBadRequest(reason=msg)
+            return response
 
 
 def get_reason_transaction(response: Dict) -> Union[str, None]:
@@ -100,7 +98,7 @@ async def get_transaction(tx_hash: str) -> Dict[str, Union[str, int, List[Dict[s
     transaction = horizon.transaction(tx_hash)
 
     if transaction.get('status', None) == 404:
-        raise web.HTTPNotFound(text=str(transaction.get('title', 'Resource not found')))
+        raise aiohttp.web.HTTPNotFound(text=str(transaction.get('title', 'Resource not found')))
 
     tx_detail = _format_transaction(transaction)
     tx_detail["operations"] = _get_operation_data_of_transaction(tx_hash, horizon)
