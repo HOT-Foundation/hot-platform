@@ -37,7 +37,7 @@ async def generate_merge_transaction(transaction_source_address: str, wallet_add
 
 
 async def build_generate_merge_transaction(transaction_source_address: str, wallet_detail: Dict, parties_wallet: List=None) -> Tuple[Any, str]:
-    """ Builder transaction close escrow wallet by payment remaining HTKN from escrow_wallet to provider_wallet and merge account from escrow_wallet to creator_wallet, Finally, return xdr and transaction_hash
+    """ Builder transaction close escrow wallet by payment remaining HOT from escrow_wallet to provider_wallet and merge account from escrow_wallet to creator_wallet, Finally, return xdr and transaction_hash
 
     Args:
         escrow_wallet: escrow wallet response from get_escrow_wallet_detail

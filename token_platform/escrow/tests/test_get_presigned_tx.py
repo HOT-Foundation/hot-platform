@@ -27,7 +27,7 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
         mock_get_wallet.return_value = {
             '@id': reverse('escrow-address', escrow_address=''),
             'asset': {
-                'HTKN': '10.0000000',
+                'HOT': '10.0000000',
                 'XLM': '9.9999200'
             },
             'generate-wallet': reverse('escrow-generate-wallet', escrow_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'),
@@ -68,7 +68,7 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
         mock_get_wallet.return_value = {
             '@id': reverse('escrow-address', escrow_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'),
             'asset': {
-                'HTKN': '10.0000000',
+                'HOT': '10.0000000',
                 'XLM': '9.9999200'
             },
             'generate-wallet': reverse('escrow-generate-wallet', escrow_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'),
@@ -133,7 +133,7 @@ class TestGeneratePreSignedTxXDR(BaseTestClass):
         mock_get_wallet.return_value = {
             '@id': reverse('escrow-address', escrow_address=''),
             'asset': {
-                'HTKN': '10.0000000',
+                'HOT': '10.0000000',
                 'XLM': '9.9999200'
             },
             'generate-wallet': reverse('escrow-generate-wallet', escrow_address='GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'),

@@ -57,7 +57,7 @@ metric['POST_CLOSE_JOINT_WALLET'] = Gauge(
     'post_close_joint_wallet_token_platform_api', 'tracking post close joint wallet api')
 
 metric['GET_CHANGE_TRUST_ADD_TOKEN'] = Gauge(
-    'get_change_trust_add_token_api', 'tracking get change trust and add HTKN')
+    'get_change_trust_add_token_api', 'tracking get change trust and add HOT')
 
 async def get_metrics(request: web.Request) -> web.Response:
     response = web.Response(body=prometheus_client.generate_latest())
