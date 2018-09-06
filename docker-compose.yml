@@ -12,7 +12,7 @@ services:
       - "./:/usr/src"
     environment:
       - ASSET_CODE=HOT
-      - ISSUER=GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ
+      - HOT_ISSUER=GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ
       - PYTHONPATH=/usr/src/token_platform
       # - PASSPHRASE=Integration Test Network ; zulucrypto
       - PASSPHRASE=TESTNET
