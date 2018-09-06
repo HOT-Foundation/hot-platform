@@ -32,7 +32,7 @@ async def test_get_wallet_success_trusted_htkn(mock_address):
         'balance': '7.0000000',
         'limit': '922337203685.4775807',
         'asset_type': 'credit_alphanum4',
-        'asset_code': 'HTKN',
+        'asset_code': 'HOT',
         'asset_issuer': 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ'
     },{
         'balance': '10.0000000',
@@ -54,7 +54,7 @@ async def test_get_wallet_success_trusted_htkn(mock_address):
         'wallet_address': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
         '@id': f'{host}{url}',
         'asset': {
-            'HTKN': '7.0000000',
+            'HOT': '7.0000000',
             'XLM': '9.9999200'
         },
         'sequence': '1',

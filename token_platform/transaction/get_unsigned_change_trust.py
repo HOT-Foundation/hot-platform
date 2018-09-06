@@ -58,7 +58,7 @@ async def build_unsigned_add_trust_and_htkn(source_address: str, transaction_sou
     """"Build unsigned transfer transaction return unsigned XDR and transaction hash.
 
         Args:
-            source_address: address need to be trust HTKN and address for getting HTKN
+            source_address: address need to be trust HOT and address for getting HOT
     """
     builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
     builder.append_trust_op(settings['ISSUER'], settings['ASSET_CODE'], source=source_address, limit=settings['LIMIT_ASSET'])
@@ -101,7 +101,7 @@ def build_unsigned_change_trust(source_address: str, transaction_source_address:
     """"Build unsigned transfer transaction return unsigned XDR and transaction hash.
 
         Args:
-            source_address: address need to be trust HTKN
+            source_address: address need to be trust HOT
     """
     builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
     builder.append_trust_op(settings['ISSUER'], settings['ASSET_CODE'], source=source_address, limit=settings['LIMIT_ASSET'])

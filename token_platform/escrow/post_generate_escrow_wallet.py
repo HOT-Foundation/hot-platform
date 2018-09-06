@@ -78,7 +78,7 @@ async def generate_escrow_wallet(escrow_address: str,
         * creator_address: an address of transaction owner.
         * destination_address: an address of transaction owner.
         * provider_address: an address of ,
-        * starting_balance: startung amount of custom asset(HTKN) in new wallet.
+        * starting_balance: startung amount of custom asset(HOT) in new wallet.
         * expiration_date: date and time in ISO 8601 format. For futher detail see https://www.w3.org/TR/NOTE-datetime.
     '''
     starting_custom_asset: Decimal = Decimal(starting_balance)
@@ -153,7 +153,7 @@ async def build_generate_escrow_wallet_transaction(
         * creator_address: an address of source wallet which is owner of the transaction.
         * cost_per_transaction: cost for each promotion deals.
         * starting_native_asset: starting amount of XLM.
-        * starting_custom_asset: starting amount of custom asset(HTKN).
+        * starting_custom_asset: starting amount of custom asset(HOT).
         * expiration_date: a date when escrow address is terminated.
     '''
 

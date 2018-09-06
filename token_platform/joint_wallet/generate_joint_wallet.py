@@ -42,7 +42,7 @@ async def generate_joint_wallet(transaction_source_address: str, deal_address: s
 
 
 async def build_joint_wallet(transaction_source_address: str, deal_address: str, parties: List, creator: str, starting_xlm: Decimal, meta:str=None):
-    """Build transaction for create joint wallet, trust HTKN and set option signer."""
+    """Build transaction for create joint wallet, trust HOT and set option signer."""
 
     def _add_signer(builder: Builder, deal_address: str, party: str, amount: Decimal):
         """Set permission of parties can signed transaction that generate from joint account"""
