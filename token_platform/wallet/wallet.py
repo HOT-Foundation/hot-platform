@@ -1,15 +1,17 @@
+from decimal import Decimal
 from typing import Tuple
 
+from aiohttp import web
 from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
-from stellar_base.utils import DecodeError
 from stellar_base.exceptions import AccountNotExistError, HorizonError
+from stellar_base.utils import DecodeError
 
-from aiohttp import web
+import async_stellar
 from conf import settings
-from decimal import Decimal
 
 
+#Will be depricated use get_wallet_async instead
 async def get_wallet(wallet_address: str) -> StellarAddress:
     """Get wallet from stellar address"""
     wallet = StellarAddress(address=wallet_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
@@ -21,6 +23,14 @@ async def get_wallet(wallet_address: str) -> StellarAddress:
         raise web.HTTPNotFound(reason=msg)
     return wallet
 
+async def get_wallet_async(wallet_address: str) -> StellarAddress:
+    """Get wallet from stellar address"""
+    try:
+        wallet = await async_stellar.get_wallet(wallet_address)
+    except (AccountNotExistError, HorizonError) as ex:
+        msg = "{}: {}".format(str(ex), wallet_address)
+        raise web.HTTPNotFound(reason=msg)
+    return wallet
 
 def wallet_address_is_duplicate(destination_address: str) -> bool:
     """Check address ID is not duplicate"""
