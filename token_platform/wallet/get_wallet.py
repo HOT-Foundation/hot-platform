@@ -7,7 +7,7 @@ from aiohttp import web
 from stellar_base.builder import Builder
 
 from conf import settings
-from wallet.wallet import (build_generate_trust_wallet_transaction, get_wallet,
+from wallet.wallet import (build_generate_trust_wallet_transaction, get_wallet_async,
                            wallet_address_is_duplicate)
 from router import reverse
 
@@ -54,7 +54,7 @@ async def get_wallet_detail(wallet_address: str) -> Dict:
         """ Decode base64 data """
         return {k: b64decode(v).decode('utf-8') for k, v in data.items()}
 
-    wallet = await get_wallet(wallet_address)
+    wallet = await get_wallet_async(wallet_address)
     result: Dict[str, Any] = {
         '@id': reverse('wallet-address', wallet_address=wallet_address),
         'wallet_address': wallet.address,

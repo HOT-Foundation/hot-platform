@@ -6,9 +6,8 @@ from aiohttp import web
 from conf import settings
 from router import reverse
 from transaction.transaction import get_signers
-from wallet.wallet import (build_generate_wallet_transaction,
+from wallet.wallet import (build_generate_wallet_transaction, get_wallet_async,
                            wallet_address_is_duplicate)
-
 
 async def post_generate_wallet_from_request(request: web.Request):
     """Aiohttp Request wallet address to get create wallet transaction."""
@@ -30,16 +29,19 @@ async def post_generate_wallet_from_request(request: web.Request):
     if balance == 0:
         raise web.HTTPBadRequest(reason = 'Balance must have more than 0.')
 
-    duplicate = wallet_address_is_duplicate(destination_address)
+    duplicate = await wallet_address_is_duplicate(destination_address)
     if duplicate:
         raise web.HTTPBadRequest(reason = 'Target address is already used.')
 
-    unsigned_xdr_byte, tx_hash_byte = build_generate_wallet_transaction(transaction_source_address, source_address, destination_address, balance)
+    #Don't move this line below build_generate_wallet_transaction otherwise it will be very slow.
+    signers = await get_signers(source_address)
+
+    wallet = await get_wallet_async(transaction_source_address)
+    unsigned_xdr_byte, tx_hash_byte = build_generate_wallet_transaction(transaction_source_address, source_address, destination_address, balance, sequence=wallet.sequence)
 
     unsigned_xdr: str = unsigned_xdr_byte.decode()
     tx_hash: str = binascii.hexlify(tx_hash_byte).decode()
 
-    signers = await get_signers(source_address)
     host: str = settings['HOST']
 
     result = {

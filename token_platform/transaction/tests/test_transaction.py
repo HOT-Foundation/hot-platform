@@ -16,7 +16,7 @@ from transaction.transaction import (get_current_sequence_number,
                                      is_duplicate_transaction,
                                      submit_transaction)
 from wallet.tests.factory.wallet import StellarWallet
-
+from async_stellar import Wallet
 
 class TestSubmitTransaction(BaseTestClass):
 
@@ -133,16 +133,31 @@ class TestGetcurrentSequenceNumber(BaseTestClass):
 
 class TestGetSigner(BaseTestClass):
     @unittest_run_loop
-    @patch('transaction.transaction.get_wallet')
+    @patch('transaction.transaction.get_wallet_async')
     async def test_get_signers(self, mock_address):
-        balances = [
-            {
-                'balance': '9.9999200',
-                'asset_type': 'native'
-            }]
-        mock_address.return_value = StellarWallet(balances)
 
-        result = await get_signers('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI')
+        signers = [{
+            'public_key': 'GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF',
+            'weight': 1,
+            'key': 'GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF',
+            'type': 'ed25519_public_key'
+        },
+        {
+            'public_key': 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI',
+            'weight': 1,
+            'key': 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI',
+            'type': 'ed25519_public_key'
+        },
+        {
+            'public_key': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+            'weight': 0,
+            'key': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+            'type': 'ed25519_public_key'
+        }]
+
+        mock_address.return_value = Wallet('test-address', 'test-balance', 'test-sequence', {}, signers)
+
+        result = await get_signers('test-address')
         expect_result = [{
                 'public_key': 'GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF',
                 'weight': 1
@@ -150,6 +165,7 @@ class TestGetSigner(BaseTestClass):
                 'public_key': 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI',
                 'weight': 1
             }]
+
         assert result == expect_result
 
 
