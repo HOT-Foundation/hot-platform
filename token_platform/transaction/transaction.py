@@ -6,7 +6,7 @@ from conf import settings
 from router import reverse
 from stellar_base.horizon import Horizon
 from stellar_base.transaction import Transaction
-from wallet.wallet import get_wallet
+from wallet.wallet import get_wallet, get_wallet_async
 
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 HORIZON_URL = settings['HORIZON_URL']
@@ -108,7 +108,7 @@ async def get_transaction(tx_hash: str) -> Dict[str, Union[str, int, List[Dict[s
 
 async def get_signers(wallet_address: str) -> List[Dict[str, str]]:
     """Get signers list of wallet address"""
-    wallet = await get_wallet(wallet_address)
+    wallet = await get_wallet_async(wallet_address)
     signers = list(filter(lambda signer: signer['weight'] > 0, wallet.signers))
     formated = list(map(lambda signer: {'public_key': signer['public_key'], 'weight': signer['weight']}, signers))
     return formated

@@ -40,7 +40,7 @@ async def post_generate_trust_wallet_from_request(request: web.Request):
     except InvalidOperation:
         raise web.HTTPBadRequest(reason = f"{json_response.get('htkn_amount')} is not decimal type")
 
-    duplicate = wallet_address_is_duplicate(destination_address)
+    duplicate = await wallet_address_is_duplicate(destination_address)
     if duplicate:
         raise web.HTTPBadRequest(reason = 'Target address is already used.')
 

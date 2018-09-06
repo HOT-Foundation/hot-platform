@@ -128,17 +128,20 @@ class TestCreateTrustWallet(BaseTestClass):
         text = await result.json()
         assert 'Target address is already used.' in text['message']
 
+    @unittest_run_loop
     @patch('wallet.wallet.StellarAddress.get', **{'side_effect': ValueError})
-    def test_wallet_address_is_duplicate_with_value_error(self, mock):
-        result = wallet_address_is_duplicate(self.target_address)
+    async def test_wallet_address_is_duplicate_with_value_error(self, mock):
+        result = await wallet_address_is_duplicate(self.target_address)
         assert result == True
 
+    @unittest_run_loop
     @patch('wallet.wallet.StellarAddress.get', **{'side_effect': HorizonError('test error')})
-    def test_wallet_address_is_duplicate_with_account_not_existing_errir(self, mock):
-        result = wallet_address_is_duplicate(self.target_address)
+    async def test_wallet_address_is_duplicate_with_account_not_existing_errir(self, mock):
+        result = await wallet_address_is_duplicate(self.target_address)
         assert result == False
 
+    @unittest_run_loop
     @patch('wallet.wallet.StellarAddress.get', **{'return_value': True})
-    def test_wallet_address_is_duplicate_fail(self, mock):
-            result = wallet_address_is_duplicate(self.wallet_address)
+    async def test_wallet_address_is_duplicate_fail(self, mock):
+            result = await wallet_address_is_duplicate(self.wallet_address)
             assert result == True

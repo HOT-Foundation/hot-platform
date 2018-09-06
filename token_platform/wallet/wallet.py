@@ -27,23 +27,19 @@ async def get_wallet_async(wallet_address: str) -> StellarAddress:
     """Get wallet from stellar address"""
     try:
         wallet = await async_stellar.get_wallet(wallet_address)
-    except (AccountNotExistError, HorizonError) as ex:
+    except (web.HTTPNotFound) as ex:
         msg = "{}: {}".format(str(ex), wallet_address)
         raise web.HTTPNotFound(reason=msg)
     return wallet
 
-def wallet_address_is_duplicate(destination_address: str) -> bool:
+async def wallet_address_is_duplicate(destination_address: str) -> bool:
     """Check address ID is not duplicate"""
-    wallet = StellarAddress(address=destination_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
-
     try:
-        wallet.get()
+        wallet = await async_stellar.get_wallet(destination_address)
         return True
-    except (AccountNotExistError, HorizonError):
+    except (web.HTTPNotFound) as ex:
         return False
-    except (ValueError):
-        return True
-
+    return True
 
 def build_generate_trust_wallet_transaction(transaction_source_address: str, source_address: str, destination_address: str, xlm_amount: Decimal, htkn_amount: Decimal = Decimal(0)) -> Tuple[bytes, bytes]:
     """"Build transaction return unsigned XDR and transaction hash.
@@ -84,7 +80,7 @@ def build_generate_trust_wallet_transaction(transaction_source_address: str, sou
     return unsigned_xdr, tx_hash
 
 
-def build_generate_wallet_transaction(transaction_source_address: str, source_address: str, destination_address: str, amount: Decimal) -> Tuple[bytes, bytes]:
+def build_generate_wallet_transaction(transaction_source_address: str, source_address: str, destination_address: str, amount: Decimal, sequence=None) -> Tuple[bytes, bytes]:
     """"Build transaction return unsigned XDR and transaction hash.
 
         Args:
@@ -93,7 +89,8 @@ def build_generate_wallet_transaction(transaction_source_address: str, source_ad
             destination_address: wallet id of new wallet
             amount: starting balance of new wallet
     """
-    builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
+
+    builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'], sequence=None)
 
     try:
         builder.append_create_account_op(
