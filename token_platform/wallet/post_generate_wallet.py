@@ -33,9 +33,6 @@ async def post_generate_wallet_from_request(request: web.Request):
     if duplicate:
         raise web.HTTPBadRequest(reason = 'Target address is already used.')
 
-    #Don't move this line below build_generate_wallet_transaction otherwise it will be very slow.
-    signers = await get_signers(source_address)
-
     wallet = await get_wallet_async(transaction_source_address)
     unsigned_xdr_byte, tx_hash_byte = build_generate_wallet_transaction(transaction_source_address, source_address, destination_address, balance, sequence=wallet.sequence)
 
@@ -43,6 +40,8 @@ async def post_generate_wallet_from_request(request: web.Request):
     tx_hash: str = binascii.hexlify(tx_hash_byte).decode()
 
     host: str = settings['HOST']
+
+    signers = await get_signers(source_address)
 
     result = {
         'source_address': source_address,

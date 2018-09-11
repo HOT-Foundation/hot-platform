@@ -90,7 +90,7 @@ def build_generate_wallet_transaction(transaction_source_address: str, source_ad
             amount: starting balance of new wallet
     """
 
-    builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'], sequence=None)
+    builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'], sequence=sequence)
 
     try:
         builder.append_create_account_op(
