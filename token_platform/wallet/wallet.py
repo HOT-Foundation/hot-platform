@@ -23,7 +23,7 @@ async def get_wallet(wallet_address: str) -> StellarAddress:
         raise web.HTTPNotFound(reason=msg)
     return wallet
 
-async def get_wallet_async(wallet_address: str) -> StellarAddress:
+async def get_wallet_async(wallet_address: str) -> async_stellar.Wallet:
     """Get wallet from stellar address"""
     try:
         wallet = await async_stellar.get_wallet(wallet_address)
