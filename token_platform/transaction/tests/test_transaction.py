@@ -133,7 +133,7 @@ class TestGetcurrentSequenceNumber(BaseTestClass):
 
 class TestGetSigner(BaseTestClass):
     @unittest_run_loop
-    @patch('transaction.transaction.get_wallet_async')
+    @patch('transaction.transaction.get_wallet')
     async def test_get_signers(self, mock_address):
 
         signers = [{
@@ -155,7 +155,7 @@ class TestGetSigner(BaseTestClass):
             'type': 'ed25519_public_key'
         }]
 
-        mock_address.return_value = Wallet('test-address', 'test-balance', 'test-sequence', {}, signers)
+        mock_address.return_value = Wallet('test-address', 'test-balance', 'test-sequence', {}, signers, {}, {})
 
         result = await get_signers('test-address')
         expect_result = [{

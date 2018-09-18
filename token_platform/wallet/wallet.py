@@ -10,20 +10,7 @@ from stellar_base.utils import DecodeError
 import async_stellar
 from conf import settings
 
-
-#Will be depricated use get_wallet_async instead
 async def get_wallet(wallet_address: str) -> StellarAddress:
-    """Get wallet from stellar address"""
-    wallet = StellarAddress(address=wallet_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
-
-    try:
-        wallet.get()
-    except (AccountNotExistError, HorizonError) as ex:
-        msg = "{}: {}".format(str(ex), wallet_address)
-        raise web.HTTPNotFound(reason=msg)
-    return wallet
-
-async def get_wallet_async(wallet_address: str) -> async_stellar.Wallet:
     """Get wallet from stellar address"""
     try:
         wallet = await async_stellar.get_wallet(wallet_address)
@@ -41,7 +28,7 @@ async def wallet_address_is_duplicate(destination_address: str) -> bool:
         return False
     return True
 
-def build_generate_trust_wallet_transaction(transaction_source_address: str, source_address: str, destination_address: str, xlm_amount: Decimal, htkn_amount: Decimal = Decimal(0)) -> Tuple[bytes, bytes]:
+def build_generate_trust_wallet_transaction(transaction_source_address: str, source_address: str, destination_address: str, xlm_amount: Decimal, htkn_amount: Decimal = Decimal(0), sequence=None) -> Tuple[bytes, bytes]:
     """"Build transaction return unsigned XDR and transaction hash.
 
         Args:
@@ -51,7 +38,7 @@ def build_generate_trust_wallet_transaction(transaction_source_address: str, sou
             xlm_amount: starting xlm_balance of new wallet.
             htkn_amount: starting htkn_balance of new wallet.
     """
-    builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
+    builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'], sequence=sequence)
     builder.append_create_account_op(
         source=source_address, destination=destination_address, starting_balance=xlm_amount)
     try:

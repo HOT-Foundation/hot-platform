@@ -12,7 +12,7 @@ from wallet.get_wallet import (get_wallet_detail,
                                get_wallet_from_request)
 from wallet.tests.factory.wallet import StellarWallet
 from router import reverse
-
+from async_stellar import Wallet
 
 @patch('wallet.get_wallet.get_wallet_detail')
 async def test_get_wallet_from_request(mock_get_wallet):
@@ -25,7 +25,7 @@ async def test_get_wallet_from_request(mock_get_wallet):
 
 
 @asyncio.coroutine
-@patch('wallet.get_wallet.get_wallet_async')
+@patch('wallet.get_wallet.get_wallet')
 async def test_get_wallet_success_trusted_htkn(mock_address):
 
     balances = [{
@@ -67,7 +67,7 @@ async def test_get_wallet_success_trusted_htkn(mock_address):
 
 
 @asyncio.coroutine
-@patch('wallet.get_wallet.get_wallet_async')
+@patch('wallet.get_wallet.get_wallet')
 async def test_get_wallet_success_not_trust_htkn(mock_address):
 
     balances = [
@@ -98,55 +98,43 @@ async def test_get_wallet_success_not_trust_htkn(mock_address):
 
 
 @asyncio.coroutine
-@patch('wallet.wallet.StellarAddress')
+@patch('wallet.wallet.async_stellar.get_wallet')
 async def test_get_wallet_success(mock_address):
-
-    balances = [
-        {
+    address = 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD'
+    balances = [{
             'balance': '9.9999200',
             'asset_type': 'native'
-        }]
-    mock_address.return_value = StellarWallet(balances)
-
-    result = await get_wallet('GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD')
-    expect_result = {
-        "address": "GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD",
-        "balances": [
-            {
-            "balance": "9.9999200",
-            "asset_type": "native"
-            }
-        ],
-        "signers": [
-            {
+    }]
+    sequence = 1
+    data = {
+        "name": "VW5pdFRlc3Q=",
+        "age": "MzA="
+    }
+    thresholds = {
+        "low_threshold": 1,
+        "med_threshold": 2,
+        "high_threshold": 2
+    }
+    signers = [
+        {
             "public_key": "GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF",
             "weight": 1,
             "key": "GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF",
             "type": "ed25519_public_key"
-            },
-            {
-            "public_key": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
-            "weight": 1,
-            "key": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
-            "type": "ed25519_public_key"
-            },
-            {
-            "public_key": "GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD",
-            "weight": 0,
-            "key": "GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD",
-            "type": "ed25519_public_key"
-            }
-        ],
-        "thresholds": {
-            "low_threshold": 1,
-            "med_threshold": 2,
-            "high_threshold": 2
-        },
-        "data": {
-            "name": "VW5pdFRlc3Q=",
-            "age": "MzA="
-        },
-        "sequence": "1"
+        }
+    ]
+
+    mock_address.return_value = Wallet(address, balances, sequence, data, signers, thresholds, {})
+
+    result = await get_wallet(address)
+    expect_result = {
+        "address": address,
+        "balances": balances,
+        "signers": signers,
+        "thresholds": thresholds,
+        "data": data,
+        "sequence": sequence,
+        "flags": {}
     }
     assert result.__dict__ == expect_result
 

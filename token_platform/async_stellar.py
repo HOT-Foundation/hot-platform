@@ -11,6 +11,8 @@ class Wallet:
     sequence: str
     data: dict
     signers: list
+    thresholds: dict
+    flags: dict
 
 async def get_wallet(address: str) -> Wallet:
     url = f'{HORIZON_URL}/accounts/{address}'
@@ -19,7 +21,7 @@ async def get_wallet(address: str) -> Wallet:
             body = await resp.json()
             if resp.status != 200:
                 raise web.HTTPNotFound(reason=body.get('detail'))
-            return Wallet(body['account_id'], body['balances'], body['sequence'], body['data'], body['signers']) # type: ignore
+            return Wallet(body['account_id'], body['balances'], body['sequence'], body['data'], body['signers'], body['thresholds'], body['flags']) # type: ignore
 
 async def get_transaction(transaction_hash: str) -> dict:
     url = f'{HORIZON_URL}/transactions/{transaction_hash}'
