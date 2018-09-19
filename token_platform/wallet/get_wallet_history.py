@@ -6,7 +6,7 @@ from stellar_base.address import Address
 
 from conf import settings
 from router import reverse
-
+import async_stellar
 
 async def get_wallet_history_from_request(request: web.Request) -> web.Response:
     """Get wallet history"""
@@ -56,11 +56,7 @@ async def get_wallet_history(wallet_address: str, sort: str='asc', limit: int=10
     """
         Get wallet history from Stellar network.
     """
-    params = { 'order': sort, 'limit': limit}
-    if offset:
-        params['cursor'] = offset
-    address = Address(address=wallet_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
-    effects = address.effects(**params)
+    effects = await async_stellar.get_wallet_effect(wallet_address, sort, limit, offset)
     return effects
 
 
