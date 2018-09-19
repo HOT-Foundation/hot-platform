@@ -7,7 +7,7 @@ from asynctest import patch
 from stellar_base.exceptions import AccountNotExistError, HorizonError
 
 from conf import settings
-from wallet.wallet import StellarAddress, get_wallet
+from wallet.wallet import get_wallet
 from wallet.get_wallet import (get_wallet_detail,
                                get_wallet_from_request)
 from wallet.tests.factory.wallet import StellarWallet
@@ -140,28 +140,16 @@ async def test_get_wallet_success(mock_address):
 
 
 @asyncio.coroutine
-@patch('wallet.wallet.StellarAddress')
+@patch('wallet.wallet.get_wallet')
 async def test_get_wallet_not_found(mock_address):
-    class MockAddress(object):
-        def get(self):
-            raise HorizonError('Resource Missing')
-
-    mock_address.return_value = MockAddress()
-
     with pytest.raises(web.HTTPNotFound) as context:
-        await get_wallet_detail('GB7D54NKPWYYMMS7JFEQZKDDTW5R7IMXTFN2WIEST2YZVVNO3SHJ3Y7M')
-    assert str(context.value) == 'The resource at the url requested was not found.  This is usually occurs for one of two reasons:  The url requested is not valid, or no data in our database could be found with the parameters provided.: GB7D54NKPWYYMMS7JFEQZKDDTW5R7IMXTFN2WIEST2YZVVNO3SHJ3Y7M'
+        await get_wallet_detail('YYYY')
+    assert str(context.value) == 'The resource at the url requested was not found.  This is usually occurs for one of two reasons:  The url requested is not valid, or no data in our database could be found with the parameters provided.: YYYY'
 
 
 @asyncio.coroutine
-@patch('wallet.wallet.StellarAddress')
+@patch('wallet.wallet.get_wallet')
 async def test_get_wallet_invalid_address(mock_address):
-    class MockAddress(object):
-        def get(self):
-            raise HorizonError('Resource Missing')
-
-    mock_address.return_value = MockAddress()
-
     with pytest.raises(web.HTTPNotFound) as context:
         await get_wallet_detail('XXXX')
     assert str(context.value) == 'The resource at the url requested was not found.  This is usually occurs for one of two reasons:  The url requested is not valid, or no data in our database could be found with the parameters provided.: XXXX'

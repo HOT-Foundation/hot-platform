@@ -2,11 +2,8 @@ import binascii
 from functools import reduce
 from typing import Any, Dict, List, Mapping, NewType, Optional, Union
 
-import requests
 from json import JSONDecodeError
 from aiohttp import web
-from stellar_base.address import Address as StellarAddress
-from stellar_base.builder import Builder
 from decimal import Decimal, InvalidOperation
 from conf import settings
 from router import reverse
@@ -14,8 +11,10 @@ from wallet.wallet import (build_generate_trust_wallet_transaction,  get_wallet,
                            wallet_address_is_duplicate)
 
 
-async def post_generate_trust_wallet_from_request(request: web.Request):
-    """Aiohttp Request wallet address to get create wallet transaction."""
+async def post_generate_trust_wallet_from_request(request: web.Request) -> web.Response:
+    """Aiohttp Request wallet address to get create wallet transaction.
+
+    """
     try:
         json_response = await request.json()
     except JSONDecodeError:

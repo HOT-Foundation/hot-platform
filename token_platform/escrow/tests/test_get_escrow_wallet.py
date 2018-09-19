@@ -10,7 +10,7 @@ from conf import settings
 from escrow.get_escrow_wallet import (get_escrow_wallet_detail,
                                       get_escrow_wallet_from_request)
 from wallet.tests.factory.wallet import StellarWallet
-from wallet.wallet import StellarAddress, get_wallet
+from wallet.wallet import get_wallet
 from router import reverse
 
 

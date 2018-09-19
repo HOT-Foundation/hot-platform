@@ -2,7 +2,6 @@ from decimal import Decimal
 from typing import Tuple
 
 from aiohttp import web
-from stellar_base.address import Address as StellarAddress
 from stellar_base.builder import Builder
 from stellar_base.exceptions import AccountNotExistError, HorizonError
 from stellar_base.utils import DecodeError
@@ -10,7 +9,8 @@ from stellar_base.utils import DecodeError
 import async_stellar
 from conf import settings
 
-async def get_wallet(wallet_address: str) -> StellarAddress:
+
+async def get_wallet(wallet_address: str) -> async_stellar.Wallet:
     """Get wallet from stellar address"""
     try:
         wallet = await async_stellar.get_wallet(wallet_address)
