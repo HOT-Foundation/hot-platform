@@ -6,7 +6,8 @@ from stellar_base.address import Address
 
 from conf import settings
 from router import reverse
-import async_stellar
+from stellar.wallet import get_wallet_effect
+
 
 async def get_wallet_history_from_request(request: web.Request) -> web.Response:
     """Get wallet history"""
@@ -21,7 +22,7 @@ async def get_wallet_history_from_request(request: web.Request) -> web.Response:
     limit = int(limit)
     sort = sort.lower()
 
-    if not(sort == 'asc' or sort == 'desc'):
+    if not (sort == 'asc' or sort == 'desc'):
         raise web.HTTPBadRequest(reason=f'Invalid. Parameter sort.')
 
     if start_date:
@@ -41,7 +42,7 @@ async def get_wallet_history_from_request(request: web.Request) -> web.Response:
 def datetime_is_valid(value: str) -> datetime:
     date_time = None
     try:
-        date_time = parser.isoparse(value) # type: ignore
+        date_time = parser.isoparse(value)  # type: ignore
     except ValueError as ex:
         raise web.HTTPBadRequest(reason=f'Invalid. Parameter date time is in wrong format.')
 
@@ -52,16 +53,15 @@ def datetime_is_valid(value: str) -> datetime:
     return date_time
 
 
-async def get_wallet_history(wallet_address: str, sort: str='asc', limit: int=10, offset: str=None) -> dict:
+async def get_wallet_history(wallet_address: str, sort: str = 'asc', limit: int = 10, offset: str = None) -> dict:
     """
         Get wallet history from Stellar network.
     """
-    effects = await async_stellar.get_wallet_effect(wallet_address, sort, limit, offset)
+    effects = await get_wallet_effect(wallet_address, sort, limit, offset)
     return effects
 
 
-async def format_history(history: dict, wallet_address: str, limit: int, sort: str)-> dict:
-
+async def format_history(history: dict, wallet_address: str, limit: int, sort: str) -> dict:
     def _format_record(record):
         result = record
         result.pop('_links', None)
@@ -82,7 +82,7 @@ async def format_history(history: dict, wallet_address: str, limit: int, sort: s
     previous_sort = 'desc'
 
     if sort and sort == 'desc':
-        #Swap value
+        # Swap value
         next_sort, previous_sort = previous_sort, next_sort
 
     next_history = f'{url}?offset={last_record_offset}&limit={limit}&sort={next_sort}'
@@ -92,7 +92,7 @@ async def format_history(history: dict, wallet_address: str, limit: int, sort: s
         '@id': reverse('wallet-history', wallet_address=wallet_address),
         'history': records,
         'next': next_history,
-        'previous': previous_history
+        'previous': previous_history,
     }
 
     return result
