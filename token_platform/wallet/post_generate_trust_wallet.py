@@ -2,20 +2,19 @@ import binascii
 from functools import reduce
 from typing import Any, Dict, List, Mapping, NewType, Optional, Union
 
-import requests
 from json import JSONDecodeError
 from aiohttp import web
-from stellar_base.address import Address as StellarAddress
-from stellar_base.builder import Builder
 from decimal import Decimal, InvalidOperation
 from conf import settings
 from router import reverse
-from wallet.wallet import (build_generate_trust_wallet_transaction,
+from wallet.wallet import (build_generate_trust_wallet_transaction,  get_wallet,
                            wallet_address_is_duplicate)
 
 
-async def post_generate_trust_wallet_from_request(request: web.Request):
-    """Aiohttp Request wallet address to get create wallet transaction."""
+async def post_generate_trust_wallet_from_request(request: web.Request) -> web.Response:
+    """Aiohttp Request wallet address to get create wallet transaction.
+
+    """
     try:
         json_response = await request.json()
     except JSONDecodeError:
@@ -40,11 +39,12 @@ async def post_generate_trust_wallet_from_request(request: web.Request):
     except InvalidOperation:
         raise web.HTTPBadRequest(reason = f"{json_response.get('htkn_amount')} is not decimal type")
 
-    duplicate = wallet_address_is_duplicate(destination_address)
+    duplicate = await wallet_address_is_duplicate(destination_address)
     if duplicate:
         raise web.HTTPBadRequest(reason = 'Target address is already used.')
 
-    unsigned_xdr_byte, tx_hash_byte = build_generate_trust_wallet_transaction(transaction_source_address, source_address, destination_address, xlm_amount, htkn_amount)
+    wallet = await get_wallet(transaction_source_address)
+    unsigned_xdr_byte, tx_hash_byte = build_generate_trust_wallet_transaction(transaction_source_address, source_address, destination_address, xlm_amount, htkn_amount, sequence=wallet.sequence)
 
     unsigned_xdr: str = unsigned_xdr_byte.decode()
     tx_hash: str = binascii.hexlify(tx_hash_byte).decode()

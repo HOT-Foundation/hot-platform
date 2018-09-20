@@ -8,28 +8,31 @@ from tests.test_utils import BaseTestClass
 
 from conf import settings
 from transaction.tests.factory.horizon import HorizonData
-from transaction.transaction import (get_current_sequence_number,
-                                     get_reason_transaction, get_signers,
-                                     get_threshold_weight,
-                                     get_transaction_by_memo,
-                                     get_transaction_hash,
-                                     is_duplicate_transaction,
-                                     submit_transaction)
+from transaction.transaction import (
+    get_current_sequence_number,
+    get_reason_transaction,
+    get_signers,
+    get_threshold_weight,
+    get_transaction_by_memo,
+    get_transaction_hash,
+    is_duplicate_transaction,
+    submit_transaction,
+)
 from wallet.tests.factory.wallet import StellarWallet
+from stellar.wallet import Wallet
 
 
 class TestSubmitTransaction(BaseTestClass):
-
-    class WrongResponse():
+    class WrongResponse:
         def submit(self, tx_hash):
             raise ValueError('response is not json format.')
 
-    class SuccessResponse():
+    class SuccessResponse:
         def __init__(self):
             self.status = 200
 
         async def json(self):
-            return { 'status': 200 }
+            return {'status': 200}
 
     @unittest_run_loop
     @patch('aiohttp.ClientSession.post')
@@ -63,7 +66,6 @@ class TestSubmitTransaction(BaseTestClass):
 
 
 class TestDuplicateTransaction(BaseTestClass):
-
     @unittest_run_loop
     @patch('transaction.transaction.Horizon')
     async def test_is_duplicate_transaction_duplicate_when_id_exist(self, mock_horizon) -> None:
@@ -79,9 +81,9 @@ class TestDuplicateTransaction(BaseTestClass):
     async def test_is_duplicate_transaction_not_duplicate_when_get_not_found(self, mock_horizon) -> None:
         instance = mock_horizon.return_value
         instance.transaction.return_value = {
-                "title": "Resource Missing",
-                "status": 404,
-                "detail": "The resource at the url requested was not found.  This is usually occurs for one of two reasons:  The url requested is not valid, or no data in our database could be found with the parameters provided."
+            "title": "Resource Missing",
+            "status": 404,
+            "detail": "The resource at the url requested was not found.  This is usually occurs for one of two reasons:  The url requested is not valid, or no data in our database could be found with the parameters provided.",
         }
 
         tx_hash = 'e11b7a3677fdd45c885'
@@ -114,8 +116,7 @@ class TestGetTransactionHash(BaseTestClass):
 
 
 class TestGetcurrentSequenceNumber(BaseTestClass):
-
-    class Account():
+    class Account:
         def get(self, str):
             return '1234566789'
 
@@ -135,21 +136,36 @@ class TestGetSigner(BaseTestClass):
     @unittest_run_loop
     @patch('transaction.transaction.get_wallet')
     async def test_get_signers(self, mock_address):
-        balances = [
-            {
-                'balance': '9.9999200',
-                'asset_type': 'native'
-            }]
-        mock_address.return_value = StellarWallet(balances)
 
-        result = await get_signers('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI')
-        expect_result = [{
+        signers = [
+            {
                 'public_key': 'GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF',
-                'weight': 1
-            }, {
+                'weight': 1,
+                'key': 'GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF',
+                'type': 'ed25519_public_key',
+            },
+            {
                 'public_key': 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI',
-                'weight': 1
-            }]
+                'weight': 1,
+                'key': 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI',
+                'type': 'ed25519_public_key',
+            },
+            {
+                'public_key': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+                'weight': 0,
+                'key': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
+                'type': 'ed25519_public_key',
+            },
+        ]
+
+        mock_address.return_value = Wallet('test-address', 'test-balance', 'test-sequence', {}, signers, {}, {})
+
+        result = await get_signers('test-address')
+        expect_result = [
+            {'public_key': 'GDBNKZDZMEKXOH3HLWLKFMM7ARN2XVPHWZ7DWBBEV3UXTIGXBTRGJLHF', 'weight': 1},
+            {'public_key': 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'weight': 1},
+        ]
+
         assert result == expect_result
 
 
@@ -157,11 +173,7 @@ class TestGetThreshold(BaseTestClass):
     @unittest_run_loop
     @patch('transaction.transaction.get_wallet')
     async def test_get_threshold_weight_low_threshold(self, mock_address):
-        balances = [
-            {
-                'balance': '9.9999200',
-                'asset_type': 'native'
-            }]
+        balances = [{'balance': '9.9999200', 'asset_type': 'native'}]
         mock_address.return_value = StellarWallet(balances)
 
         result = await get_threshold_weight('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'allow_trust')
@@ -170,11 +182,7 @@ class TestGetThreshold(BaseTestClass):
     @unittest_run_loop
     @patch('transaction.transaction.get_wallet')
     async def test_get_threshold_weight_med_threshold(self, mock_address):
-        balances = [
-            {
-                'balance': '9.9999200',
-                'asset_type': 'native'
-            }]
+        balances = [{'balance': '9.9999200', 'asset_type': 'native'}]
         mock_address.return_value = StellarWallet(balances)
 
         result = await get_threshold_weight('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'payment')
@@ -183,11 +191,7 @@ class TestGetThreshold(BaseTestClass):
     @unittest_run_loop
     @patch('transaction.transaction.get_wallet')
     async def test_get_threshold_weight_high_threshold(self, mock_address):
-        balances = [
-            {
-                'balance': '9.9999200',
-                'asset_type': 'native'
-            }]
+        balances = [{'balance': '9.9999200', 'asset_type': 'native'}]
         mock_address.return_value = StellarWallet(balances)
 
         result = await get_threshold_weight('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'set_signer')
@@ -209,27 +213,13 @@ class TestGetReasonTransaction(BaseTestClass):
     @unittest_run_loop
     async def test_get_reason_transacton_successfully(self):
         respons_data = {
-            "extras": {
-                "result_codes": {
-                    "transaction": "tx_failed",
-                    "operations": [
-                        "op_no_destination",
-                        "op_success"
-                    ]
-                }
-            }
+            "extras": {"result_codes": {"transaction": "tx_failed", "operations": ["op_no_destination", "op_success"]}}
         }
         resp = get_reason_transaction(respons_data)
         self.assertEqual(resp, 'op_no_destination/op_success')
 
     @unittest_run_loop
     async def test_get_reason_transacton_not_found_value(self):
-        respons_data = {
-            "extras": {
-                "result_codes": {
-                    "transaction": "tx_bad_seq"
-                }
-            }
-        }
+        respons_data = {"extras": {"result_codes": {"transaction": "tx_bad_seq"}}}
         resp = get_reason_transaction(respons_data)
         self.assertEqual(resp, None)
