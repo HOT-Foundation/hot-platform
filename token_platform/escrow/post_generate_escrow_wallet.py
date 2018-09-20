@@ -11,6 +11,7 @@ from stellar_base.utils import DecodeError
 from conf import settings
 from transaction.transaction import get_signers, get_threshold_weight
 from router import reverse
+from stellar.wallet import get_stellar_wallet
 
 
 async def post_generate_escrow_wallet_from_request(request: web.Request) -> web.Response:
@@ -26,12 +27,11 @@ async def post_generate_escrow_wallet_from_request(request: web.Request) -> web.
     cost_per_transaction = body['cost_per_transaction']
     expiration_date = body.get('expiration_date', None)
 
-
     try:
         int_cost = Decimal(cost_per_transaction)
         decimal_starting_balance = Decimal(starting_balance)
     except InvalidOperation:
-        raise web.HTTPBadRequest(reason = f"Can not convert to destination_address or cost_per_transaction to Decimal")
+        raise web.HTTPBadRequest(reason=f"Can not convert to destination_address or cost_per_transaction to Decimal")
 
     if int_cost <= 0:
         raise web.HTTPBadRequest(reason=f'Parameter cost_per_transaction is not valid.')
@@ -40,33 +40,35 @@ async def post_generate_escrow_wallet_from_request(request: web.Request) -> web.
         raise web.HTTPBadRequest(reason=f'Parameter starting_balance is not match with cost_per_transaction.')
 
     if expiration_date:
-        datetime = parser.isoparse(expiration_date) # type: ignore
+        datetime = parser.isoparse(expiration_date)  # type: ignore
 
         timezone_offset = datetime.utcoffset()
         if timezone_offset is None:
             raise web.HTTPBadRequest(reason=f'Parameter expiration date is not valid.')
 
     result = await generate_escrow_wallet(
-                                escrow_address,
-                                transaction_source_address,
-                                creator_address,
-                                destination_address,
-                                provider_address,
-                                starting_balance,
-                                cost_per_transaction,
-                                expiration_date)
+        escrow_address,
+        transaction_source_address,
+        creator_address,
+        destination_address,
+        provider_address,
+        starting_balance,
+        cost_per_transaction,
+        expiration_date,
+    )
     return web.json_response(result)
 
 
-async def generate_escrow_wallet(escrow_address: str,
-                                transaction_source_address: str,
-                                creator_address: str,
-                                destination_address: str,
-                                provider_address: str,
-                                starting_balance: str,
-                                cost_per_transaction: str,
-                                expiration_date: str = None,
-                                ) -> Dict:
+async def generate_escrow_wallet(
+    escrow_address: str,
+    transaction_source_address: str,
+    creator_address: str,
+    destination_address: str,
+    provider_address: str,
+    starting_balance: str,
+    cost_per_transaction: str,
+    expiration_date: str = None,
+) -> Dict:
     '''Making transaction for creating escrow wallet
 
         number_of_transaction + 2 due to transfer to merchant and merge back to hotnow
@@ -87,16 +89,18 @@ async def generate_escrow_wallet(escrow_address: str,
     number_of_transaction: Decimal = (starting_custom_asset / cost_per_tx_decimal) + 2
     starting_xlm: Decimal = calculate_initial_xlm(Decimal(8), number_of_transaction)
 
+    wallet = await get_stellar_wallet(transaction_source_address)
     xdr, tx_hash = await build_generate_escrow_wallet_transaction(
-        escrow_address = escrow_address,
-        transaction_source_address = transaction_source_address,
-        provider_address = provider_address,
-        creator_address = creator_address,
-        destination_address = destination_address,
-        cost_per_transaction = cost_per_tx_decimal,
-        expiration_date = expiration_date,
-        starting_native_asset = starting_xlm,
-        starting_custom_asset = starting_custom_asset
+        escrow_address=escrow_address,
+        transaction_source_address=transaction_source_address,
+        provider_address=provider_address,
+        creator_address=creator_address,
+        destination_address=destination_address,
+        cost_per_transaction=cost_per_tx_decimal,
+        expiration_date=expiration_date,
+        starting_native_asset=starting_xlm,
+        starting_custom_asset=starting_custom_asset,
+        sequence=wallet.sequence,
     )
 
     host = settings['HOST']
@@ -105,7 +109,7 @@ async def generate_escrow_wallet(escrow_address: str,
         '@transaction_url': f"{host}{reverse('transaction', transaction_hash=tx_hash)}",
         'signers': [escrow_address, creator_address, provider_address],
         'xdr': xdr,
-        'transaction_hash': tx_hash
+        'transaction_hash': tx_hash,
     }
 
 
@@ -131,16 +135,17 @@ def calculate_initial_xlm(number_of_entries: Decimal, number_of_transaction: Dec
 
 
 async def build_generate_escrow_wallet_transaction(
-                                        escrow_address: str,
-                                        transaction_source_address: str,
-                                        creator_address: str,
-                                        destination_address: str,
-                                        provider_address: str,
-                                        cost_per_transaction: Decimal,
-                                        starting_native_asset: Decimal,
-                                        starting_custom_asset: Decimal,
-                                        expiration_date: str = None,
-                                        ) -> Tuple[Any, str]:
+    escrow_address: str,
+    transaction_source_address: str,
+    creator_address: str,
+    destination_address: str,
+    provider_address: str,
+    cost_per_transaction: Decimal,
+    starting_native_asset: Decimal,
+    starting_custom_asset: Decimal,
+    expiration_date: str = None,
+    sequence: str = None,
+) -> Tuple[Any, str]:
     '''Building transaction for generating escrow wallet with minimum balance of lumens
         and return unsigned XDR and transaction hash.
 
@@ -157,12 +162,23 @@ async def build_generate_escrow_wallet_transaction(
         * expiration_date: a date when escrow address is terminated.
     '''
 
-    builder = Builder(address=transaction_source_address, horizon=settings['HORIZON_URL'], network=settings['PASSPHRASE'])
-    builder.append_create_account_op(source=creator_address, destination=escrow_address, starting_balance=starting_native_asset)
+    builder = Builder(
+        address=transaction_source_address,
+        horizon=settings['HORIZON_URL'],
+        network=settings['PASSPHRASE'],
+        sequence=sequence,
+    )
+    builder.append_create_account_op(
+        source=creator_address, destination=escrow_address, starting_balance=starting_native_asset
+    )
 
     try:
         builder.append_trust_op(
-            source=escrow_address, destination=settings['ISSUER'], code=settings['ASSET_CODE'], limit=settings['LIMIT_ASSET'])
+            source=escrow_address,
+            destination=settings['ISSUER'],
+            code=settings['ASSET_CODE'],
+            limit=settings['LIMIT_ASSET'],
+        )
     except DecodeError:
         raise web.HTTPBadRequest(reason='Parameter escrow_address or issuer address are not valid.')
     except Exception as e:
@@ -170,25 +186,34 @@ async def build_generate_escrow_wallet_transaction(
         raise web.HTTPInternalServerError(reason=msg)
 
     builder.append_manage_data_op(source=escrow_address, data_name='creator_address', data_value=creator_address)
-    builder.append_manage_data_op(source=escrow_address, data_name='destination_address', data_value=destination_address)
+    builder.append_manage_data_op(
+        source=escrow_address, data_name='destination_address', data_value=destination_address
+    )
     builder.append_manage_data_op(source=escrow_address, data_name='provider_address', data_value=provider_address)
 
     if expiration_date:
         builder.append_manage_data_op(source=escrow_address, data_name='expiration_date', data_value=expiration_date)
-    builder.append_manage_data_op(source=escrow_address, data_name='cost_per_transaction', data_value=str(cost_per_transaction))
+    builder.append_manage_data_op(
+        source=escrow_address, data_name='cost_per_transaction', data_value=str(cost_per_transaction)
+    )
 
     builder.append_set_options_op(
-        source=escrow_address, signer_address=creator_address, signer_type='ed25519PublicKey', signer_weight=1)
+        source=escrow_address, signer_address=creator_address, signer_type='ed25519PublicKey', signer_weight=1
+    )
     builder.append_set_options_op(
-        source=escrow_address, signer_address=provider_address, signer_type='ed25519PublicKey', signer_weight=1)
-    builder.append_set_options_op(source=escrow_address,
-                                  master_weight=0, low_threshold=2, med_threshold=2, high_threshold=2)
+        source=escrow_address, signer_address=provider_address, signer_type='ed25519PublicKey', signer_weight=1
+    )
+    builder.append_set_options_op(
+        source=escrow_address, master_weight=0, low_threshold=2, med_threshold=2, high_threshold=2
+    )
 
-    builder.append_payment_op(source=provider_address,
-                                destination=escrow_address,
-                                asset_code=settings['ASSET_CODE'],
-                                asset_issuer=settings['ISSUER'],
-                                amount=starting_custom_asset)
+    builder.append_payment_op(
+        source=provider_address,
+        destination=escrow_address,
+        asset_code=settings['ASSET_CODE'],
+        asset_issuer=settings['ISSUER'],
+        amount=starting_custom_asset,
+    )
 
     try:
         xdr = builder.gen_xdr()
