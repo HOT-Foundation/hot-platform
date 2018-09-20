@@ -10,7 +10,7 @@ from conf import settings
 from escrow.get_escrow_wallet import (get_escrow_wallet_detail,
                                       get_escrow_wallet_from_request)
 from wallet.tests.factory.wallet import StellarWallet
-from wallet.wallet import StellarAddress, get_wallet
+from wallet.wallet import get_wallet
 from router import reverse
 
 
@@ -76,14 +76,11 @@ async def test_get_escrow_wallet_success_trusted_htkn(mock_address):
 
 
 @asyncio.coroutine
-@patch('wallet.wallet.StellarAddress')
+@patch('wallet.wallet.get_wallet')
 async def test_get_escrow_wallet_not_found(mock_address):
-    class MockAddress(object):
-        def get(self):
-            raise HorizonError('Resource Missing')
-
-    mock_address.return_value = MockAddress()
+    error_message = 'The resource at the url requested was not found.  This is usually occurs for one of two reasons:  The url requested is not valid, or no data in our database could be found with the parameters provided.'
+    mock_address.side_effect = web.HTTPNotFound(reason=error_message)
 
     with pytest.raises(web.HTTPNotFound) as context:
         await get_escrow_wallet_detail('GB7D54NKPWYYMMS7JFEQZKDDTW5R7IMXTFN2WIEST2YZVVNO3SHJ3Y7M')
-    assert str(context.value) == 'Resource Missing: GB7D54NKPWYYMMS7JFEQZKDDTW5R7IMXTFN2WIEST2YZVVNO3SHJ3Y7M'
+    assert str(context.value) == f'{error_message}: GB7D54NKPWYYMMS7JFEQZKDDTW5R7IMXTFN2WIEST2YZVVNO3SHJ3Y7M'

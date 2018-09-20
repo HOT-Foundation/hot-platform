@@ -1,23 +1,18 @@
 import binascii
 
 import pytest
+from aiohttp import web
 from aiohttp.test_utils import unittest_run_loop
 from asynctest import patch
 from stellar_base.exceptions import AccountNotExistError, HorizonError
 from stellar_base.keypair import Keypair
 from stellar_base.utils import StellarMnemonic
 from tests.test_utils import BaseTestClass
-from aiohttp import web
 
 from conf import settings
+from router import reverse
 from wallet.wallet import (build_generate_trust_wallet_transaction,
                            wallet_address_is_duplicate)
-from router import reverse
-
-
-class MockBuilder():
-    def __init__(self):
-        self.te = 'hash'
 
 
 class TestCreateTrustWallet(BaseTestClass):
@@ -33,11 +28,9 @@ class TestCreateTrustWallet(BaseTestClass):
         self.host = settings['HOST']
 
     @unittest_run_loop
-    @patch('wallet.post_generate_trust_wallet.Builder')
     @patch('wallet.post_generate_trust_wallet.wallet_address_is_duplicate')
     @patch('wallet.post_generate_trust_wallet.build_generate_trust_wallet_transaction')
-    async def test_post_generate_trust_wallet_from_request_success(self, mock_xdr, mock_check, mock_te):
-        mock_te.return_value = MockBuilder()
+    async def test_post_generate_trust_wallet_from_request_success(self, mock_xdr, mock_check):
         mock_xdr.return_value = (b'test-xdr', b'test-transaction-envelop')
         mock_check.return_value = False
 
@@ -51,7 +44,6 @@ class TestCreateTrustWallet(BaseTestClass):
         resp = await self.client.request("POST", url, json=json_request)
         assert resp.status == 200
         text = await resp.json()
-        hash = MockBuilder()
         expect_tx_hash = binascii.hexlify(mock_xdr.return_value[1]).decode()
         expect_unsigned_xdr = mock_xdr.return_value[0].decode()
         expect = {

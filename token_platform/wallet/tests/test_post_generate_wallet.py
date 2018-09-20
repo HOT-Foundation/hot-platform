@@ -120,13 +120,13 @@ class TestCreateWallet(BaseTestClass):
         assert 'Target address is already used.' in text['message']
 
     @unittest_run_loop
-    @patch('wallet.wallet.async_stellar.get_wallet', **{'side_effect': web.HTTPNotFound})
+    @patch('wallet.wallet.get_wallet', **{'side_effect': web.HTTPNotFound})
     async def test_wallet_address_is_duplicate_with_value_error(self, mock):
         result = await wallet_address_is_duplicate(self.target_address)
         assert result == False
 
     @unittest_run_loop
-    @patch('wallet.wallet.async_stellar.get_wallet', **{'return_value': 'test-value'})
+    @patch('wallet.wallet.get_wallet', **{'return_value': 'test-value'})
     async def test_wallet_address_is_duplicate_fail(self, mock):
             result = await wallet_address_is_duplicate(self.wallet_address)
             assert result == True
