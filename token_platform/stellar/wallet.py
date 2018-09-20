@@ -1,4 +1,7 @@
+from urllib.parse import urlencode
+
 from aiohttp import ClientSession, web
+
 from conf import settings
 from dataclasses import dataclass
 
@@ -52,16 +55,19 @@ async def get_wallet_effect(address: str, sort: str = 'asc', limit: int = None, 
     if not sort.lower() in {'asc', 'desc'}:
         raise ValueError('sort parameter is wrong.')
 
-    url = f'{HORIZON_URL}/accounts/{address}/effects?order={sort}'
+    url = f'{HORIZON_URL}/accounts/{address}/effects?'
+    query = {'order': sort}
 
     if limit:
-        url += f'&limit={limit}'
+        query['limit'] = limit
 
     if offset:
-        url += f'&cursor={offset}'
+        query['cursor'] = offset
+
+    completed_url = url + urlencode(query)
 
     async with ClientSession() as session:
-        async with session.get(url) as resp:
+        async with session.get(completed_url) as resp:
             body = await resp.json()
             if resp.status == 400:
                 raise web.HTTPBadRequest(reason=body.get('detail'))
