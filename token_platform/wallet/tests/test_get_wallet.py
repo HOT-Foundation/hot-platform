@@ -114,25 +114,3 @@ async def test_get_wallet_success(mock_address):
         "flags": {},
     }
     assert result.__dict__ == expect_result
-
-
-@asyncio.coroutine
-@patch('wallet.wallet.get_wallet')
-async def test_get_wallet_not_found(mock_address):
-    with pytest.raises(web.HTTPNotFound) as context:
-        await get_wallet_detail('YYYY')
-    assert (
-        str(context.value)
-        == 'The resource at the url requested was not found.  This is usually occurs for one of two reasons:  The url requested is not valid, or no data in our database could be found with the parameters provided.: YYYY'
-    )
-
-
-@asyncio.coroutine
-@patch('wallet.wallet.get_wallet')
-async def test_get_wallet_invalid_address(mock_address):
-    with pytest.raises(web.HTTPNotFound) as context:
-        await get_wallet_detail('XXXX')
-    assert (
-        str(context.value)
-        == 'The resource at the url requested was not found.  This is usually occurs for one of two reasons:  The url requested is not valid, or no data in our database could be found with the parameters provided.: XXXX'
-    )
