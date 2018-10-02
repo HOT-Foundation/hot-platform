@@ -22,6 +22,7 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
     target_address = body['target_address']
     amount_htkn = body.get('amount_htkn')
     amount_xlm = body.get('amount_xlm')
+    tax_amount_htkn = body.get('tax_amount_htkn', None)
     sequence_number = body.get('sequence_number', None)
     memo = body.get('memo', None)
     memo_on = body.get('memo_on', 'source')
@@ -43,7 +44,7 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
         if url_get_transaction:
             raise web.HTTPBadRequest(reason="Transaction is already submitted")
     result = await generate_payment(
-        transaction_source_address, source_account, target_address, amount_htkn, amount_xlm, sequence_number, memo
+        transaction_source_address, source_account, target_address, amount_htkn, amount_xlm, tax_amount_htkn, sequence_number, memo
     )
     return web.json_response(result)
 
@@ -54,6 +55,7 @@ async def generate_payment(
     destination: str,
     amount_htkn: Decimal,
     amount_xlm: Decimal,
+    tax_amount_htkn: Decimal = None,
     sequence: int = None,
     memo: str = None
 ) -> Dict:
@@ -68,7 +70,7 @@ async def generate_payment(
             memo: memo text [optional]
     """
     unsigned_xdr, tx_hash = await build_unsigned_transfer(
-        transaction_source_address, source_address, destination, amount_htkn, amount_xlm, sequence, memo
+        transaction_source_address, source_address, destination, amount_htkn, amount_xlm, tax_amount_htkn, sequence, memo
     )
     host: str = settings['HOST']
     result = {
@@ -88,6 +90,7 @@ async def build_unsigned_transfer(
     destination_address: str,
     amount_htkn: Decimal,
     amount_xlm: Decimal,
+    tax_amount_htkn: Decimal = None,
     sequence: int = None,
     memo_text: str = None
 ) -> Tuple[str, str]:
@@ -120,6 +123,9 @@ async def build_unsigned_transfer(
             asset_issuer=settings['ISSUER'],
             source=source_address,
         )
+    if tax_amount_htkn and tax_amount_htkn > 0:
+        builder.append_payment_op(
+            settings['TRACK_COLLECTOR_ADDRESS'], tax_amount_htkn, source=source_address)
 
     if amount_htkn and not wallet['asset'].get(settings['ASSET_CODE'], False):
         raise web.HTTPBadRequest(reason="{} is not trusted {}".format(

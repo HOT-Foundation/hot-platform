@@ -34,7 +34,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
         url = reverse('generate-payment', wallet_address=source_address)
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 200
-        mock_generate_payment.assert_called_once_with(transaction_source_address, source_address, destination_address, 5, 10, None, None)
+        mock_generate_payment.assert_called_once_with(transaction_source_address, source_address, destination_address, 5, 10, None, None, None)
 
     @unittest_run_loop
     @patch('transaction.generate_payment.get_wallet')
@@ -149,7 +149,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
             'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ',
             'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI',
             'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6',
-            '100', '0', None, None)
+            '100', '0', None, None, None)
 
         expect_data = {
             "@id": reverse('generate-payment', wallet_address='GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'),
@@ -170,7 +170,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
     @patch('transaction.generate_payment.get_wallet_detail')
     async def test_build_unsigned_transfer_with_memo(self, mock_wallet):
         mock_wallet.return_value = {'asset': {settings['ASSET_CODE']: 10}}
-        result = await build_unsigned_transfer('GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 0, 1, 'memo')
+        result = await build_unsigned_transfer('GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 0, 0, 1, 'memo')
         assert result == (
             'AAAAAOQdpyPCl4VbPm3G95niwnekSZPOl1L1+IGxwPCmaimmAAAAZAAAAAAAAAACAAAAAAAAAAEAAAAEbWVtbwAAAAEAAAABAAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAAQAAAADZmUaevDbFEdvFYNAKhFBHPxv9Rr4phQFV2Vx/gRzlsQAAAAFIT1QAAAAAAOQdpyPCl4VbPm3G95niwnekSZPOl1L1+IGxwPCmaimmAAAAAAX14QAAAAAAAAAAAA==',
             '3e2d70f71460e522477cb78a5eea5c5a2a88e8ce030cccbc1dde3e39195639fa'
@@ -180,7 +180,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
     @patch('transaction.generate_payment.get_wallet_detail')
     async def test_build_unsigned_transfer_with_xlm_amount(self, mock_wallet):
         mock_wallet.return_value = {'asset': {}}
-        result = await build_unsigned_transfer('GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 0, 10, 1, 'memo')
+        result = await build_unsigned_transfer('GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 0, 10, 0, 1, 'memo')
 
         assert result == (
             'AAAAAOQdpyPCl4VbPm3G95niwnekSZPOl1L1+IGxwPCmaimmAAAAZAAAAAAAAAACAAAAAAAAAAEAAAAEbWVtbwAAAAEAAAABAAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAAQAAAADZmUaevDbFEdvFYNAKhFBHPxv9Rr4phQFV2Vx/gRzlsQAAAAAAAAAABfXhAAAAAAAAAAAA',
@@ -191,7 +191,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
     @patch('transaction.generate_payment.get_wallet_detail')
     async def test_build_unsigned_transfer_with_xlm_and_htkn_amount_with_trust(self, mock_wallet):
         mock_wallet.return_value = {'asset': {settings['ASSET_CODE']: 10}}
-        result = await build_unsigned_transfer('GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 10, 1, 'memo')
+        result = await build_unsigned_transfer('GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 10, 0, 1, 'memo')
         assert result == (
             'AAAAAOQdpyPCl4VbPm3G95niwnekSZPOl1L1+IGxwPCmaimmAAAAyAAAAAAAAAACAAAAAAAAAAEAAAAEbWVtbwAAAAIAAAABAAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAAQAAAADZmUaevDbFEdvFYNAKhFBHPxv9Rr4phQFV2Vx/gRzlsQAAAAAAAAAABfXhAAAAAAEAAAAAzn/d1FIsDTZsMGI9v1zr/yroYANpqKHNCA/hmGuPbIkAAAABAAAAANmZRp68NsUR28Vg0AqEUEc/G/1GvimFAVXZXH+BHOWxAAAAAUhPVAAAAAAA5B2nI8KXhVs+bcb3meLCd6RJk86XUvX4gbHA8KZqKaYAAAAABfXhAAAAAAAAAAAA',
             '8c68e2e653792304c554bb7db94989de6e08c7f74e70b5a2b4e2aa0716128dbf'
@@ -199,12 +199,22 @@ class TestGetUnsignedTransaction(BaseTestClass):
 
     @unittest_run_loop
     @patch('transaction.generate_payment.get_wallet_detail')
+    async def test_build_usigned_transfer_with_tax_amount(self, mock_wallet):
+        mock_wallet.return_value = {'asset': {settings['ASSET_CODE']: 10}}
+        result = await build_unsigned_transfer('GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 10, 2, 1, 'memo')
+        assert result == (
+            'AAAAAOQdpyPCl4VbPm3G95niwnekSZPOl1L1+IGxwPCmaimmAAABLAAAAAAAAAACAAAAAAAAAAEAAAAEbWVtbwAAAAMAAAABAAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAAQAAAADZmUaevDbFEdvFYNAKhFBHPxv9Rr4phQFV2Vx/gRzlsQAAAAAAAAAABfXhAAAAAAEAAAAAzn/d1FIsDTZsMGI9v1zr/yroYANpqKHNCA/hmGuPbIkAAAABAAAAANmZRp68NsUR28Vg0AqEUEc/G/1GvimFAVXZXH+BHOWxAAAAAUhPVAAAAAAA5B2nI8KXhVs+bcb3meLCd6RJk86XUvX4gbHA8KZqKaYAAAAABfXhAAAAAAEAAAAAzn/d1FIsDTZsMGI9v1zr/yroYANpqKHNCA/hmGuPbIkAAAABAAAAAOQdpyPCl4VbPm3G95niwnekSZPOl1L1+IGxwPCmaimmAAAAAAAAAAABMS0AAAAAAAAAAAA=',
+            '7ea46955bc33800e81faf85b1d554f01f44358cd310bb1f11e76a373a1d76b04'
+        )        
+
+    @unittest_run_loop
+    @patch('transaction.generate_payment.get_wallet_detail')
     async def test_build_unsigned_transfer_with_invalid_htkn(self, mock_wallet):
         mock_wallet.return_value = {'asset': {}}
         with pytest.raises(web.HTTPBadRequest) as context:
-            result = await build_unsigned_transfer('GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 10, 1, 'memo')
+            result = await build_unsigned_transfer('GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 10, 0, 1, 'memo')
 
     @unittest_run_loop
     async def test_build_unsigned_transfer_with_target_not_created(self):
         with pytest.raises(web.HTTPNotFound):
-            result = await build_unsigned_transfer('GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 0, 10, 1, 'NotFound')
+            result = await build_unsigned_transfer('GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 0, 10, 0, 1, 'NotFound')
