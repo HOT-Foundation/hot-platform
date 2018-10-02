@@ -18,7 +18,7 @@ services:
       - PASSPHRASE=TESTNET
       # - HORIZON_URL=http://horizon-integrationnet:8000
       - HORIZON_URL=https://horizon-testnet.stellar.org
-      - TRACK_COLLECTOR_ADDRESS=GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ
+      - TAX_COLLECTOR_ADDRESS=GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ
     networks:
       - hotnow-network
 networks:

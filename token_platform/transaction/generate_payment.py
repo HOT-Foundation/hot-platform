@@ -125,7 +125,7 @@ async def build_unsigned_transfer(
         )
     if tax_amount_htkn and tax_amount_htkn > 0:
         builder.append_payment_op(
-            settings['TRACK_COLLECTOR_ADDRESS'], tax_amount_htkn, source=source_address)
+            settings['TAX_COLLECTOR_ADDRESS'], tax_amount_htkn, source=source_address)
 
     if amount_htkn and not wallet['asset'].get(settings['ASSET_CODE'], False):
         raise web.HTTPBadRequest(reason="{} is not trusted {}".format(
