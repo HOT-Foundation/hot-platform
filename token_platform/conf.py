@@ -10,6 +10,7 @@ settings['LIMIT_ASSET'] = '10000000000'
 settings['ISSUER'] = os.environ['HOT_ISSUER']
 settings['PASSPHRASE'] = os.environ['PASSPHRASE']
 settings['HORIZON_URL'] = os.environ['HORIZON_URL']
+settings['TAX_COLLECTOR_ADDRESS'] = os.environ['TAX_COLLECTOR_ADDRESS']
 
 settings['LOG_OPS'] = {
     'SUBMIT': '[SUBMIT]'

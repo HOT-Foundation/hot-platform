@@ -67,7 +67,7 @@ async def get_presigned_tx_xdr(
         """
 
         unsigned_xdr, tx_hash = await build_unsigned_transfer(
-            transaction_source_address, source_address, destination, amount, Decimal(0), sequence=sequence
+            transaction_source_address, source_address, destination, amount, Decimal(0), None, sequence=sequence
         )
         host: str = settings['HOST']
         result = {
