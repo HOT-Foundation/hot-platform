@@ -4,6 +4,9 @@ from aiohttp.test_utils import unittest_run_loop
 from asynctest import patch
 from tests.test_utils import BaseTestClass
 
+from stellar_base.transaction import Transaction
+from stellar_base.transaction_envelope import TransactionEnvelope
+
 from conf import settings
 from transaction.generate_payment import (get_signers,
                                                get_threshold_weight,
@@ -201,11 +204,27 @@ class TestGetUnsignedTransaction(BaseTestClass):
     @patch('transaction.generate_payment.get_wallet_detail')
     async def test_build_usigned_transfer_with_tax_amount(self, mock_wallet):
         mock_wallet.return_value = {'asset': {settings['ASSET_CODE']: 10}}
-        result = await build_unsigned_transfer('GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 10, 2, 1, 'memo')
+        result = await build_unsigned_transfer('GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ', 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6', 10, 5, 2, 1, 'memo')
         assert result == (
-            'AAAAAOQdpyPCl4VbPm3G95niwnekSZPOl1L1+IGxwPCmaimmAAABLAAAAAAAAAACAAAAAAAAAAEAAAAEbWVtbwAAAAMAAAABAAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAAQAAAADZmUaevDbFEdvFYNAKhFBHPxv9Rr4phQFV2Vx/gRzlsQAAAAAAAAAABfXhAAAAAAEAAAAAzn/d1FIsDTZsMGI9v1zr/yroYANpqKHNCA/hmGuPbIkAAAABAAAAANmZRp68NsUR28Vg0AqEUEc/G/1GvimFAVXZXH+BHOWxAAAAAUhPVAAAAAAA5B2nI8KXhVs+bcb3meLCd6RJk86XUvX4gbHA8KZqKaYAAAAABfXhAAAAAAEAAAAAzn/d1FIsDTZsMGI9v1zr/yroYANpqKHNCA/hmGuPbIkAAAABAAAAALA9mZ8grz8iu8VgoDleCsmyQofm9hN8oEMEYHzHbbbnAAAAAUhPVAAAAAAA5B2nI8KXhVs+bcb3meLCd6RJk86XUvX4gbHA8KZqKaYAAAAAATEtAAAAAAAAAAAA',
-            'f41633bc7c7e071eb4de1048ac7a7321605bffabe362b9abc622ac9e88ccafba'
-        )        
+            'AAAAAOQdpyPCl4VbPm3G95niwnekSZPOl1L1+IGxwPCmaimmAAABLAAAAAAAAAACAAAAAAAAAAEAAAAEbWVtbwAAAAMAAAABAAAAAM5/3dRSLA02bDBiPb9c6/8q6GADaaihzQgP4Zhrj2yJAAAAAQAAAADZmUaevDbFEdvFYNAKhFBHPxv9Rr4phQFV2Vx/gRzlsQAAAAAAAAAAAvrwgAAAAAEAAAAAzn/d1FIsDTZsMGI9v1zr/yroYANpqKHNCA/hmGuPbIkAAAABAAAAANmZRp68NsUR28Vg0AqEUEc/G/1GvimFAVXZXH+BHOWxAAAAAUhPVAAAAAAA5B2nI8KXhVs+bcb3meLCd6RJk86XUvX4gbHA8KZqKaYAAAAABfXhAAAAAAEAAAAAzn/d1FIsDTZsMGI9v1zr/yroYANpqKHNCA/hmGuPbIkAAAABAAAAALA9mZ8grz8iu8VgoDleCsmyQofm9hN8oEMEYHzHbbbnAAAAAUhPVAAAAAAA5B2nI8KXhVs+bcb3meLCd6RJk86XUvX4gbHA8KZqKaYAAAAAATEtAAAAAAAAAAAA',
+            'cc6b6a0938b83ddbaff31ca29b5224c0e90bc2f4d59840c77a1b951d79130eb4'
+        )
+
+        transaction = TransactionEnvelope.from_xdr(result[0]).tx
+        assert transaction.source.decode('utf8') == 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ'
+        assert transaction.sequence == 2
+        assert transaction.operations[0].source == 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'
+        assert transaction.operations[0].destination == 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6'
+        assert transaction.operations[0].amount == '5'
+        assert transaction.operations[0].asset.code == 'XLM'
+        assert transaction.operations[1].source == 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'
+        assert transaction.operations[1].destination == 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6'
+        assert transaction.operations[1].amount == '10'
+        assert transaction.operations[1].asset.code == 'HOT'
+        assert transaction.operations[2].source == 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'
+        assert transaction.operations[2].destination == settings['TAX_COLLECTOR_ADDRESS']
+        assert transaction.operations[2].amount == '2'
+        assert transaction.operations[2].asset.code == 'HOT'
 
     @unittest_run_loop
     @patch('transaction.generate_payment.get_wallet_detail')
