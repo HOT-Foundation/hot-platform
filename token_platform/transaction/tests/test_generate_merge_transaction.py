@@ -11,7 +11,7 @@ from typing import List
 from stellar_base.builder import Builder
 from stellar_base.stellarxdr import StellarXDR_const as const
 from transaction.generate_merge_transaction import (generate_merge_transaction, build_payment_operation, build_remove_trustlines_operation, build_remove_manage_data_operation, build_account_merge_operation, build_generate_merge_transaction, generate_parties_wallet, is_match_balance, get_creator_address)
-
+from stellar.wallet import Wallet
 
 class TestGenerateMergeTransaction(BaseTestClass):
     async def setUpAsync(self):
@@ -41,13 +41,24 @@ class TestGenerateMergeTransaction(BaseTestClass):
         }
 
     @unittest_run_loop
+    @patch('transaction.generate_merge_transaction.get_stellar_wallet')
     @patch('transaction.generate_merge_transaction.build_generate_merge_transaction')
     @patch('transaction.generate_merge_transaction.get_escrow_wallet_detail')
-    async def test_generate_merge_transaction_success(self, mock_wallet_detail, mock_merge_transaction):
+    async def test_generate_merge_transaction_success(self, mock_wallet_detail, mock_merge_transaction,mock_get_stellar_wallet):
         mock_wallet_detail.return_value = self.wallet_detail
         mock_merge_transaction.return_value = self.unsigned_xdr, self.tx_hash
 
         result = await generate_merge_transaction(self.transaction_source_address, self.wallet_address, self.parties_wallet)
+
+        mock_get_stellar_wallet.return_value = Wallet(
+            "1",
+            [],
+            "1",
+            {},
+            [],
+            {},
+            {}
+        )
 
         expect = {
             'wallet_address' : self.wallet_address,
