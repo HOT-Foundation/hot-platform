@@ -1,5 +1,6 @@
 # Production Dependencies
 aiohttp==3.3.2
+aioresponses==0.4.2
 python-dateutil==2.7.3
 git+https://github.com/StellarCN/py-stellar-base.git@191845bae47bb20158ebba25c9f79e1e0f367cfa
 

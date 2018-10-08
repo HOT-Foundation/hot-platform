@@ -1,6 +1,7 @@
 import pytest
 from aiohttp.test_utils import unittest_run_loop
 from aiohttp.web_exceptions import HTTPBadRequest, HTTPInternalServerError
+from aioresponses import aioresponses
 from asynctest import patch
 from stellar_base.builder import Builder
 from stellar_base.keypair import Keypair
@@ -73,8 +74,14 @@ class TestDuplicateTransaction(BaseTestClass):
         instance.transaction.return_value = {"id": 'testteestsetbbdf'}
 
         tx_hash = 'e11b7a3677fdd45c885e8fb49d0079d083ee8a5cab08e32b00126172abb05111'
-        result = await is_duplicate_transaction(tx_hash)
-        assert result == True
+
+        with aioresponses() as m:
+            HORIZON_URL = settings['HORIZON_URL']
+
+            url = f'{HORIZON_URL}/transactions/{tx_hash}'
+            m.get(url, status=200, payload={'id': '1'})
+            result = await is_duplicate_transaction(tx_hash)
+            assert result == True
 
     @unittest_run_loop
     @patch('transaction.transaction.Horizon')
@@ -198,13 +205,21 @@ class TestGetThreshold(BaseTestClass):
         assert result == 2
 
     @unittest_run_loop
-    async def test_get_transaction_by_memo_success(self):
+    @patch('transaction.transaction.Horizon')
+    async def test_get_transaction_by_memo_success(self, mock_horizon):
+        instance = mock_horizon.return_value
+        instance.account_transactions.return_value = {"_embedded": {"records": [{"memo_type": "text", "memo": "testmemo", "hash": "testhash"}]}}
+
         result = await get_transaction_by_memo('GD3PPDLKXRDM57UV7QDFIHLLRCLM4KGVIA43GEM7ZOT7EHK5TR3Z5G6I', 'testmemo')
         assert 'error' in result.keys()
         assert 'url' in result.keys()
 
     @unittest_run_loop
-    async def test_get_transaction_by_memo_not_found(self):
+    @patch('transaction.transaction.Horizon')
+    async def test_get_transaction_by_memo_not_found(self, mock_horizon):
+        instance = mock_horizon.return_value
+        instance.account_transactions.return_value = {"_embedded": {"records": []}}
+
         result = await get_transaction_by_memo('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'testmemo')
         assert not result
 
