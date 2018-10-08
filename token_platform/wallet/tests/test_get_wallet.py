@@ -34,15 +34,15 @@ async def test_get_wallet_success_trusted_htkn(mock_address):
             'balance': '7.0000000',
             'limit': '922337203685.4775807',
             'asset_type': 'credit_alphanum4',
-            'asset_code': 'HOT',
-            'asset_issuer': 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ',
+            'asset_code': settings['ASSET_CODE'],
+            'asset_issuer': settings['ISSUER'],
         },
         {
             'balance': '10.0000000',
             'limit': '1000',
             'asset_type': 'credit_alphanum4',
-            'asset_code': 'PTKN',
-            'asset_issuer': 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ',
+            'asset_code': 'HTKN',
+            'asset_issuer': settings['ISSUER'],
         },
         {'balance': '9.9999200', 'asset_type': 'native'},
     ]
@@ -55,10 +55,11 @@ async def test_get_wallet_success_trusted_htkn(mock_address):
     expect_data = {
         'wallet_address': 'GBVJJJH6VS5NNM5B4FZ3JQHWN6ANEAOSCEU4STPXPB24BHD5JO5VTGAD',
         '@id': f'{host}{url}',
-        'asset': {'HOT': '7.0000000', 'XLM': '9.9999200'},
+        'asset': {settings['ASSET_CODE']: '7.0000000', 'XLM': '9.9999200'},
         'sequence': '1',
         'data': {'age': '30', 'name': 'UnitTest'},
     }
+
     assert result == expect_data
 
 
