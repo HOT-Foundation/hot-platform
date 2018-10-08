@@ -6,7 +6,7 @@ from conf import settings
 from joint_wallet.generate_joint_wallet import (build_joint_wallet,
                                                 generate_joint_wallet)
 from router import reverse
-
+from stellar.wallet import Wallet
 
 class TestGenerateJointWallet(BaseTestClass):
     async def setUpAsync(self):
@@ -35,8 +35,9 @@ class TestGenerateJointWallet(BaseTestClass):
         mock_joint_wallet.assert_called_once_with(transaction_source_address, deal_address, data['parties'], data['creator_address'], 5, None)
 
     @unittest_run_loop
+    @patch('joint_wallet.generate_joint_wallet.get_stellar_wallet')
     @patch('joint_wallet.generate_joint_wallet.build_joint_wallet')
-    async def test_generate_joint_wallet_with_out_meta(self, mock_build):
+    async def test_generate_joint_wallet_with_out_meta(self, mock_build, mock_get_stellar_wallet):
         deal_address = 'deal_address'
         parties = [
             {
@@ -47,6 +48,17 @@ class TestGenerateJointWallet(BaseTestClass):
                 'amount': 20
             }
         ]
+
+        mock_get_stellar_wallet.return_value = Wallet(
+            "1",
+            [],
+            "1",
+            {},
+            [],
+            {},
+            {}
+        )
+
         creator = 'creator_address'
         transaction_source_address = 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ'
         mock_build.return_value = ('create_joint_wallet_xdr', 'create_joint_wallet_tx_hash')
@@ -75,8 +87,9 @@ class TestGenerateJointWallet(BaseTestClass):
         assert result == expect
 
     @unittest_run_loop
+    @patch('joint_wallet.generate_joint_wallet.get_stellar_wallet')
     @patch('joint_wallet.generate_joint_wallet.build_joint_wallet')
-    async def test_generate_joint_wallet_with_meta(self, mock_build):
+    async def test_generate_joint_wallet_with_meta(self, mock_build, mock_get_stellar_wallet):
         deal_address = 'deal_address'
         parties = [
             {
@@ -87,6 +100,15 @@ class TestGenerateJointWallet(BaseTestClass):
                 'amount': 20
             }
         ]
+        mock_get_stellar_wallet.return_value = Wallet(
+            "1",
+            [],
+            "1",
+            {},
+            [],
+            {},
+            {}
+        )
         creator = 'creator_address'
         meta = {
             "expiration_date": "2018-05-15"
@@ -118,8 +140,9 @@ class TestGenerateJointWallet(BaseTestClass):
         assert result == expect
 
     @unittest_run_loop
+    @patch('joint_wallet.generate_joint_wallet.get_stellar_wallet')
     @patch('joint_wallet.generate_joint_wallet.Builder')
-    async def test_build_joint_wallet(self, mock_builder):
+    async def test_build_joint_wallet(self, mock_builder, mock_get_stellar_wallet):
         instance = mock_builder.return_value
         instance.append_create_account_op.return_value = 'test'
         instance.append_trust_op.return_value = 'test'
@@ -138,13 +161,23 @@ class TestGenerateJointWallet(BaseTestClass):
             "address": "GAYIEFTTY52HSXAHKTQGK4K4OQRKMD324WCG4O2HGIQUGVTVE6RZW25F",
             "amount": 15
         }]
+        mock_get_stellar_wallet.return_value = Wallet(
+            "1",
+            [],
+            "1",
+            {},
+            [],
+            {},
+            {}
+        )
         result_xdr, result_hash = await build_joint_wallet(transaction_source_address, deal_address, parties, creator, 5)
         assert result_xdr == 'generate-joint-wallet-xdr'
         assert result_hash == '74782d68617368'
 
     @unittest_run_loop
+    @patch('joint_wallet.generate_joint_wallet.get_stellar_wallet')
     @patch('joint_wallet.generate_joint_wallet.Builder')
-    async def test_build_joint_wallet_with_meta(self, mock_builder):
+    async def test_build_joint_wallet_with_meta(self, mock_builder, mock_get_stellar_wallet):
         instance = mock_builder.return_value
         instance.append_create_account_op.return_value = 'test'
         instance.append_trust_op.return_value = 'test'
@@ -152,7 +185,15 @@ class TestGenerateJointWallet(BaseTestClass):
         instance.append_payment_op.return_value = 'test'
         instance.gen_xdr.return_value = b'generate-joint-wallet-xdr'
         instance.te.hash_meta.return_value = b'tx-hash'
-
+        mock_get_stellar_wallet.return_value = Wallet(
+            "1",
+            [],
+            "1",
+            {},
+            [],
+            {},
+            {}
+        )
         transaction_source_address = 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ'
         deal_address = 'GAYIEFTTY52HSXAHKTQGK4K4OQRKMD324WCG4O2HGIQUGVTVE6RZW25F'
         creator = 'GABEAFZ7POCHDY4YCQMRAGVVXEEO4XWYKBY4LMHHJRHTC4MZQBWS6NL6'

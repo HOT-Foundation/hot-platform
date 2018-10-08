@@ -14,6 +14,7 @@ from transaction.get_unsigned_change_trust import (get_signers,
 from wallet.tests.factory.wallet import StellarWallet
 from router import reverse
 from decimal import Decimal
+from stellar.wallet import Wallet
 
 class TestGetUnsignedChangeTrust(BaseTestClass):
     @unittest_run_loop
@@ -31,15 +32,24 @@ class TestGetUnsignedChangeTrust(BaseTestClass):
         mock_get_unsigned_change_trust.assert_called_once_with(wallet_address, transaction_source_address)
 
     @unittest_run_loop
+    @patch('transaction.get_unsigned_change_trust.get_stellar_wallet')
     @patch('transaction.get_unsigned_change_trust.get_signers')
     @patch('transaction.get_unsigned_change_trust.get_threshold_weight')
-    async def test_get_unsigned_change_trust_success(self, mock_get_threshold_weight, mock_get_signer):
+    async def test_get_unsigned_change_trust_success(self, mock_get_threshold_weight, mock_get_signer, mock_get_stellar_wallet):
         mock_get_threshold_weight.return_value = 1
         mock_get_signer.return_value = [{
             "public_key": "GAGNG7WP6JJH726KJ3RPMHB3TNOVNABRBHULYVN3APK6CHXRJNRSSHBA",
             "weight": 1
         }]
-
+        mock_get_stellar_wallet.return_value = Wallet(
+            "1",
+            [],
+            "1",
+            {},
+            [],
+            {},
+            {}
+        )
         result = await get_unsigned_change_trust(
             'GAGNG7WP6JJH726KJ3RPMHB3TNOVNABRBHULYVN3APK6CHXRJNRSSHBA', 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE')
 

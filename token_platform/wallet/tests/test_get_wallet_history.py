@@ -80,9 +80,69 @@ class TestGetWalletHistory(BaseTestClass):
         self.wallet_address = 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE'
         self.limit = '1'
         self.offset = '37667833848532999-1'
+        self.mock_get_wallet_effect_value = {
+            '_links': {
+                'self': {
+                    'href': 'https://horizon-testnet.stellar.org/accounts/GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE/effects?cursor=&limit=1&order=asc'
+                    }, 
+                'next': {
+                    'href': 'https://horizon-testnet.stellar.org/accounts/GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE/effects?cursor=37667833848532993-1&limit=1&order=asc'
+                    }, 
+                'prev': {
+                    'href': 'https://horizon-testnet.stellar.org/accounts/GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE/effects?cursor=37667833848532993-1&limit=1&order=desc'
+                }
+            },
+            '_embedded': {
+                'records': [
+                    {
+                        '_links': {
+                            'operation': {
+                            'href': 'https://horizon-testnet.stellar.org/operations/37667833848532993'
+                            }, 
+                            'succeeds': {
+                                'href': 'https://horizon-testnet.stellar.org/effects?order=desc&cursor=37667833848532993-1'
+                            }, 
+                            'precedes': {
+                                'href': 'https://horizon-testnet.stellar.org/effects?order=asc&cursor=37667833848532993-1'
+                            }
+                        }, 
+                        'id': '0037667833848532993-0000000001', 
+                        'paging_token': '37667833848532993-1', 
+                        'account': 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE', 
+                        'type': 'account_created', 
+                        'type_i': 0, 
+                        'created_at': 
+                        '2018-05-03T13:31:45Z', 
+                        'starting_balance': '5.0002000'
+                    }, 
+                    {
+                        '_links': {
+                            'operation': {
+                                'href': 'https://horizon-testnet.stellar.org/operations/37667833848532995'
+                            },
+                            'succeeds': {
+                                'href': 'https://horizon-testnet.stellar.org/effects?order=desc&cursor=37667833848532995-1'
+                            }, 
+                            'precedes': {
+                                'href': 'https://horizon-testnet.stellar.org/effects?order=asc&cursor=37667833848532995-1'
+                            }
+                        }, 
+                        'id': '0037667833848532995-0000000001',
+                        'paging_token': '37667833848532995-1', 
+                        'account': 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE', 
+                        'type': 'data_created', 
+                        'type_i': 40, 
+                        'created_at': '2018-05-03T13:31:45Z'
+                    }
+                ]
+            }
+        }
 
     @unittest_run_loop
-    async def test_get_wallet_history_success(self):
+    @patch('wallet.get_wallet_history.get_wallet_effect')
+    async def test_get_wallet_history_success(self, mock_get_wallet_effect):
+
+        mock_get_wallet_effect.return_value = self.mock_get_wallet_effect_value
 
         history = await get_wallet_history(wallet_address=self.wallet_address,
                                            limit=self.limit)
@@ -91,7 +151,10 @@ class TestGetWalletHistory(BaseTestClass):
         assert expect in history
 
     @unittest_run_loop
-    async def test_get_wallet_history_with_specific_start_position(self):
+    @patch('wallet.get_wallet_history.get_wallet_effect')
+    async def test_get_wallet_history_with_specific_start_position(self, mock_get_wallet_effect):
+
+        mock_get_wallet_effect.return_value = self.mock_get_wallet_effect_value
 
         history = await get_wallet_history(wallet_address=self.wallet_address,
                                            limit=self.limit, offset=self.offset)

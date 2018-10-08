@@ -11,6 +11,7 @@ from tests.test_utils import BaseTestClass
 
 from conf import settings
 from router import reverse
+from stellar.wallet import Wallet
 from wallet.wallet import (build_generate_trust_wallet_transaction,
                            wallet_address_is_duplicate)
 
@@ -29,9 +30,19 @@ class TestCreateTrustWallet(BaseTestClass):
 
     @unittest_run_loop
     @patch('wallet.post_generate_trust_wallet.wallet_address_is_duplicate')
+    @patch('wallet.post_generate_trust_wallet.get_wallet')
     @patch('wallet.post_generate_trust_wallet.build_generate_trust_wallet_transaction')
-    async def test_post_generate_trust_wallet_from_request_success(self, mock_xdr, mock_check):
+    async def test_post_generate_trust_wallet_from_request_success(self, mock_xdr, get_wallet, mock_check):
         mock_xdr.return_value = (b'test-xdr', b'test-transaction-envelop')
+        get_wallet.return_value = Wallet(
+                "1",
+                [],
+                "1",
+                {},
+                [],
+                {},
+                {}
+            )
         mock_check.return_value = False
 
         url = reverse('generate-trust-wallet', wallet_address=self.wallet_address)
