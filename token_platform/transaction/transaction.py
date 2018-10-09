@@ -46,7 +46,7 @@ async def submit_transaction(xdr: bytes) -> Dict[str, str]:
                 raise aiohttp.web.HTTPNotFound(reason=msg)
             if resp.status == 200 or resp.status == 202:
                 return response
-            raise aiohttp.web.HTTPGatewayTimeout()
+            raise aiohttp.web.HTTPInternalServerError()
 
 
 def get_reason_transaction(response: Dict) -> Union[str, None]:
