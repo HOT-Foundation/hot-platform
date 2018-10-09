@@ -24,3 +24,4 @@ async def put_transaction_from_request(request: web.Request) -> web.Response:
     write_audit_log(request, response, operation, message)
 
     return web.json_response(response, status=202)
+

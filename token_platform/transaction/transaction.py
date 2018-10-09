@@ -11,6 +11,7 @@ from wallet.wallet import get_wallet
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 HORIZON_URL = settings['HORIZON_URL']
 
+
 async def is_duplicate_transaction(transaction_hash: str) -> bool:
     """Check transaction is duplicate or not"""
     url = f'{HORIZON_URL}/transactions/{transaction_hash}'
@@ -26,28 +27,39 @@ async def submit_transaction(xdr: bytes) -> Dict[str, str]:
     horizon = Horizon(horizon=settings['HORIZON_URL'])
     url = f'{HORIZON_URL}/transactions'
     async with aiohttp.ClientSession() as session:
-        data = { 'tx': xdr }
+        data = {'tx': xdr}
         async with session.post(url, data=data) as resp:
             response = await resp.json()
             if resp.status == 400:
                 msg = response.get('extras', {}).get('result_codes', {}).get('transaction', None)
                 if msg:
                     reasons = get_reason_transaction(response)
-                    if reasons: msg += f' {reasons}'
+                    if reasons:
+                        msg += f' {reasons}'
                 raise aiohttp.web.HTTPBadRequest(reason=msg)
-            return response
+            if resp.status == 404:
+                msg = response.get('extras', {}).get('result_codes', {}).get('transaction', None)
+                if msg:
+                    reasons = get_reason_transaction(response)
+                    if reasons:
+                        msg += f' {reasons}'
+                raise aiohttp.web.HTTPNotFound(reason=msg)
+            if resp.status == 200 or resp.status == 202:
+                return response
+            raise aiohttp.web.HTTPGatewayTimeout()
 
 
 def get_reason_transaction(response: Dict) -> Union[str, None]:
     reasons = response.get('extras', {}).get('result_codes', {}).get('operations', None)
-    if not reasons: return None
+    if not reasons:
+        return None
     result = reasons[0]
     for i in range(1, len(reasons)):
         result += f'/{reasons[i]}'
     return result
 
 
-async def get_current_sequence_number(wallet_address:str) -> int:
+async def get_current_sequence_number(wallet_address: str) -> int:
     """Get current sequence number of the wallet"""
     horizon = Horizon(horizon=settings['HORIZON_URL'])
     sequence = horizon.account(wallet_address).get('sequence')
@@ -83,7 +95,7 @@ async def get_transaction(tx_hash: str) -> Dict[str, Union[str, int, List[Dict[s
             "source_account_sequence": tx_detail.get("source_account_sequence", None),
             "fee_paid": tx_detail.get("fee_paid", None),
             "signatures": tx_detail.get("signatures", None),
-            "memo": tx_detail.get("memo", None)
+            "memo": tx_detail.get("memo", None),
         }
 
     def _get_operation_data_of_transaction(tx_hash: str, horizon: Horizon) -> List[Dict[str, str]]:
@@ -114,7 +126,7 @@ async def get_signers(wallet_address: str) -> List[Dict[str, str]]:
     return formated
 
 
-async def get_threshold_weight(wallet_address:str, operation_type:str) -> int:
+async def get_threshold_weight(wallet_address: str, operation_type: str) -> int:
     """Get threshold weight for operation type of wallet address"""
 
     def _get_threshould_level(operation_type):
@@ -139,18 +151,22 @@ async def get_transaction_by_memo(source_account: str, memo: str, cursor: int = 
     horizon = Horizon(horizon=settings['HORIZON_URL'])
 
     # Get transactions data within key 'records'
-    transactions = horizon.account_transactions(source_account, params={'limit' : 200, 'order' : 'desc', 'cursor' : cursor}).get('_embedded').get('records')
+    transactions = (
+        horizon.account_transactions(source_account, params={'limit': 200, 'order': 'desc', 'cursor': cursor})
+        .get('_embedded')
+        .get('records')
+    )
 
     # Filter result data on above by 'memo_type' == text
-    transactions_filter = list([transaction for transaction in transactions if transaction['memo_type'] == 'text' ])
+    transactions_filter = list([transaction for transaction in transactions if transaction['memo_type'] == 'text'])
 
     for transaction in transactions_filter:
 
         if transaction['memo'] == memo:
             return {
-                'error' : 'Transaction is already submited',
-                'url' : '/transaction/{}'.format(transaction['hash']),
-                'transaction_hash' : transaction['hash']
+                'error': 'Transaction is already submited',
+                'url': '/transaction/{}'.format(transaction['hash']),
+                'transaction_hash': transaction['hash'],
             }
 
     if len(transactions) > 0:
