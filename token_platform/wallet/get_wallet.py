@@ -2,12 +2,13 @@ from base64 import b64decode
 from functools import reduce
 from typing import Any, Dict, List, Mapping, NewType, Optional, Union
 
-import requests
 from aiohttp import web
+
 
 from conf import settings
 from wallet.wallet import build_generate_trust_wallet_transaction, get_wallet, wallet_address_is_duplicate
 from router import reverse
+
 
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 STELLAR_BALANCE = Dict[str, str]
