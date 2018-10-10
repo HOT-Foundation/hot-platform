@@ -2,13 +2,13 @@ from base64 import b64decode
 from functools import reduce
 from typing import Any, Dict, List, Mapping, NewType, Optional, Union
 
-import requests
 from aiohttp import web
 
+
 from conf import settings
-from wallet.wallet import (build_generate_trust_wallet_transaction, get_wallet,
-                           wallet_address_is_duplicate)
+from wallet.wallet import build_generate_trust_wallet_transaction, get_wallet, wallet_address_is_duplicate
 from router import reverse
+
 
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 STELLAR_BALANCE = Dict[str, str]
@@ -45,7 +45,18 @@ async def get_wallet_detail(wallet_address: str) -> Dict:
 
     def _trusted_htkn(balances: STELLAR_BALANCES) -> Union[Dict, Dict[str, str]]:
         """Return URL for making trust HOT"""
-        if len(list(filter(lambda b: b.get('asset_code', None) == settings['ASSET_CODE'] and b.get('asset_issuer', None) == settings['ISSUER'], balances))) == 0:
+        if (
+            len(
+                list(
+                    filter(
+                        lambda b: b.get('asset_code', None) == settings['ASSET_CODE']
+                        and b.get('asset_issuer', None) == settings['ISSUER'],
+                        balances,
+                    )
+                )
+            )
+            == 0
+        ):
             return {'trust': f"{settings['HOST']}{reverse('change-trust-add-token', wallet_address=wallet_address)}"}
         return {}
 

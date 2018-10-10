@@ -14,7 +14,7 @@ from escrow.post_generate_escrow_wallet import (build_generate_escrow_wallet_tra
                                                 calculate_initial_xlm,
                                                 generate_escrow_wallet,
                                                 post_generate_escrow_wallet_from_request)
-
+from stellar.wallet import Wallet
 
 class TestGetCreateEscrowWalletFromRequest(BaseTestClass):
     async def setUpAsync(self):
@@ -341,13 +341,22 @@ class TestGetCreateWallet(BaseTestClass):
         self.host = settings['HOST']
 
     @unittest_run_loop
+    @patch('escrow.post_generate_escrow_wallet.get_stellar_wallet')
     @patch('escrow.post_generate_escrow_wallet.calculate_initial_xlm')
     @patch('escrow.post_generate_escrow_wallet.build_generate_escrow_wallet_transaction')
-    async def test_generate_escrow_wallet_success(self, mock_build, mock_cal):
+    async def test_generate_escrow_wallet_success(self, mock_build, mock_cal, mock_get_stellar_wallet):
 
         mock_build.return_value = ['xdr', 'tx_hash']
         mock_cal.return_value = 20
-
+        mock_get_stellar_wallet.return_value = Wallet(
+            "1",
+            [],
+            "1",
+            {},
+            [],
+            {},
+            {}
+        )
         expect = {
             '@id': reverse('escrow-generate-wallet', escrow_address=self.escrow_address),
             '@transaction_url': reverse('transaction', transaction_hash='tx_hash'),

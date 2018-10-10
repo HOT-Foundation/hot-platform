@@ -10,6 +10,7 @@ from tests.test_utils import BaseTestClass
 from aiohttp import web
 
 from conf import settings
+from stellar.wallet import Wallet
 from wallet.wallet import (build_generate_wallet_transaction,
                            wallet_address_is_duplicate)
 from router import reverse
@@ -29,13 +30,23 @@ class TestCreateWallet(BaseTestClass):
 
     @unittest_run_loop
     @patch('wallet.post_generate_wallet.get_signers')
+    @patch('wallet.post_generate_wallet.get_wallet')
     @patch('wallet.post_generate_wallet.wallet_address_is_duplicate')
     @patch('wallet.post_generate_wallet.build_generate_wallet_transaction')
-    async def test_post_generate_wallet_from_request_success(self, mock_xdr, mock_check, mock_signers):
+    async def test_post_generate_wallet_from_request_success(self, mock_xdr, mock_check, mock_get_wallet, mock_signers):
         mock_signers.return_value = [{
             "public_key": "GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI",
             "weight": 1
         }]
+        mock_get_wallet.return_value = Wallet(
+                "1",
+                [],
+                "1",
+                {},
+                [],
+                {},
+                {}
+            )
         mock_xdr.return_value = (b'test-xdr', b'test-transaction-envelop')
         mock_check.return_value = False
 

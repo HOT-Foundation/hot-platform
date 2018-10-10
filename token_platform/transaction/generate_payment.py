@@ -29,14 +29,12 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
     await get_wallet(source_account)
 
     if memo_on not in ['destination', 'source']:
-        raise web.HTTPBadRequest(
-            reason='memo_on should be only "source" or "destination"')
+        raise web.HTTPBadRequest(reason='memo_on should be only "source" or "destination"')
 
     try:
         decode_check('account', target_address)
     except DecodeError as e:
-        raise web.HTTPBadRequest(
-            reason='Invalid value : {}'.format(target_address))
+        raise web.HTTPBadRequest(reason='Invalid value : {}'.format(target_address))
 
     if memo:
         focus_address = target_address if memo_on == 'destination' else source_account
@@ -44,7 +42,14 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
         if url_get_transaction:
             raise web.HTTPBadRequest(reason="Transaction is already submitted")
     result = await generate_payment(
-        transaction_source_address, source_account, target_address, amount_htkn, amount_xlm, tax_amount_htkn, sequence_number, memo
+        transaction_source_address,
+        source_account,
+        target_address,
+        amount_htkn,
+        amount_xlm,
+        tax_amount_htkn,
+        sequence_number,
+        memo,
     )
     return web.json_response(result)
 
@@ -57,7 +62,7 @@ async def generate_payment(
     amount_xlm: Decimal,
     tax_amount_htkn: Decimal = None,
     sequence: int = None,
-    memo: str = None
+    memo: str = None,
 ) -> Dict:
     """Get unsigned transfer transaction and signers
 
@@ -70,7 +75,14 @@ async def generate_payment(
             memo: memo text [optional]
     """
     unsigned_xdr, tx_hash = await build_unsigned_transfer(
-        transaction_source_address, source_address, destination, amount_htkn, amount_xlm, tax_amount_htkn, sequence, memo
+        transaction_source_address,
+        source_address,
+        destination,
+        amount_htkn,
+        amount_xlm,
+        tax_amount_htkn,
+        sequence,
+        memo,
     )
     host: str = settings['HOST']
     result = {
@@ -92,7 +104,7 @@ async def build_unsigned_transfer(
     amount_xlm: Decimal,
     tax_amount_htkn: Decimal = None,
     sequence: int = None,
-    memo_text: str = None
+    memo_text: str = None,
 ) -> Tuple[str, str]:
     """"Build unsigned transfer transaction return unsigned XDR and transaction hash.
 
@@ -112,9 +124,13 @@ async def build_unsigned_transfer(
     )
 
     wallet = await get_wallet_detail(destination_address)
+
+    if amount_htkn and not wallet['asset'].get(settings['ASSET_CODE'], False):
+        raise web.HTTPBadRequest(reason="{} is not trusted {}".format(destination_address, settings['ASSET_CODE']))
+
     if amount_xlm:
-        builder.append_payment_op(
-            destination_address, amount_xlm, source=source_address)
+        builder.append_payment_op(destination_address, amount_xlm, source=source_address)
+
     if amount_htkn and wallet['asset'].get(settings['ASSET_CODE'], False):
         builder.append_payment_op(
             destination_address,
@@ -123,13 +139,15 @@ async def build_unsigned_transfer(
             asset_issuer=settings['ISSUER'],
             source=source_address,
         )
+
     if tax_amount_htkn and Decimal(tax_amount_htkn) > 0:
         builder.append_payment_op(
-            settings['TAX_COLLECTOR_ADDRESS'], Decimal(tax_amount_htkn), asset_code=settings['ASSET_CODE'], asset_issuer=settings['ISSUER'], source=source_address)
-
-    if amount_htkn and not wallet['asset'].get(settings['ASSET_CODE'], False):
-        raise web.HTTPBadRequest(reason="{} is not trusted {}".format(
-            destination_address, settings['ASSET_CODE']))
+            settings['TAX_COLLECTOR_ADDRESS'],
+            Decimal(tax_amount_htkn),
+            asset_code=settings['ASSET_CODE'],
+            asset_issuer=settings['ISSUER'],
+            source=source_address,
+        )
 
     if memo_text:
         builder.add_text_memo(memo_text)
