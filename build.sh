@@ -20,7 +20,7 @@ if [[ "$OPT" == "build" ]]; then
     docker-compose build --pull --no-cache hotnow-htkn-platform
 fi
 
-if [[ "$OPT" == "push"]]; then
+if [[ "$OPT" == "push" ]]; then
     docker-compose push hotnow-htkn-platform
 fi
 
