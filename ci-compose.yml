@@ -1,0 +1,25 @@
+version: '3'
+services:
+  hotnow-htkn-platform:
+    image: "${REGISTRY:-hotnow-htkn-platform}:${TAG:-latest}"
+    build: .
+    container_name: hotnow-htkn-platform
+    working_dir: "/usr/src"
+    command: "python -u token_platform/server.py"
+    ports:
+      - "8081:80"
+    environment:
+      - ASSET_CODE=HOT
+      - HOT_ISSUER=GAR6I4HX2Q6VLOMAJFKDG22MUQC345U73RVA3J3FIONGTT2F656HA4CK
+      - PYTHONPATH=/usr/src/token_platform
+      # - PASSPHRASE=Integration Test Network ; zulucrypto
+      - PASSPHRASE=TESTNET
+      # - HORIZON_URL=http://horizon-integrationnet:8000
+      - HORIZON_URL=http://128.199.205.66:8000
+      - TAX_COLLECTOR_ADDRESS=GCSSUGQ6SNJKZ5CYBVRP2N2BDTTF2TLNZQC6SCVFXOX2TI5ERTCXKJPL
+    networks:
+      - hotnow-network
+networks:
+  hotnow-network:
+    external:
+      name: hotnow-network

@@ -44,3 +44,16 @@ docker-compose up -d
 ```
 ./runtests.sh
 ```
+
+# Build command
+```
+./build.sh <option> <branch> <compose>.yml
+```
+option
+- build
+- push
+- remove
+
+compose
+- docker-compose (default)
+- ci-compose
