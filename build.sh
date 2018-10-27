@@ -7,13 +7,13 @@ COMPOSE=${3:=docker-compose.yml}
 
 export TAG=$(git describe --always --tags)
 
-if [[ "$BRANCH" == "default" ]]; then
-    BRANCH=$(git rev-parse --abbrev-ref HEAD)
-fi
+# if [[ "$BRANCH" == "default" ]]; then
+#     BRANCH=$(git rev-parse --abbrev-ref HEAD)
+# fi
 
-if [[ "$BRANCH" == "develop" ]]; then
-    export TAG="latest"
-fi
+# if [[ "$BRANCH" == "develop" ]]; then
+#     export TAG="latest"
+# fi
 
 export REGISTRY="registry-hotnow.proteus-tech.com/hotnow-htkn-platform"
 if [[ "$OPT" == "build" ]]; then
