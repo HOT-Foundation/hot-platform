@@ -23,6 +23,7 @@ unit_test_feature:
   except:
     - master
     - develop
+    - tags
 
 unit_test:
   stage: test
@@ -35,6 +36,7 @@ unit_test:
   only:
     - develop
     - master
+    - tags
 
 push_image:
   stage: push_image
