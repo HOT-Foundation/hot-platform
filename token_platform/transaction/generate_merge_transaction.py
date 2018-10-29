@@ -5,8 +5,7 @@ from router import reverse
 from decimal import Decimal
 from conf import settings
 from aiohttp import web
-from stellar_base.horizon import Horizon
-from stellar.wallet import get_stellar_wallet
+from stellar.wallet import get_stellar_wallet, get_transaction_by_wallet
 import binascii
 
 
@@ -94,12 +93,8 @@ async def get_creator_address(wallet_address: str) -> str:
 
     Args:
         wallet_address: address for search creator address  '''
-    horizon = Horizon(horizon=settings['HORIZON_URL'])
-    result = (
-        horizon.account_operations(wallet_address, params={'limit': 1, 'order': 'asc'})
-        .get('_embedded')
-        .get('records')[0]
-    )
+    transactions = await get_transaction_by_wallet(wallet_address, limit=1, sort='asc')
+    result = transactions[0]
     return result['source_account']
 
 
