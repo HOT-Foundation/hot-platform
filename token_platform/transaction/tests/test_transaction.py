@@ -10,104 +10,33 @@ from tests.test_utils import BaseTestClass
 from conf import settings
 from transaction.transaction import (
     get_current_sequence_number,
-    get_reason_transaction,
     get_signers,
     get_threshold_weight,
     get_transaction_by_memo,
     get_transaction_hash,
     is_duplicate_transaction,
-    submit_transaction,
 )
 from wallet.tests.factory.wallet import StellarWallet
 from stellar.wallet import Wallet
 
 
-class TestSubmitTransaction(BaseTestClass):
-    class WrongResponseBadRequest:
-        def __init__(self):
-            self.status = 400
-
-        async def json(self):
-            return {'status': 400}
-
-    class WrongResponseNotFound:
-        def __init__(self):
-            self.status = 404
-
-        async def json(self):
-            return {'status': 404}
-
-    class SuccessResponse:
-        def __init__(self):
-            self.status = 200
-
-        async def json(self):
-            return {'status': 200}
-
-    @unittest_run_loop
-    @patch('transaction.transaction.aiohttp.ClientSession.post')
-    async def test_submit_transaction_success(self, mock_post) -> None:
-        session = mock_post.return_value
-        session.__aenter__.return_value = self.SuccessResponse()
-        signed_xdr = 'Testtest'
-        result = await submit_transaction(signed_xdr)
-        expect = self.SuccessResponse()
-        assert result == await expect.json()
-
-    @unittest_run_loop
-    @patch('transaction.transaction.aiohttp.ClientSession.post')
-    async def test_submit_transaction_fail_not_found(self, mock_post) -> None:
-        session = mock_post.return_value
-        session.__aenter__.return_value = self.WrongResponseBadRequest()
-        with pytest.raises(HTTPBadRequest):
-            signed_xdr = 'Testtest'
-            result = await submit_transaction(signed_xdr)
-
-    @unittest_run_loop
-    @patch('transaction.transaction.aiohttp.ClientSession.post')
-    async def test_submit_transaction_fail_bad_request(self, mock_post) -> None:
-        session = mock_post.return_value
-        session.__aenter__.return_value = self.WrongResponseNotFound()
-        with pytest.raises(HTTPNotFound):
-            signed_xdr = 'Testtest'
-            result = await submit_transaction(signed_xdr)
-
-
 class TestDuplicateTransaction(BaseTestClass):
-    class SuccessResponse:
-        def __init__(self):
-            self.status = 200
-
-        async def json(self):
-            return {"id": 'testteestsetbbdf'}
-
-    class WrongResponse:
-        def __init__(self):
-            self.status = 400
-
-        async def json(self):
-            return {
-                "title": "Resource Missing",
-                "status": 404,
-                "detail": "The resource at the url requested was not found.  This is usually occurs for one of two reasons:  The url requested is not valid, or no data in our database could be found with the parameters provided.",
-            }
-
     @unittest_run_loop
-    @patch('transaction.transaction.aiohttp.ClientSession.get')
-    async def test_is_duplicate_transaction_duplicate_when_id_exist(self, mock_get) -> None:
-        session = mock_get.return_value
-        session.__aenter__.return_value = self.SuccessResponse()
-
+    @patch('transaction.transaction.stellar.wallet.get_transaction')
+    async def test_is_duplicate_transaction_duplicate_when_id_exist(self, mock_data) -> None:
+        mock_data.return_value = {"id": 'testteestsetbbdf'}
         tx_hash = 'e11b7a3677fdd45c885e8fb49d0079d083ee8a5cab08e32b00126172abb05111'
         result = await is_duplicate_transaction(tx_hash)
         assert result == True
 
     @unittest_run_loop
-    @patch('transaction.transaction.aiohttp.ClientSession.get')
-    async def test_is_duplicate_transaction_not_duplicate_when_get_not_found(self, mock_get) -> None:
-        session = mock_get.return_value
-        session.__aenter__.return_value = self.WrongResponse()
-
+    @patch('transaction.transaction.stellar.wallet.get_transaction')
+    async def test_is_duplicate_transaction_not_duplicate_when_get_not_found(self, mock_data) -> None:
+        mock_data.return_value = {
+            "title": "Resource Missing",
+            "status": 404,
+            "detail": "The resource at the url requested was not found.  This is usually occurs for one of two reasons:  The url requested is not valid, or no data in our database could be found with the parameters provided.",
+        }
         tx_hash = 'e11b7a3677fdd45c885'
         result = await is_duplicate_transaction(tx_hash)
         assert result == False
@@ -231,19 +160,3 @@ class TestGetThreshold(BaseTestClass):
 
         result = await get_transaction_by_memo('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'testmemo')
         assert not result
-
-
-class TestGetReasonTransaction(BaseTestClass):
-    @unittest_run_loop
-    async def test_get_reason_transacton_successfully(self):
-        respons_data = {
-            "extras": {"result_codes": {"transaction": "tx_failed", "operations": ["op_no_destination", "op_success"]}}
-        }
-        resp = get_reason_transaction(respons_data)
-        self.assertEqual(resp, 'op_no_destination/op_success')
-
-    @unittest_run_loop
-    async def test_get_reason_transacton_not_found_value(self):
-        respons_data = {"extras": {"result_codes": {"transaction": "tx_bad_seq"}}}
-        resp = get_reason_transaction(respons_data)
-        self.assertEqual(resp, None)
