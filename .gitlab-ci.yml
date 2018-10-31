@@ -1,0 +1,51 @@
+stages:
+  - build_image
+  - test
+  - push_image
+
+build_image:
+  stage: build_image
+  before_script:
+    - docker login registry-hotnow.proteus-tech.com -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  script:
+    - "./build.sh build $CI_COMMIT_REF_NAME ci-compose.yml"
+
+
+unit_test_feature:
+  stage: test
+  before_script:
+    - docker login registry-hotnow.proteus-tech.com -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  script:
+    - "./ci-runtests.sh"
+  after_script:
+    - "./build.sh down $CI_COMMIT_REF_NAME ci-compose.yml"
+    - "./build.sh remove $CI_COMMIT_REF_NAME ci-compose.yml"
+  except:
+    - master
+    - develop
+    - tags
+
+unit_test:
+  stage: test
+  before_script:
+    - docker login registry-hotnow.proteus-tech.com -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  script:
+    - "./ci-runtests.sh"
+  after_script:
+    - "./build.sh down $CI_COMMIT_REF_NAME ci-compose.yml"
+  only:
+    - develop
+    - master
+    - tags
+
+push_image:
+  stage: push_image
+  before_script:
+    - docker login registry-hotnow.proteus-tech.com -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  script:
+    - "./build.sh push $CI_COMMIT_REF_NAME ci-compose.yml"
+  after_script:
+    - "./build.sh remove $CI_COMMIT_REF_NAME ci-compose.yml"
+  only:
+    - develop
+    - tags
