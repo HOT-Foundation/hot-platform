@@ -1,6 +1,6 @@
 import pytest
 from aiohttp.test_utils import unittest_run_loop
-from aiohttp.web_exceptions import HTTPBadRequest, HTTPInternalServerError
+from aiohttp.web_exceptions import HTTPBadRequest, HTTPInternalServerError, HTTPNotFound
 from aioresponses import aioresponses
 from asynctest import patch
 from stellar_base.builder import Builder
@@ -8,7 +8,6 @@ from stellar_base.keypair import Keypair
 from tests.test_utils import BaseTestClass
 
 from conf import settings
-from transaction.tests.factory.horizon import HorizonData
 from transaction.transaction import (
     get_current_sequence_number,
     get_reason_transaction,
@@ -24,9 +23,19 @@ from stellar.wallet import Wallet
 
 
 class TestSubmitTransaction(BaseTestClass):
-    class WrongResponse:
-        def submit(self, tx_hash):
-            raise ValueError('response is not json format.')
+    class WrongResponseBadRequest:
+        def __init__(self):
+            self.status = 400
+
+        async def json(self):
+            return {'status': 400}
+
+    class WrongResponseNotFound:
+        def __init__(self):
+            self.status = 404
+
+        async def json(self):
+            return {'status': 404}
 
     class SuccessResponse:
         def __init__(self):
@@ -36,9 +45,9 @@ class TestSubmitTransaction(BaseTestClass):
             return {'status': 200}
 
     @unittest_run_loop
-    @patch('aiohttp.ClientSession.post')
-    async def test_submit_transaction_success(self, mock_client) -> None:
-        session = mock_client.return_value
+    @patch('transaction.transaction.aiohttp.ClientSession.post')
+    async def test_submit_transaction_success(self, mock_post) -> None:
+        session = mock_post.return_value
         session.__aenter__.return_value = self.SuccessResponse()
         signed_xdr = 'Testtest'
         result = await submit_transaction(signed_xdr)
@@ -46,52 +55,58 @@ class TestSubmitTransaction(BaseTestClass):
         assert result == await expect.json()
 
     @unittest_run_loop
-    async def test_submit_transaction_fail_with_duplicate_xdr(self) -> None:
+    @patch('transaction.transaction.aiohttp.ClientSession.post')
+    async def test_submit_transaction_fail_not_found(self, mock_post) -> None:
+        session = mock_post.return_value
+        session.__aenter__.return_value = self.WrongResponseBadRequest()
         with pytest.raises(HTTPBadRequest):
-            signed_xdr = b'AAAAACRdQ0bLIMY2WB03xlOGSqWXyb8uFQIxp+QSypNpjsW0AAAAZAB79gEAAAAHAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAbUsVq2bqEoCf7vIHxSuFBHDqxrZiYvtyqyavFkpA9wQAAAABDzN9gAAAAAAAAAABaY7FtAAAAEB0OSEaK6FTDW3imY9vU/jFe3dDhz0j5/656Kpns/uzBdSMUvl9q8ZNQes7ASTp98hgsxfZBlVnYAr0jzwY05MI'
+            signed_xdr = 'Testtest'
             result = await submit_transaction(signed_xdr)
 
     @unittest_run_loop
-    async def test_submit_transaction_fail_with_wrong_xdr_value(self) -> None:
-        with pytest.raises(HTTPBadRequest):
-            signed_xdr = b'AAAAACRdQ0bLIMY2WB03xlOGSqWXy'
-            result = await submit_transaction(signed_xdr)
-
-    @unittest_run_loop
-    @patch('transaction.transaction.Horizon')
-    async def test_submit_transaction_fail_with_wrong_response_format(self, mock_horizon) -> None:
-        mock_horizon.return_value = self.WrongResponse()
-        with pytest.raises(HTTPBadRequest):
+    @patch('transaction.transaction.aiohttp.ClientSession.post')
+    async def test_submit_transaction_fail_bad_request(self, mock_post) -> None:
+        session = mock_post.return_value
+        session.__aenter__.return_value = self.WrongResponseNotFound()
+        with pytest.raises(HTTPNotFound):
             signed_xdr = 'Testtest'
             result = await submit_transaction(signed_xdr)
 
 
 class TestDuplicateTransaction(BaseTestClass):
+    class SuccessResponse:
+        def __init__(self):
+            self.status = 200
+
+        async def json(self):
+            return {"id": 'testteestsetbbdf'}
+
+    class WrongResponse:
+        def __init__(self):
+            self.status = 400
+
+        async def json(self):
+            return {
+                "title": "Resource Missing",
+                "status": 404,
+                "detail": "The resource at the url requested was not found.  This is usually occurs for one of two reasons:  The url requested is not valid, or no data in our database could be found with the parameters provided.",
+            }
+
     @unittest_run_loop
-    @patch('transaction.transaction.Horizon')
-    async def test_is_duplicate_transaction_duplicate_when_id_exist(self, mock_horizon) -> None:
-        instance = mock_horizon.return_value
-        instance.transaction.return_value = {"id": 'testteestsetbbdf'}
+    @patch('transaction.transaction.aiohttp.ClientSession.get')
+    async def test_is_duplicate_transaction_duplicate_when_id_exist(self, mock_get) -> None:
+        session = mock_get.return_value
+        session.__aenter__.return_value = self.SuccessResponse()
 
         tx_hash = 'e11b7a3677fdd45c885e8fb49d0079d083ee8a5cab08e32b00126172abb05111'
-
-        with aioresponses() as m:
-            HORIZON_URL = settings['HORIZON_URL']
-
-            url = f'{HORIZON_URL}/transactions/{tx_hash}'
-            m.get(url, status=200, payload={'id': '1'})
-            result = await is_duplicate_transaction(tx_hash)
-            assert result == True
+        result = await is_duplicate_transaction(tx_hash)
+        assert result == True
 
     @unittest_run_loop
-    @patch('transaction.transaction.Horizon')
-    async def test_is_duplicate_transaction_not_duplicate_when_get_not_found(self, mock_horizon) -> None:
-        instance = mock_horizon.return_value
-        instance.transaction.return_value = {
-            "title": "Resource Missing",
-            "status": 404,
-            "detail": "The resource at the url requested was not found.  This is usually occurs for one of two reasons:  The url requested is not valid, or no data in our database could be found with the parameters provided.",
-        }
+    @patch('transaction.transaction.aiohttp.ClientSession.get')
+    async def test_is_duplicate_transaction_not_duplicate_when_get_not_found(self, mock_get) -> None:
+        session = mock_get.return_value
+        session.__aenter__.return_value = self.WrongResponse()
 
         tx_hash = 'e11b7a3677fdd45c885'
         result = await is_duplicate_transaction(tx_hash)
@@ -123,20 +138,16 @@ class TestGetTransactionHash(BaseTestClass):
 
 
 class TestGetcurrentSequenceNumber(BaseTestClass):
-    class Account:
-        def get(self, str):
-            return '1234566789'
-
     @unittest_run_loop
-    @patch('transaction.transaction.Horizon')
-    async def test_get_sequence_number_success(self, mock_horizon) -> None:
-        instance = mock_horizon.return_value
-        instance.account.return_value = self.Account()
+    @patch('transaction.transaction.stellar.wallet.get_stellar_wallet')
+    async def test_get_sequence_number_success(self, mock_wallet) -> None:
+        instance = mock_wallet.return_value
+        instance.sequence = '5'
 
         wallet_address = 'GASF2Q2GZMQMMNSYDU34MU4GJKSZPSN7FYKQEMNH4QJMVE3JR3C3I3N5'
         result = await get_current_sequence_number(wallet_address)
         assert isinstance(result, str)
-        assert result == '1234566789'
+        assert result == '5'
 
 
 class TestGetSigner(BaseTestClass):
@@ -205,20 +216,18 @@ class TestGetThreshold(BaseTestClass):
         assert result == 2
 
     @unittest_run_loop
-    @patch('transaction.transaction.Horizon')
-    async def test_get_transaction_by_memo_success(self, mock_horizon):
-        instance = mock_horizon.return_value
-        instance.account_transactions.return_value = {"_embedded": {"records": [{"memo_type": "text", "memo": "testmemo", "hash": "testhash"}]}}
+    @patch('transaction.transaction.stellar.wallet.get_transaction_by_wallet')
+    async def test_get_transaction_by_memo_success(self, mock_get_transaction):
+        mock_get_transaction.return_value = [{"memo_type": "text", "memo": "testmemo", "hash": "testhash"}]
 
         result = await get_transaction_by_memo('GD3PPDLKXRDM57UV7QDFIHLLRCLM4KGVIA43GEM7ZOT7EHK5TR3Z5G6I', 'testmemo')
         assert 'error' in result.keys()
         assert 'url' in result.keys()
 
     @unittest_run_loop
-    @patch('transaction.transaction.Horizon')
-    async def test_get_transaction_by_memo_not_found(self, mock_horizon):
-        instance = mock_horizon.return_value
-        instance.account_transactions.return_value = {"_embedded": {"records": []}}
+    @patch('transaction.transaction.stellar.wallet.get_transaction_by_wallet')
+    async def test_get_transaction_by_memo_not_found(self, mock_get_transaction):
+        mock_get_transaction.return_value = []
 
         result = await get_transaction_by_memo('GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI', 'testmemo')
         assert not result

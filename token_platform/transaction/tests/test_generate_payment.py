@@ -18,14 +18,18 @@ from decimal import Decimal
 class TestGetUnsignedTransaction(BaseTestClass):
     @unittest_run_loop
     @patch('transaction.generate_payment.get_wallet')
+    @patch('transaction.generate_payment.get_stellar_wallet')
     @patch('transaction.generate_payment.generate_payment')
-    async def test_get_transaction_from_request(self, mock_generate_payment, mock_address):
+    async def test_get_transaction_from_request(self, mock_generate_payment, mock_stellar_wallet, mock_address):
         mock_generate_payment.return_value = {}
         balances = [{'balance': '9.9999200', 'asset_type': 'native'}]
         mock_address.return_value = StellarWallet(balances)
         source_address = 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'
         destination_address = 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6'
         transaction_source_address = 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ'
+
+        instance = mock_stellar_wallet.return_value
+        instance.sequence = 5
 
         data = {
             'target_address': destination_address,
@@ -37,8 +41,9 @@ class TestGetUnsignedTransaction(BaseTestClass):
         resp = await self.client.request('POST', url, json=data)
         assert resp.status == 200
         mock_generate_payment.assert_called_once_with(
-            transaction_source_address, source_address, destination_address, 5, 10, None, None, None
+            transaction_source_address, source_address, destination_address, 5, 10, None, 5, None
         )
+        mock_stellar_wallet.assert_called_once()
 
     @unittest_run_loop
     @patch('transaction.generate_payment.get_wallet')
@@ -56,6 +61,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
             'transaction_source_address': transaction_source_address,
             'amount_xlm': 10,
             'amount_htkn': 5,
+            'sequence_number': 3,
         }
         url = reverse('generate-payment', wallet_address=source_address)
         resp = await self.client.request('POST', url, json=data)
@@ -79,6 +85,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
             'amount_xlm': 10,
             'amount_htkn': 5,
             'memo_on': 'a',
+            'sequence_number': 3,
         }
         url = reverse('generate-payment', wallet_address=source_address)
         resp = await self.client.request('POST', url, json=data)
@@ -102,6 +109,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
             'amount_xlm': 10,
             'amount_htkn': 5,
             'memo': memo,
+            'sequence_number': 3,
         }
         url = reverse('generate-payment', wallet_address=source_address)
         resp = await self.client.request('POST', url, json=data)

@@ -11,6 +11,7 @@ from router import reverse
 from transaction.transaction import get_signers, get_threshold_weight, get_transaction_by_memo
 from wallet.get_wallet import get_wallet_detail
 from wallet.wallet import get_wallet
+from stellar.wallet import get_stellar_wallet
 
 
 async def generate_payment_from_request(request: web.Request) -> web.Response:
@@ -41,6 +42,11 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
         url_get_transaction = await get_transaction_by_memo(focus_address, memo)
         if url_get_transaction:
             raise web.HTTPBadRequest(reason="Transaction is already submitted")
+
+    if not sequence_number:
+        wallet = await get_stellar_wallet(transaction_source_address)
+        sequence_number = wallet.sequence
+
     result = await generate_payment(
         transaction_source_address,
         source_account,

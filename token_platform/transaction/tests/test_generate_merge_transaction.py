@@ -10,8 +10,19 @@ from decimal import Decimal
 from typing import List
 from stellar_base.builder import Builder
 from stellar_base.stellarxdr import StellarXDR_const as const
-from transaction.generate_merge_transaction import (generate_merge_transaction, build_payment_operation, build_remove_trustlines_operation, build_remove_manage_data_operation, build_account_merge_operation, build_generate_merge_transaction, generate_parties_wallet, is_match_balance, get_creator_address)
+from transaction.generate_merge_transaction import (
+    generate_merge_transaction,
+    build_payment_operation,
+    build_remove_trustlines_operation,
+    build_remove_manage_data_operation,
+    build_account_merge_operation,
+    build_generate_merge_transaction,
+    generate_parties_wallet,
+    is_match_balance,
+    get_creator_address,
+)
 from stellar.wallet import Wallet
+
 
 class TestGenerateMergeTransaction(BaseTestClass):
     async def setUpAsync(self):
@@ -23,49 +34,37 @@ class TestGenerateMergeTransaction(BaseTestClass):
         self.transaction_source_address = 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ'
         self.tx_hash = 'tx_tash'
         self.unsigned_xdr = 'xdr'
-        self.parties_wallet = [
-            {'address' : 'wallet1', 'amount' : '15'},
-            {'address' : 'wallet2', 'amount' : '20'}
-        ]
+        self.parties_wallet = [{'address': 'wallet1', 'amount': '15'}, {'address': 'wallet2', 'amount': '20'}]
         self.wallet_detail = {
             '@id': reverse('escrow-address', escrow_address=self.wallet_address),
-            'asset': {
-                self.custom_asset : self.remain_custom_asset
-            },
+            'asset': {self.custom_asset: self.remain_custom_asset},
             'generate-wallet': reverse('escrow-generate-wallet', escrow_address=self.wallet_address),
-            'data': {
-                'provider_address' : self.provider_address,
-                'creator_address' : self.creator_address
-            },
-            'signers' : [self.provider_address, self.creator_address]
+            'data': {'provider_address': self.provider_address, 'creator_address': self.creator_address},
+            'signers': [self.provider_address, self.creator_address],
         }
 
     @unittest_run_loop
     @patch('transaction.generate_merge_transaction.get_stellar_wallet')
     @patch('transaction.generate_merge_transaction.build_generate_merge_transaction')
     @patch('transaction.generate_merge_transaction.get_escrow_wallet_detail')
-    async def test_generate_merge_transaction_success(self, mock_wallet_detail, mock_merge_transaction,mock_get_stellar_wallet):
+    async def test_generate_merge_transaction_success(
+        self, mock_wallet_detail, mock_merge_transaction, mock_get_stellar_wallet
+    ):
         mock_wallet_detail.return_value = self.wallet_detail
         mock_merge_transaction.return_value = self.unsigned_xdr, self.tx_hash
 
-        result = await generate_merge_transaction(self.transaction_source_address, self.wallet_address, self.parties_wallet)
-
-        mock_get_stellar_wallet.return_value = Wallet(
-            "1",
-            [],
-            "1",
-            {},
-            [],
-            {},
-            {}
+        result = await generate_merge_transaction(
+            self.transaction_source_address, self.wallet_address, self.parties_wallet
         )
 
+        mock_get_stellar_wallet.return_value = Wallet("1", [], "1", {}, [], {}, {})
+
         expect = {
-            'wallet_address' : self.wallet_address,
-            'transaction_url' : reverse('transaction', transaction_hash=self.tx_hash),
-            'signers' : self.wallet_detail['signers'],
-            'xdr' : self.unsigned_xdr,
-            'transaction_hash' : self.tx_hash
+            'wallet_address': self.wallet_address,
+            'transaction_url': reverse('transaction', transaction_hash=self.tx_hash),
+            'signers': self.wallet_detail['signers'],
+            'xdr': self.unsigned_xdr,
+            'transaction_hash': self.tx_hash,
         }
 
         assert result == expect
@@ -77,22 +76,14 @@ class TestBuildGenerateMergeTransaction(BaseTestClass):
         self.provider_address = 'provider_address'
         self.creator_address = 'creator_address'
         self.transaction_source_address = 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ'
-        self.parties_wallet = [
-            {'address' : 'wallet1', 'amount' : '15'},
-            {'address' : 'wallet2', 'amount' : '20'}
-        ]
+        self.parties_wallet = [{'address': 'wallet1', 'amount': '15'}, {'address': 'wallet2', 'amount': '20'}]
         self.wallet_detail = {
             'escrow_address': self.wallet_address,
             '@id': reverse('escrow-address', escrow_address=self.wallet_address),
-            'asset': {
-                settings['ASSET_CODE'] : '100.0000'
-            },
+            'asset': {settings['ASSET_CODE']: '100.0000'},
             'generate-wallet': reverse('escrow-generate-wallet', escrow_address=self.wallet_address),
-            'data': {
-                'provider_address' : self.provider_address,
-                'creator_address' : self.creator_address
-            },
-            'signers' : [self.provider_address, self.creator_address]
+            'data': {'provider_address': self.provider_address, 'creator_address': self.creator_address},
+            'signers': [self.provider_address, self.creator_address],
         }
 
     @unittest_run_loop
@@ -104,7 +95,9 @@ class TestBuildGenerateMergeTransaction(BaseTestClass):
         instance.te.hash_meta.return_value = b'tx-hash'
         mock_is_match.return_value = True
 
-        result = await build_generate_merge_transaction(self.transaction_source_address, self.wallet_detail, self.parties_wallet)
+        result = await build_generate_merge_transaction(
+            self.transaction_source_address, self.wallet_detail, self.parties_wallet
+        )
         expect = ('unsigned-xdr', '74782d68617368')
         assert result == expect
 
@@ -112,7 +105,9 @@ class TestBuildGenerateMergeTransaction(BaseTestClass):
     @patch('transaction.generate_merge_transaction.get_creator_address')
     @patch('transaction.generate_merge_transaction.is_match_balance')
     @patch('transaction.generate_merge_transaction.Builder')
-    async def test_build_generate_merge_transaction_creator_is_none(self, mock_builder, mock_is_match, mock_get_creator):
+    async def test_build_generate_merge_transaction_creator_is_none(
+        self, mock_builder, mock_is_match, mock_get_creator
+    ):
         instance = mock_builder.return_value
         instance.gen_xdr.return_value = b'unsigned-xdr'
         instance.te.hash_meta.return_value = b'tx-hash'
@@ -120,7 +115,9 @@ class TestBuildGenerateMergeTransaction(BaseTestClass):
         mock_get_creator.return_value = self.creator_address
         self.wallet_detail['data'] = {}
 
-        result = await build_generate_merge_transaction(self.transaction_source_address, self.wallet_detail, self.parties_wallet)
+        result = await build_generate_merge_transaction(
+            self.transaction_source_address, self.wallet_detail, self.parties_wallet
+        )
         expect = ('unsigned-xdr', '74782d68617368')
         assert result == expect
 
@@ -147,7 +144,9 @@ class TestBuildGenerateMergeTransaction(BaseTestClass):
         mock_is_match.return_value = True
 
         with pytest.raises(web.HTTPBadRequest):
-            await build_generate_merge_transaction(self.transaction_source_address, self.wallet_detail, self.parties_wallet)
+            await build_generate_merge_transaction(
+                self.transaction_source_address, self.wallet_detail, self.parties_wallet
+            )
 
     @unittest_run_loop
     @patch('transaction.generate_merge_transaction.is_match_balance')
@@ -156,23 +155,17 @@ class TestBuildGenerateMergeTransaction(BaseTestClass):
         mock_is_match.return_value = False
 
         with pytest.raises(web.HTTPBadRequest):
-            await build_generate_merge_transaction(self.transaction_source_address, self.wallet_detail, self.parties_wallet)
+            await build_generate_merge_transaction(
+                self.transaction_source_address, self.wallet_detail, self.parties_wallet
+            )
 
 
 class TestGetCreatorAddress(BaseTestClass):
-    async def setUpAsync(self):
-        self.wallet_address = 'wallet_address'
-        self.result = { "_embedded": {"records": [
-                            {'source_account' : 'source_account'}
-                      ]}}
-
     @unittest_run_loop
-    @patch('transaction.generate_merge_transaction.Horizon')
-    async def test_get_creator_address_success(self, mock_horizon):
-        instance = mock_horizon.return_value
-        instance.account_operations.return_value = self.result
-        result = await get_creator_address(self.wallet_address)
-
+    @patch('transaction.generate_merge_transaction.get_transaction_by_wallet')
+    async def test_get_creator_address_success(self, mock_wallet):
+        mock_wallet.return_value = [{'source_account': 'source_account'}]
+        result = await get_creator_address('wallet_address')
         assert result == 'source_account'
 
 
@@ -183,23 +176,16 @@ class TestGeneratePartiesWallet(BaseTestClass):
         self.creator_address = 'creator_address'
         self.wallet_detail = {
             '@id': reverse('escrow-address', escrow_address=self.wallet_address),
-            'asset': {
-                settings['ASSET_CODE'] : '100.0000'
-            },
+            'asset': {settings['ASSET_CODE']: '100.0000'},
             'generate-wallet': reverse('escrow-generate-wallet', escrow_address=self.wallet_address),
-            'data': {
-                'provider_address' : self.provider_address,
-                'creator_address' : self.creator_address
-            },
-            'signers' : [self.provider_address, self.creator_address]
+            'data': {'provider_address': self.provider_address, 'creator_address': self.creator_address},
+            'signers': [self.provider_address, self.creator_address],
         }
 
     @unittest_run_loop
     async def test_generate_parties_wallet_success(self):
         result = await generate_parties_wallet(self.wallet_detail)
-        expect = [
-            {'address' : self.provider_address, 'amount' : self.wallet_detail['asset'][settings['ASSET_CODE']]}
-        ]
+        expect = [{'address': self.provider_address, 'amount': self.wallet_detail['asset'][settings['ASSET_CODE']]}]
 
         assert isinstance(result, List)
         assert result == expect
@@ -207,10 +193,7 @@ class TestGeneratePartiesWallet(BaseTestClass):
 
 class TestIsMatchBalance(BaseTestClass):
     async def setUpAsync(self):
-        self.parties_wallet = [
-            {'address' : 'wallet1', 'amount' : '15'},
-            {'address' : 'wallet2', 'amount' : '20'}
-        ]
+        self.parties_wallet = [{'address': 'wallet1', 'amount': '15'}, {'address': 'wallet2', 'amount': '20'}]
 
     @unittest_run_loop
     async def test_is_match_balance_success(self):
@@ -229,15 +212,17 @@ class TestIsMatchBalance(BaseTestClass):
 
 class TestBuildPaymentOperation(BaseTestClass):
     async def setUpAsync(self):
-        self.builder = Builder(address='GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE', horizon=settings['HORIZON_URL'])
+        self.builder = Builder(
+            address='GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE', horizon=settings['HORIZON_URL']
+        )
         self.source_address = 'GCEOD3ALYS3I7PVF5PZ3JJDNQF2AWKX5IOWWPC4RBHQVJFR6LXEFOMZ3'
         self.destination_address = 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE'
 
     @unittest_run_loop
     async def test_build_payment_operation_success(self):
         parties_wallet = [
-            {'address' : 'GCEOD3ALYS3I7PVF5PZ3JJDNQF2AWKX5IOWWPC4RBHQVJFR6LXEFOMZ3', 'amount' : '15'},
-            {'address' : 'GD3PPDLKXRDM57UV7QDFIHLLRCLM4KGVIA43GEM7ZOT7EHK5TR3Z5G6I', 'amount' : '20'}
+            {'address': 'GCEOD3ALYS3I7PVF5PZ3JJDNQF2AWKX5IOWWPC4RBHQVJFR6LXEFOMZ3', 'amount': '15'},
+            {'address': 'GD3PPDLKXRDM57UV7QDFIHLLRCLM4KGVIA43GEM7ZOT7EHK5TR3Z5G6I', 'amount': '20'},
         ]
 
         await build_payment_operation(self.builder, self.source_address, parties_wallet)
@@ -250,8 +235,8 @@ class TestBuildPaymentOperation(BaseTestClass):
     async def test_build_payment_operation_fail(self):
 
         parties_wallet = [
-            {'address' : 'GCEOD3ALYS3I7PVF5PZ3JJDNQF2AWKX5IOWWPC4RBHQVJFR6LXEFOMZ3', 'amount' : '0'},
-            {'address' : 'GD3PPDLKXRDM57UV7QDFIHLLRCLM4KGVIA43GEM7ZOT7EHK5TR3Z5G6I', 'amount' : '0'}
+            {'address': 'GCEOD3ALYS3I7PVF5PZ3JJDNQF2AWKX5IOWWPC4RBHQVJFR6LXEFOMZ3', 'amount': '0'},
+            {'address': 'GD3PPDLKXRDM57UV7QDFIHLLRCLM4KGVIA43GEM7ZOT7EHK5TR3Z5G6I', 'amount': '0'},
         ]
         await build_payment_operation(self.builder, self.source_address, parties_wallet)
 
@@ -261,7 +246,9 @@ class TestBuildPaymentOperation(BaseTestClass):
 
 class TestBuildRemoveTrustlinesOperation(BaseTestClass):
     async def setUpAsync(self):
-        self.builder = Builder(address='GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE', horizon=settings['HORIZON_URL'])
+        self.builder = Builder(
+            address='GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE', horizon=settings['HORIZON_URL']
+        )
         self.source_address = 'GCEOD3ALYS3I7PVF5PZ3JJDNQF2AWKX5IOWWPC4RBHQVJFR6LXEFOMZ3'
 
     @unittest_run_loop
@@ -274,7 +261,9 @@ class TestBuildRemoveTrustlinesOperation(BaseTestClass):
 
 class TestBuildRemoveManageDataOperation(BaseTestClass):
     async def setUpAsync(self):
-        self.builder = Builder(address='GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE', horizon=settings['HORIZON_URL'])
+        self.builder = Builder(
+            address='GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE', horizon=settings['HORIZON_URL']
+        )
         self.source_address = 'GCEOD3ALYS3I7PVF5PZ3JJDNQF2AWKX5IOWWPC4RBHQVJFR6LXEFOMZ3'
         self.key_list = ['key1', 'key2', 'key3']
 
@@ -289,7 +278,9 @@ class TestBuildRemoveManageDataOperation(BaseTestClass):
 
 class TestBuildAccountMergeOperation(BaseTestClass):
     async def setUpAsync(self):
-        self.builder = Builder(address='GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE', horizon=settings['HORIZON_URL'])
+        self.builder = Builder(
+            address='GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE', horizon=settings['HORIZON_URL']
+        )
         self.source_address = 'GCEOD3ALYS3I7PVF5PZ3JJDNQF2AWKX5IOWWPC4RBHQVJFR6LXEFOMZ3'
         self.destination_address = 'GDHZCRVQP3W3GUSZMC3ECHRG3WVQQZXVDHY5TOQ5AB5JKRSSUUZ6XDUE'
 
