@@ -2,10 +2,9 @@ import copy
 from typing import Any, Dict, List, Mapping, NewType, Optional, Union
 
 import aiohttp
+import stellar
 from conf import settings
 from router import reverse
-from stellar_base.horizon import Horizon
-from stellar_base.transaction import Transaction
 from wallet.wallet import get_wallet
 
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
@@ -24,7 +23,6 @@ async def is_duplicate_transaction(transaction_hash: str) -> bool:
 
 async def submit_transaction(xdr: bytes) -> Dict[str, str]:
     """Submit transaction into Stellar network"""
-    horizon = Horizon(horizon=settings['HORIZON_URL'])
     url = f'{HORIZON_URL}/transactions'
     async with aiohttp.ClientSession() as session:
         data = {'tx': xdr}
@@ -61,9 +59,8 @@ def get_reason_transaction(response: Dict) -> Union[str, None]:
 
 async def get_current_sequence_number(wallet_address: str) -> int:
     """Get current sequence number of the wallet"""
-    horizon = Horizon(horizon=settings['HORIZON_URL'])
-    sequence = horizon.account(wallet_address).get('sequence')
-    return sequence
+    wallet = await stellar.wallet.get_stellar_wallet(wallet_address)
+    return wallet.sequence
 
 
 async def get_transaction_hash(address: str, memo: str) -> Union[str, None]:
@@ -98,22 +95,18 @@ async def get_transaction(tx_hash: str) -> Dict[str, Union[str, int, List[Dict[s
             "memo": tx_detail.get("memo", None),
         }
 
-    def _get_operation_data_of_transaction(tx_hash: str, horizon: Horizon) -> List[Dict[str, str]]:
+    async def _get_operation_data_of_transaction(tx_hash: str) -> List[Dict[str, str]]:
         """Get operation list of transaction"""
-        operations = copy.deepcopy(horizon.transaction_operations(tx_hash).get("_embedded").get("records"))
-
+        operations = await stellar.wallet.get_operations_of_transaction(tx_hash)
         for operation in operations:
             operation.pop("_links")
         return operations
 
-    horizon = Horizon(horizon=settings['HORIZON_URL'])
-    transaction = horizon.transaction(tx_hash)
-
-    if transaction.get('status', None) == 404:
-        raise aiohttp.web.HTTPNotFound(text=str(transaction.get('title', 'Resource not found')))
+    transaction = await stellar.wallet.get_transaction(tx_hash)
 
     tx_detail = _format_transaction(transaction)
-    tx_detail["operations"] = _get_operation_data_of_transaction(tx_hash, horizon)
+
+    tx_detail["operations"] = await _get_operation_data_of_transaction(tx_hash)
 
     return tx_detail
 
@@ -148,13 +141,10 @@ async def get_threshold_weight(wallet_address: str, operation_type: str) -> int:
 
 
 async def get_transaction_by_memo(source_account: str, memo: str, cursor: int = None) -> Dict:
-    horizon = Horizon(horizon=settings['HORIZON_URL'])
 
     # Get transactions data within key 'records'
-    transactions = (
-        horizon.account_transactions(source_account, params={'limit': 200, 'order': 'desc', 'cursor': cursor})
-        .get('_embedded')
-        .get('records')
+    transactions = await stellar.wallet.get_transaction_by_wallet(
+        wallet_address=source_account, limit=200, sort='desc', offset=cursor
     )
 
     # Filter result data on above by 'memo_type' == text
