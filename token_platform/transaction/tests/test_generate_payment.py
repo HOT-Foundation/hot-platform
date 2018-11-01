@@ -365,7 +365,9 @@ class TestGetUnsignedTransaction(BaseTestClass):
             )
 
     @unittest_run_loop
-    async def test_build_unsigned_transfer_with_target_not_created(self):
+    @patch('transaction.generate_payment.get_wallet_detail')
+    async def test_build_unsigned_transfer_with_target_not_created(self, mock_wallet):
+        mock_wallet.side_effect = web.HTTPNotFound()
         with pytest.raises(web.HTTPNotFound):
             result = await build_unsigned_transfer(
                 'GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ',

@@ -11,6 +11,7 @@ from stellar.wallet import (
     get_wallet_effect,
     get_operations_of_transaction,
     get_transaction_by_wallet,
+    submit_transaction,
 )
 
 HORIZON_URL = settings['HORIZON_URL']
@@ -18,8 +19,9 @@ HORIZON_URL = settings['HORIZON_URL']
 
 class TestHorizonApi(BaseTestClass):
     class SuccessResponse:
-        def __init__(self):
+        def __init__(self, content_type):
             self.status = 200
+            self.content_type = content_type
 
         async def json(self):
             return {
@@ -33,7 +35,7 @@ class TestHorizonApi(BaseTestClass):
             }
 
     class GetOperationsOfTransactionSuccess:
-        def __init__(self):
+        def __init__(self, content_type):
             self.status = 200
             self.operation_records = [
                 {
@@ -56,6 +58,7 @@ class TestHorizonApi(BaseTestClass):
                     "account": "test-account-address",
                 }
             ]
+            self.content_type = content_type
 
         async def json(self):
             return {
@@ -64,7 +67,7 @@ class TestHorizonApi(BaseTestClass):
             }
 
     class GetTransactionBywalletSuccess:
-        def __init__(self):
+        def __init__(self, content_type):
             self.status = 200
             self.transaction_records = [
                 {
@@ -94,6 +97,7 @@ class TestHorizonApi(BaseTestClass):
                     'signatures': ['test-signature'],
                 }
             ]
+            self.content_type = content_type
 
         async def json(self):
             return {
@@ -102,8 +106,9 @@ class TestHorizonApi(BaseTestClass):
             }
 
     class NotFoundResponse:
-        def __init__(self):
+        def __init__(self, content_type):
             self.status = 404
+            self.content_type = content_type
 
         async def json(self):
             return {
@@ -114,8 +119,9 @@ class TestHorizonApi(BaseTestClass):
             }
 
     class BadRequestResponse:
-        def __init__(self):
+        def __init__(self, content_type):
             self.status = 400
+            self.content_type = content_type
 
         async def json(self):
             return {'detail': 'test-detail'}
@@ -128,7 +134,7 @@ class TestHorizonApi(BaseTestClass):
     @patch('stellar.wallet.ClientSession.get')
     async def test_get_stellar_wallet_success(self, mock_get):
         session = mock_get.return_value
-        session.__aenter__.return_value = self.SuccessResponse()
+        session.__aenter__.return_value = self.SuccessResponse('application/hal+json')
         wallet = await get_stellar_wallet(self.wallet_address)
         url = f'{HORIZON_URL}/accounts/{self.wallet_address}'
         mock_get.assert_called_once_with(url)
@@ -137,8 +143,18 @@ class TestHorizonApi(BaseTestClass):
     @patch('stellar.wallet.ClientSession.get')
     async def test_get_stellar_wallet_fail(self, mock_get):
         session = mock_get.return_value
-        session.__aenter__.return_value = self.NotFoundResponse()
+        session.__aenter__.return_value = self.NotFoundResponse('application/problem+json')
         with pytest.raises(web.HTTPNotFound):
+            wallet = await get_stellar_wallet(self.wallet_address)
+        url = f'{HORIZON_URL}/accounts/{self.wallet_address}'
+        mock_get.assert_called_once_with(url)
+
+    @unittest_run_loop
+    @patch('stellar.wallet.ClientSession.get')
+    async def test_get_stellar_wallet_upstream_fail(self, mock_get):
+        session = mock_get.return_value
+        session.__aenter__.return_value = self.NotFoundResponse('document/html')
+        with pytest.raises(web.HTTPInternalServerError):
             wallet = await get_stellar_wallet(self.wallet_address)
         url = f'{HORIZON_URL}/accounts/{self.wallet_address}'
         mock_get.assert_called_once_with(url)
@@ -147,7 +163,7 @@ class TestHorizonApi(BaseTestClass):
     @patch('stellar.wallet.ClientSession.get')
     async def test_get_transaction_success(self, mock_get):
         session = mock_get.return_value
-        session.__aenter__.return_value = self.SuccessResponse()
+        session.__aenter__.return_value = self.SuccessResponse('application/hal+json')
         transaction = await get_transaction(self.transaction_hash)
         url = f'{HORIZON_URL}/transactions/{self.transaction_hash}'
         mock_get.assert_called_once_with(url)
@@ -156,8 +172,18 @@ class TestHorizonApi(BaseTestClass):
     @patch('stellar.wallet.ClientSession.get')
     async def test_get_transaction_fail(self, mock_get):
         session = mock_get.return_value
-        session.__aenter__.return_value = self.NotFoundResponse()
+        session.__aenter__.return_value = self.NotFoundResponse('application/problem+json')
         with pytest.raises(web.HTTPNotFound):
+            transaction = await get_transaction(self.transaction_hash)
+        url = f'{HORIZON_URL}/transactions/{self.transaction_hash}'
+        mock_get.assert_called_once_with(url)
+
+    @unittest_run_loop
+    @patch('stellar.wallet.ClientSession.get')
+    async def test_get_transaction_upstream_fail(self, mock_get):
+        session = mock_get.return_value
+        session.__aenter__.return_value = self.NotFoundResponse('document/html')
+        with pytest.raises(web.HTTPInternalServerError):
             transaction = await get_transaction(self.transaction_hash)
         url = f'{HORIZON_URL}/transactions/{self.transaction_hash}'
         mock_get.assert_called_once_with(url)
@@ -166,7 +192,7 @@ class TestHorizonApi(BaseTestClass):
     @patch('stellar.wallet.ClientSession.get')
     async def test_get_wallet_effect_success(self, mock_get):
         session = mock_get.return_value
-        session.__aenter__.return_value = self.SuccessResponse()
+        session.__aenter__.return_value = self.SuccessResponse('application/hal+json')
         effect = await get_wallet_effect(self.wallet_address, limit=2, offset='test-cursor')
         url = f'{HORIZON_URL}/accounts/{self.wallet_address}/effects?order=asc&limit=2&cursor=test-cursor'
         mock_get.assert_called_once_with(url)
@@ -175,7 +201,7 @@ class TestHorizonApi(BaseTestClass):
     @patch('stellar.wallet.ClientSession.get')
     async def test_get_wallet_effect_not_found(self, mock_get):
         session = mock_get.return_value
-        session.__aenter__.return_value = self.NotFoundResponse()
+        session.__aenter__.return_value = self.NotFoundResponse('application/problem+json')
         with pytest.raises(web.HTTPNotFound):
             effect = await get_wallet_effect(self.wallet_address)
         url = f'{HORIZON_URL}/accounts/{self.wallet_address}/effects?order=asc'
@@ -185,7 +211,7 @@ class TestHorizonApi(BaseTestClass):
     @patch('stellar.wallet.ClientSession.get')
     async def test_get_wallet_effect_bad_request(self, mock_get):
         session = mock_get.return_value
-        session.__aenter__.return_value = self.BadRequestResponse()
+        session.__aenter__.return_value = self.BadRequestResponse('application/problem+json')
         with pytest.raises(web.HTTPBadRequest):
             effect = await get_wallet_effect(self.wallet_address)
         url = f'{HORIZON_URL}/accounts/{self.wallet_address}/effects?order=asc'
@@ -195,7 +221,16 @@ class TestHorizonApi(BaseTestClass):
     @patch('stellar.wallet.ClientSession.get')
     async def test_get_wallet_effect_wrong_parameter(self, mock_get):
         session = mock_get.return_value
-        session.__aenter__.return_value = self.BadRequestResponse()
+        session.__aenter__.return_value = self.BadRequestResponse('application/problem+json')
+        with pytest.raises(ValueError):
+            effect = await get_wallet_effect(self.wallet_address, sort='test-sort')
+        mock_get.assert_not_called()
+
+    @unittest_run_loop
+    @patch('stellar.wallet.ClientSession.get')
+    async def test_get_wallet_effect_upstream_fail(self, mock_get):
+        session = mock_get.return_value
+        session.__aenter__.return_value = self.BadRequestResponse('document/html')
         with pytest.raises(ValueError):
             effect = await get_wallet_effect(self.wallet_address, sort='test-sort')
         mock_get.assert_not_called()
@@ -204,7 +239,7 @@ class TestHorizonApi(BaseTestClass):
     @patch('stellar.wallet.ClientSession.get')
     async def test_get_get_transaction_by_wallet_success(self, mock_get):
         session = mock_get.return_value
-        session.__aenter__.return_value = self.GetTransactionBywalletSuccess()
+        session.__aenter__.return_value = self.GetTransactionBywalletSuccess('application/hal+json')
         transactions = await get_transaction_by_wallet(self.wallet_address, limit=2, offset='test-cursor')
         url = f'{HORIZON_URL}/accounts/{self.wallet_address}/transactions?order=asc&limit=2&cursor=test-cursor'
         mock_get.assert_called_once_with(url)
@@ -214,8 +249,16 @@ class TestHorizonApi(BaseTestClass):
     @patch('stellar.wallet.ClientSession.get')
     async def test_get_get_transaction_by_wallet_not_found(self, mock_get):
         session = mock_get.return_value
-        session.__aenter__.return_value = self.NotFoundResponse()
+        session.__aenter__.return_value = self.NotFoundResponse('application/problem+json')
         with pytest.raises(web.HTTPNotFound):
+            transactions = await get_transaction_by_wallet(self.wallet_address)
+
+    @unittest_run_loop
+    @patch('stellar.wallet.ClientSession.get')
+    async def test_get_get_transaction_by_wallet_upstream_fail(self, mock_get):
+        session = mock_get.return_value
+        session.__aenter__.return_value = self.NotFoundResponse('document/html')
+        with pytest.raises(web.HTTPInternalServerError):
             transactions = await get_transaction_by_wallet(self.wallet_address)
 
     @unittest_run_loop
@@ -227,7 +270,7 @@ class TestHorizonApi(BaseTestClass):
     @patch('stellar.wallet.ClientSession.get')
     async def test_get_operations_of_transaction_success(self, mock_get):
         session = mock_get.return_value
-        session.__aenter__.return_value = self.GetOperationsOfTransactionSuccess()
+        session.__aenter__.return_value = self.GetOperationsOfTransactionSuccess('application/hal+json')
         transactions = await get_operations_of_transaction(self.transaction_hash, limit=2, offset='test-cursor')
         url = f'{HORIZON_URL}/transactions/{self.transaction_hash}/operations?order=asc&limit=2&cursor=test-cursor'
         mock_get.assert_called_once_with(url)
@@ -237,11 +280,57 @@ class TestHorizonApi(BaseTestClass):
     @patch('stellar.wallet.ClientSession.get')
     async def test_get_operations_of_transaction_not_found(self, mock_get):
         session = mock_get.return_value
-        session.__aenter__.return_value = self.NotFoundResponse()
+        session.__aenter__.return_value = self.NotFoundResponse('application/problem+json')
         with pytest.raises(web.HTTPNotFound):
+            transactions = await get_operations_of_transaction(self.wallet_address)
+
+    @unittest_run_loop
+    @patch('stellar.wallet.ClientSession.get')
+    async def test_get_operations_of_transaction_upstream_fail(self, mock_get):
+        session = mock_get.return_value
+        session.__aenter__.return_value = self.NotFoundResponse('document/html')
+        with pytest.raises(web.HTTPInternalServerError):
             transactions = await get_operations_of_transaction(self.wallet_address)
 
     @unittest_run_loop
     async def test_get_operations_of_transaction_wrong_parameter(self):
         with pytest.raises(ValueError):
             transactions = await get_operations_of_transaction(self.wallet_address, sort='test-sort')
+
+    @unittest_run_loop
+    @patch('transaction.transaction.aiohttp.ClientSession.post')
+    async def test_submit_transaction_success(self, mock_post) -> None:
+        session = mock_post.return_value
+        session.__aenter__.return_value = self.SuccessResponse('application/hal+json')
+        signed_xdr = 'Testtest'
+        result = await submit_transaction(signed_xdr)
+        expect = self.SuccessResponse('application/hal+json')
+        assert result == await expect.json()
+
+    @unittest_run_loop
+    @patch('transaction.transaction.aiohttp.ClientSession.post')
+    async def test_submit_transaction_fail_not_found(self, mock_post) -> None:
+        session = mock_post.return_value
+        session.__aenter__.return_value = self.BadRequestResponse('application/hal+json')
+        with pytest.raises(web.HTTPBadRequest):
+            signed_xdr = 'Testtest'
+            result = await submit_transaction(signed_xdr)
+
+    @unittest_run_loop
+    @patch('transaction.transaction.aiohttp.ClientSession.post')
+    async def test_submit_transaction_fail_bad_request(self, mock_post) -> None:
+        session = mock_post.return_value
+        session.__aenter__.return_value = self.NotFoundResponse('application/problem+json')
+        with pytest.raises(web.HTTPNotFound):
+            signed_xdr = 'Testtest'
+            result = await submit_transaction(signed_xdr)
+
+    @unittest_run_loop
+    @patch('transaction.transaction.aiohttp.ClientSession.post')
+    async def test_submit_transaction_upstream_fail(self, mock_post) -> None:
+        session = mock_post.return_value
+        session.__aenter__.return_value = self.NotFoundResponse('document/html')
+        with pytest.raises(web.HTTPInternalServerError):
+            signed_xdr = 'Testtest'
+            result = await submit_transaction(signed_xdr)
+
