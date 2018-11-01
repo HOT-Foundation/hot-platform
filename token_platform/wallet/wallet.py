@@ -35,7 +35,7 @@ def build_generate_trust_wallet_transaction(
     source_address: str,
     destination_address: str,
     xlm_amount: Decimal,
-    htkn_amount: Decimal = Decimal(0),
+    hot_amount: Decimal = Decimal(0),
     sequence=None,
 ) -> Tuple[bytes, bytes]:
     """"Build transaction return unsigned XDR and transaction hash.
@@ -45,7 +45,7 @@ def build_generate_trust_wallet_transaction(
             source_address: Owner of creator address and payment operations.
             destination_address: wallet id of new wallet.
             xlm_amount: starting xlm_balance of new wallet.
-            htkn_amount: starting htkn_balance of new wallet.
+            hot_amount: starting hot balance of new wallet.
     """
     builder = Builder(
         address=transaction_source_address,
@@ -69,13 +69,13 @@ def build_generate_trust_wallet_transaction(
         msg = str(e)
         raise web.HTTPInternalServerError(reason=msg)
 
-    if htkn_amount > 0:
+    if hot_amount > 0:
         builder.append_payment_op(
             source=source_address,
             destination=destination_address,
             asset_code=settings['ASSET_CODE'],
             asset_issuer=settings['ISSUER'],
-            amount=htkn_amount,
+            amount=hot_amount,
         )
 
     try:

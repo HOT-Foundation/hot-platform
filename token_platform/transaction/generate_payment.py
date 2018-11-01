@@ -21,9 +21,9 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
     source_account = request.match_info.get("wallet_address", "")
     transaction_source_address = body['transaction_source_address']
     target_address = body['target_address']
-    amount_htkn = body.get('amount_htkn')
+    amount_hot = body.get('amount_htkn')
     amount_xlm = body.get('amount_xlm')
-    tax_amount_htkn = body.get('tax_amount_htkn', None)
+    tax_amount_hot = body.get('tax_amount_htkn', None)
     sequence_number = body.get('sequence_number', None)
     memo = body.get('memo', None)
     memo_on = body.get('memo_on', 'source')
@@ -51,9 +51,9 @@ async def generate_payment_from_request(request: web.Request) -> web.Response:
         transaction_source_address,
         source_account,
         target_address,
-        amount_htkn,
+        amount_hot,
         amount_xlm,
-        tax_amount_htkn,
+        tax_amount_hot,
         sequence_number,
         memo,
     )
@@ -64,9 +64,9 @@ async def generate_payment(
     transaction_source_address: str,
     source_address: str,
     destination: str,
-    amount_htkn: Decimal,
+    amount_hot: Decimal,
     amount_xlm: Decimal,
-    tax_amount_htkn: Decimal = None,
+    tax_amount_hot: Decimal = None,
     sequence: int = None,
     memo: str = None,
 ) -> Dict:
@@ -75,20 +75,13 @@ async def generate_payment(
         Args:
             source_address: Owner of operation
             destination_address: address of receiveing wallet
-            amount_htkn: amount of HoToken that would be transferred
+            amount_hot: amount of HoToken that would be transferred
             amount_xlm: amount of XLM that would be transferred
             sequence: sequence number for generate transaction [optional]
             memo: memo text [optional]
     """
     unsigned_xdr, tx_hash = await build_unsigned_transfer(
-        transaction_source_address,
-        source_address,
-        destination,
-        amount_htkn,
-        amount_xlm,
-        tax_amount_htkn,
-        sequence,
-        memo,
+        transaction_source_address, source_address, destination, amount_hot, amount_xlm, tax_amount_hot, sequence, memo
     )
     host: str = settings['HOST']
     result = {
@@ -106,9 +99,9 @@ async def build_unsigned_transfer(
     transaction_source_address: str,
     source_address: str,
     destination_address: str,
-    amount_htkn: Decimal,
+    amount_hot: Decimal,
     amount_xlm: Decimal,
-    tax_amount_htkn: Decimal = None,
+    tax_amount_hot: Decimal = None,
     sequence: int = None,
     memo_text: str = None,
 ) -> Tuple[str, str]:
@@ -117,7 +110,7 @@ async def build_unsigned_transfer(
         Args:
             source_address: Owner of operation
             destination_address: wallet id of new wallet
-            amount_htkn: amount of htkn that would be transfer
+            amount_hot: amount of hot that would be transfer
             amount_xlm: amount of xlm that would be transfer
             sequence: sequence number for generate transaction [optional]
             memo: memo text [optional]
@@ -131,25 +124,25 @@ async def build_unsigned_transfer(
 
     wallet = await get_wallet_detail(destination_address)
 
-    if amount_htkn and not wallet['asset'].get(settings['ASSET_CODE'], False):
+    if amount_hot and not wallet['asset'].get(settings['ASSET_CODE'], False):
         raise web.HTTPBadRequest(reason="{} is not trusted {}".format(destination_address, settings['ASSET_CODE']))
 
     if amount_xlm:
         builder.append_payment_op(destination_address, amount_xlm, source=source_address)
 
-    if amount_htkn and wallet['asset'].get(settings['ASSET_CODE'], False):
+    if amount_hot and wallet['asset'].get(settings['ASSET_CODE'], False):
         builder.append_payment_op(
             destination_address,
-            amount_htkn,
+            amount_hot,
             asset_code=settings['ASSET_CODE'],
             asset_issuer=settings['ISSUER'],
             source=source_address,
         )
 
-    if tax_amount_htkn and Decimal(tax_amount_htkn) > 0:
+    if tax_amount_hot and Decimal(tax_amount_hot) > 0:
         builder.append_payment_op(
             settings['TAX_COLLECTOR_ADDRESS'],
-            Decimal(tax_amount_htkn),
+            Decimal(tax_amount_hot),
             asset_code=settings['ASSET_CODE'],
             asset_issuer=settings['ISSUER'],
             source=source_address,

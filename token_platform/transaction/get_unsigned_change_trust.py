@@ -12,13 +12,13 @@ from wallet.wallet import get_wallet
 from stellar.wallet import get_stellar_wallet
 
 
-async def get_unsigned_add_trust_and_htkn_from_request(request: web.Request) -> web.Response:
+async def get_unsigned_add_trust_and_hot_from_request(request: web.Request) -> web.Response:
     """AIOHttp Request unsigned transfer transaction"""
     source_account = request.match_info.get("wallet_address", "")
     transaction_source_address = request.query['transaction-source-address']
-    htkn_amount = request.query['htkn_amount']
+    hot_amount = request.query['htkn_amount']
     try:
-        htkn_amount = Decimal(htkn_amount)
+        hot_amount = Decimal(hot_amount)
     except InvalidOperation:
         raise web.HTTPBadRequest(reason='htkn_amount cannot convert to decimal.')
 
@@ -26,7 +26,7 @@ async def get_unsigned_add_trust_and_htkn_from_request(request: web.Request) -> 
     if trust:
         raise web.HTTPBadRequest(reason='Wallet already has trust.')
 
-    result = await get_unsigned_add_trust_and_htkn(source_account, transaction_source_address, htkn_amount)
+    result = await get_unsigned_add_trust_and_hot(source_account, transaction_source_address, hot_amount)
     return web.json_response(result)
 
 
@@ -52,13 +52,13 @@ async def does_wallet_have_trust(wallet_address: str) -> bool:
         return False
 
 
-async def get_unsigned_add_trust_and_htkn(
-    source_address: str, transaction_source_address: str, htkn_amount: Decimal
+async def get_unsigned_add_trust_and_hot(
+    source_address: str, transaction_source_address: str, hot_amount: Decimal
 ) -> Dict:
     """Get unsigned transfer transaction and signers"""
     wallet = await get_stellar_wallet(transaction_source_address)
-    unsigned_xdr, tx_hash = await build_unsigned_add_trust_and_htkn(
-        source_address, transaction_source_address, htkn_amount, wallet.sequence
+    unsigned_xdr, tx_hash = await build_unsigned_add_trust_and_hot(
+        source_address, transaction_source_address, hot_amount, wallet.sequence
     )
     host: str = settings['HOST']
     result = {
@@ -72,8 +72,8 @@ async def get_unsigned_add_trust_and_htkn(
     return result
 
 
-async def build_unsigned_add_trust_and_htkn(
-    source_address: str, transaction_source_address: str, htkn_amount: Decimal, sequence: str = None
+async def build_unsigned_add_trust_and_hot(
+    source_address: str, transaction_source_address: str, hot_amount: Decimal, sequence: str = None
 ) -> Tuple[str, str]:
     """"Build unsigned transfer transaction return unsigned XDR and transaction hash.
 
@@ -90,13 +90,13 @@ async def build_unsigned_add_trust_and_htkn(
         settings['ISSUER'], settings['ASSET_CODE'], source=source_address, limit=settings['LIMIT_ASSET']
     )
 
-    if htkn_amount > 0:
+    if hot_amount > 0:
         builder.append_payment_op(
             source=transaction_source_address,
             destination=source_address,
             asset_code=settings['ASSET_CODE'],
             asset_issuer=settings['ISSUER'],
-            amount=htkn_amount,
+            amount=hot_amount,
         )
 
     try:

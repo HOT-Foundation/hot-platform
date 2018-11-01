@@ -43,7 +43,7 @@ async def get_wallet_detail(wallet_address: str) -> Dict:
             asset.update(_format_balance(balance))
         return asset
 
-    def _trusted_htkn(balances: STELLAR_BALANCES) -> Union[Dict, Dict[str, str]]:
+    def _trusted_hot(balances: STELLAR_BALANCES) -> Union[Dict, Dict[str, str]]:
         """Return URL for making trust HOT"""
         if (
             len(
@@ -73,6 +73,6 @@ async def get_wallet_detail(wallet_address: str) -> Dict:
         'data': _format_data(wallet.data),
     }
 
-    result.update(_trusted_htkn(wallet.balances))
+    result.update(_trusted_hot(wallet.balances))
 
     return result
