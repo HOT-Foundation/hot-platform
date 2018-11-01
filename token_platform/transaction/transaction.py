@@ -13,48 +13,18 @@ HORIZON_URL = settings['HORIZON_URL']
 
 async def is_duplicate_transaction(transaction_hash: str) -> bool:
     """Check transaction is duplicate or not"""
-    url = f'{HORIZON_URL}/transactions/{transaction_hash}'
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            response = await resp.json()
-            id = response.get('id')
-            return True if id else False
+    try:
+        transaction = await stellar.wallet.get_transaction(transaction_hash)
+        id = transaction.get('id')
+        return True if id else False
+    except:
+        return False
 
 
-async def submit_transaction(xdr: bytes) -> Dict[str, str]:
+async def submit_transaction(xdr: bytes) -> dict:
     """Submit transaction into Stellar network"""
-    url = f'{HORIZON_URL}/transactions'
-    async with aiohttp.ClientSession() as session:
-        data = {'tx': xdr}
-        async with session.post(url, data=data) as resp:
-            response = await resp.json()
-            if resp.status == 400:
-                msg = response.get('extras', {}).get('result_codes', {}).get('transaction', None)
-                if msg:
-                    reasons = get_reason_transaction(response)
-                    if reasons:
-                        msg += f' {reasons}'
-                raise aiohttp.web.HTTPBadRequest(reason=msg)
-            if resp.status == 404:
-                msg = response.get('extras', {}).get('result_codes', {}).get('transaction', None)
-                if msg:
-                    reasons = get_reason_transaction(response)
-                    if reasons:
-                        msg += f' {reasons}'
-                raise aiohttp.web.HTTPNotFound(reason=msg)
-            if resp.status == 200 or resp.status == 202:
-                return response
-            raise aiohttp.web.HTTPInternalServerError()
-
-
-def get_reason_transaction(response: Dict) -> Union[str, None]:
-    reasons = response.get('extras', {}).get('result_codes', {}).get('operations', None)
-    if not reasons:
-        return None
-    result = reasons[0]
-    for i in range(1, len(reasons)):
-        result += f'/{reasons[i]}'
-    return result
+    resp = await stellar.wallet.submit_transaction(xdr)
+    return resp
 
 
 async def get_current_sequence_number(wallet_address: str) -> int:

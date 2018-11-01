@@ -68,11 +68,9 @@ async def test_get_escrow_wallet_success_trusted_htkn(mock_address):
 
 
 @asyncio.coroutine
-@patch('wallet.wallet.get_wallet')
+@patch('escrow.get_escrow_wallet.get_wallet')
 async def test_get_escrow_wallet_not_found(mock_address):
-    error_message = 'The resource at the url requested was not found.  This is usually occurs for one of two reasons:  The url requested is not valid, or no data in our database could be found with the parameters provided.'
-    mock_address.side_effect = web.HTTPNotFound(reason=error_message)
+    mock_address.side_effect = web.HTTPNotFound()
 
     with pytest.raises(web.HTTPNotFound) as context:
         await get_escrow_wallet_detail('GB7D54NKPWYYMMS7JFEQZKDDTW5R7IMXTFN2WIEST2YZVVNO3SHJ3Y7M')
-    assert str(context.value) == f'{error_message}: GB7D54NKPWYYMMS7JFEQZKDDTW5R7IMXTFN2WIEST2YZVVNO3SHJ3Y7M'

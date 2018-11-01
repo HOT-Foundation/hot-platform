@@ -7,6 +7,7 @@ from log.log import write_audit_log
 
 async def put_transaction_from_request(request: web.Request) -> web.Response:
     """Submit the transaction into Stellar network"""
+
     signed_xdr = await request.text()
     tx_hash = request.match_info.get('transaction_hash')
 
