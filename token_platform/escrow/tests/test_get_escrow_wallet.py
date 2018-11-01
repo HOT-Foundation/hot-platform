@@ -26,7 +26,7 @@ async def test_get_escrow_wallet_from_request(mock_get_escrow_wallet):
 
 @asyncio.coroutine
 @patch('escrow.get_escrow_wallet.get_wallet')
-async def test_get_escrow_wallet_success_trusted_htkn(mock_address):
+async def test_get_escrow_wallet_success_trusted_hot(mock_address):
 
     balances = [
         {

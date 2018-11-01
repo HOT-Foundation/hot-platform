@@ -27,7 +27,7 @@ async def test_get_wallet_from_request(mock_get_wallet):
 
 @asyncio.coroutine
 @patch('wallet.get_wallet.get_wallet')
-async def test_get_wallet_success_trusted_htkn(mock_address):
+async def test_get_wallet_success_trusted_hot(mock_address):
 
     balances = [
         {
@@ -65,7 +65,7 @@ async def test_get_wallet_success_trusted_htkn(mock_address):
 
 @asyncio.coroutine
 @patch('wallet.get_wallet.get_wallet')
-async def test_get_wallet_success_not_trust_htkn(mock_address):
+async def test_get_wallet_success_not_trust_hot(mock_address):
 
     balances = [{'balance': '9.9999200', 'asset_type': 'native'}]
     mock_address.return_value = StellarWallet(balances)

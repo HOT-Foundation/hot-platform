@@ -7,8 +7,7 @@ from aiohttp import web
 from decimal import Decimal, InvalidOperation
 from conf import settings
 from router import reverse
-from wallet.wallet import (build_generate_trust_wallet_transaction,  get_wallet,
-                           wallet_address_is_duplicate)
+from wallet.wallet import build_generate_trust_wallet_transaction, get_wallet, wallet_address_is_duplicate
 
 
 async def post_generate_trust_wallet_from_request(request: web.Request) -> web.Response:
@@ -29,28 +28,35 @@ async def post_generate_trust_wallet_from_request(request: web.Request) -> web.R
     try:
         xlm_amount: Decimal = Decimal(json_response.get('xlm_amount', 0))
     except InvalidOperation:
-        raise web.HTTPBadRequest(reason = f"{json_response.get('xlm_amount')} is not decimal type")
+        raise web.HTTPBadRequest(reason=f"{json_response.get('xlm_amount')} is not decimal type")
 
     if xlm_amount == 0:
-        raise web.HTTPBadRequest(reason = 'XLM balance must have more than 0.')
+        raise web.HTTPBadRequest(reason='XLM balance must have more than 0.')
 
     try:
-        htkn_amount: Decimal = Decimal(json_response.get('htkn_amount', 0))
+        hot_amount: Decimal = Decimal(json_response.get('htkn_amount', 0))
     except InvalidOperation:
-        raise web.HTTPBadRequest(reason = f"{json_response.get('htkn_amount')} is not decimal type")
+        raise web.HTTPBadRequest(reason=f"{json_response.get('htkn_amount')} is not decimal type")
 
     duplicate = await wallet_address_is_duplicate(destination_address)
     if duplicate:
-        raise web.HTTPBadRequest(reason = 'Target address is already used.')
+        raise web.HTTPBadRequest(reason='Target address is already used.')
 
     wallet = await get_wallet(transaction_source_address)
-    unsigned_xdr_byte, tx_hash_byte = build_generate_trust_wallet_transaction(transaction_source_address, source_address, destination_address, xlm_amount, htkn_amount, sequence=wallet.sequence)
+    unsigned_xdr_byte, tx_hash_byte = build_generate_trust_wallet_transaction(
+        transaction_source_address,
+        source_address,
+        destination_address,
+        xlm_amount,
+        hot_amount,
+        sequence=wallet.sequence,
+    )
 
     unsigned_xdr: str = unsigned_xdr_byte.decode()
     tx_hash: str = binascii.hexlify(tx_hash_byte).decode()
 
     signers: List[str] = []
-    if (source_address == transaction_source_address):
+    if source_address == transaction_source_address:
         signers = [source_address, destination_address]
     else:
         signers = [source_address, destination_address, transaction_source_address]
@@ -64,7 +70,7 @@ async def post_generate_trust_wallet_from_request(request: web.Request) -> web.R
         'xdr': unsigned_xdr,
         'transaction_url': reverse('transaction', transaction_hash=tx_hash),
         'transaction_hash': tx_hash,
-        '@id': reverse('generate-trust-wallet', wallet_address=source_address)
+        '@id': reverse('generate-trust-wallet', wallet_address=source_address),
     }
 
     return web.json_response(result)

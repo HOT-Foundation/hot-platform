@@ -60,7 +60,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
             'target_address': 'invalid',
             'transaction_source_address': transaction_source_address,
             'amount_xlm': 10,
-            'amount_htkn': 5,
+            'amount_hot': 5,
             'sequence_number': 3,
         }
         url = reverse('generate-payment', wallet_address=source_address)
@@ -83,7 +83,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
             'target_address': 'invalid',
             'transaction_source_address': transaction_source_address,
             'amount_xlm': 10,
-            'amount_htkn': 5,
+            'amount_hot': 5,
             'memo_on': 'a',
             'sequence_number': 3,
         }
@@ -107,7 +107,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
             'target_address': destination_address,
             'transaction_source_address': transaction_source_address,
             'amount_xlm': 10,
-            'amount_htkn': 5,
+            'amount_hot': 5,
             'memo': memo,
             'sequence_number': 3,
         }
@@ -144,7 +144,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
         data = {
             'target_address': destination_address,
             'transaction_source_address': transaction_source_address,
-            'amount_htkn': 10,
+            'amount_hot': 10,
         }
         url = reverse('generate-payment', wallet_address=source_address)
 
@@ -206,9 +206,9 @@ class TestGetUnsignedTransaction(BaseTestClass):
             transaction_source_address='GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ',
             source_address='GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI',
             destination_address=destination_address,
-            amount_htkn=amount_hot,
+            amount_hot=amount_hot,
             amount_xlm=amount_xlm,
-            tax_amount_htkn=0,
+            tax_amount_hot=0,
             sequence=1,
             memo_text='memo',
         )
@@ -243,9 +243,9 @@ class TestGetUnsignedTransaction(BaseTestClass):
             transaction_source_address='GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ',
             source_address=source_address,
             destination_address=destination_address,
-            amount_htkn=amount_hot,
+            amount_hot=amount_hot,
             amount_xlm=amount_xlm,
-            tax_amount_htkn=0,
+            tax_amount_hot=0,
             sequence=1,
             memo_text='memo',
         )
@@ -259,7 +259,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
     @unittest_run_loop
     @patch('transaction.generate_payment.Builder')
     @patch('transaction.generate_payment.get_wallet_detail')
-    async def test_build_unsigned_transfer_with_xlm_and_htkn_amount_with_trust(self, mock_wallet, mock_builder):
+    async def test_build_unsigned_transfer_with_xlm_and_hot_amount_with_trust(self, mock_wallet, mock_builder):
         mock_wallet.return_value = {'asset': {settings['ASSET_CODE']: 10}}
 
         instance = mock_builder.return_value
@@ -275,9 +275,9 @@ class TestGetUnsignedTransaction(BaseTestClass):
             transaction_source_address='GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ',
             source_address=source_address,
             destination_address=destination_address,
-            amount_htkn=amount_hot,
+            amount_hot=amount_hot,
             amount_xlm=amount_xlm,
-            tax_amount_htkn=0,
+            tax_amount_hot=0,
             sequence=1,
             memo_text='memo',
         )
@@ -312,15 +312,15 @@ class TestGetUnsignedTransaction(BaseTestClass):
         amount_xlm = 10
         destination_address = 'GDMZSRU6XQ3MKEO3YVQNACUEKBDT6G75I27CTBIBKXMVY74BDTS3CSA6'
         source_address = 'GDHH7XOUKIWA2NTMGBRD3P245P7SV2DAANU2RIONBAH6DGDLR5WISZZI'
-        tax_amount_htkn = 2
+        tax_amount_hot = 2
 
         result = await build_unsigned_transfer(
             transaction_source_address='GDSB3JZDYKLYKWZ6NXDPPGPCYJ32ISMTZ2LVF5PYQGY4B4FGNIU2M5BJ',
             source_address=source_address,
             destination_address=destination_address,
-            amount_htkn=amount_hot,
+            amount_hot=amount_hot,
             amount_xlm=amount_xlm,
-            tax_amount_htkn=tax_amount_htkn,
+            tax_amount_hot=tax_amount_hot,
             sequence=1,
             memo_text='memo',
         )
@@ -339,7 +339,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
             call.append_payment_op(destination_address, amount_xlm, source=source_address),
             call.append_payment_op(
                 settings['TAX_COLLECTOR_ADDRESS'],
-                tax_amount_htkn,
+                tax_amount_hot,
                 asset_code=settings['ASSET_CODE'],
                 asset_issuer=settings['ISSUER'],
                 source=source_address,
@@ -350,7 +350,7 @@ class TestGetUnsignedTransaction(BaseTestClass):
 
     @unittest_run_loop
     @patch('transaction.generate_payment.get_wallet_detail')
-    async def test_build_unsigned_transfer_with_invalid_htkn(self, mock_wallet):
+    async def test_build_unsigned_transfer_with_invalid_hot(self, mock_wallet):
         mock_wallet.return_value = {'asset': {}}
         with pytest.raises(web.HTTPBadRequest) as context:
             result = await build_unsigned_transfer(
