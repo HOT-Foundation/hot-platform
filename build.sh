@@ -7,9 +7,9 @@ COMPOSE=${3:=docker-compose.yml}
 
 export TAG=$(git describe --always --tags)
 
-# if [[ "$BRANCH" == "default" ]]; then
-#     BRANCH=$(git rev-parse --abbrev-ref HEAD)
-# fi
+if [[ "$BRANCH" == "default" ]]; then
+    BRANCH=$(git rev-parse --abbrev-ref HEAD)
+fi
 
 # if [[ "$BRANCH" == "develop" ]]; then
 #     export TAG="latest"
@@ -18,10 +18,18 @@ export TAG=$(git describe --always --tags)
 export REGISTRY="registry-hotnow.proteus-tech.com/hotnow-htkn-platform"
 if [[ "$OPT" == "build" ]]; then
     docker-compose build --pull --no-cache hotnow-htkn-platform
+    if [[ "$BRANCH" == develop ]] || [[ "$BRANCH" == "master" ]]; then
+        export TAG="latest"
+        docker-compose build --pull --no-cache hotnow-htkn-platform
+    fi
 fi
 
 if [[ "$OPT" == "push" ]]; then
     docker-compose push hotnow-htkn-platform
+    if [[ "$BRANCH" == develop ]] || [[ "$BRANCH" == "master" ]]; then
+        export TAG="latest"
+        docker-compose push hotnow-htkn-platform
+    fi
 fi
 
 if [[ "$OPT" == "remove" ]]; then
